@@ -1,4 +1,5 @@
 #!/bin/sh
+echo "AUTH_TOKEN is: $AUTH_TOKEN"
 
 # set variables for the chain
 VALIDATOR_NAME=validator1
@@ -8,6 +9,11 @@ KEY_2_NAME=poktroll-key-2
 CHAINFLAG="--chain-id ${CHAIN_ID}"
 TOKEN_AMOUNT="10000000000000000000000000stake"
 STAKING_AMOUNT="1000000000stake"
+AUTH_TOKEN=$AUTH_TOKEN
+
+echo "~~~~~"
+echo $AUTH_TOKEN
+echo "~~~~~"
 
 # create a random Namespace ID for your rollup to post blocks to
 NAMESPACE_ID=$(openssl rand -hex 10)
@@ -78,7 +84,10 @@ poktrolld gentx $KEY_NAME $STAKING_AMOUNT --chain-id $CHAIN_ID --keyring-backend
 poktrolld collect-gentxs
 
 # start the chain
+echo "========="
+echo $AUTH_TOKEN
 poktrolld start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://localhost:26658","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE_ID --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:36657 --p2p.laddr "0.0.0.0:36656"
+echo "========="
 
 # uncomment the next command if you are using lazy aggregation
 # poktrolld start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://localhost:26658","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE_ID --rollkit.da_start_height $DA_BLOCK_HEIGHT --rollkit.lazy_aggregator

@@ -55,19 +55,18 @@ docker_wipe: docker_check warn_destructive prompt_user ## [WARNING] Remove all t
 celestia_localnet: docker_check  ## Run a celestia localnet
 	docker run --name celestia --platform linux/amd64 -p 26657:26657 -p 26658:26658 -p 26659:26659 ghcr.io/rollkit/local-celestia-devnet:v0.11.0-rc8
 
-# Intended to be called like so: `export CELESTIA_NODE_AUTH_TOKEN=$(make celestia_localnet_auth_token)`
+# Intended to be called like so: `export AUTH_TOKEN=$(make celestia_localnet_auth_token)`
 .PHONY: celestia_localnet_auth_token
 celestia_localnet_auth_token: docker_check  ## Get the auth token for the celestia localnet
-	CELESTIA_CONTAINER_ID=$$(docker ps -qf "name=celestia"); \
-	CELESTIA_AUTH=$$(docker exec $$CELESTIA_CONTAINER_ID celestia bridge --node.store /bridge auth admin); \
-	export AUTH_TOKEN=$$CELESTIA_AUTH
-	echo $$CELESTIA_AUTH
+	CONTAINER_ID=$$(docker ps -qf "name=celestia"); \
+	AUTH_TOKEN=$$(docker exec $$CONTAINER_ID celestia bridge --node.store /bridge auth admin); \
+	echo $$AUTH_TOKEN
 
 .PHONY: celestia_localnet_balance_check
 celestia_localnet_balance_check: docker_check  ## Check the balance of an account in the celestia localnet
-	CELESTIA_NODE_AUTH_TOKEN=$$(make celestia_localnet_auth_token); \
-	CELESTIA_CONTAINER_ID=$$(docker ps -qf "name=celestia"); \
-	docker exec $$CELESTIA_CONTAINER_ID /bin/sh -c "celestia rpc state Balance --auth $$CELESTIA_NODE_AUTH_TOKEN"
+	AUTH_TOKEN=$$(make celestia_localnet_auth_token); \
+	CONTAINER_ID=$$(docker ps -qf "name=celestia"); \
+	docker exec $$CONTAINER_ID /bin/sh -c "celestia rpc state Balance --auth $$AUTH_TOKEN"
 
 # Useful if you want to run `apk update &&  apk add busybox-extras`
 .PHONY: celestia_localnet_exec_root
@@ -75,8 +74,8 @@ celestia_localnet_exec_root: docker_check  ## Execu into the container as root u
 	docker exec -it --user=root celestia /bin/sh
 
 .PHONY: poktroll_start
-poktroll_start: docker_check celestia_localnet_auth_token go_version_check  ## Start the poktroll node
-	./build/init-local.sh
+poktroll_start: docker_check go_version_check ## Start the poktroll node
+	@AUTH_TOKEN=$$(make celestia_localnet_auth_token) ./build/init-local.sh
 
 .PHONY: poktroll_clear
 poktroll_clear: ## Clear the poktroll state
