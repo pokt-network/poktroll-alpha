@@ -1,0 +1,12 @@
+syntax = "proto3";
+package poktrollalpha.poktrollalpha;
+
+import "gogoproto/gogo.proto";
+import "poktrollalpha/poktrollalpha/params.proto";
+
+option go_package = "poktroll-alpha/x/poktrollalpha/types";
+
+// GenesisState defines the poktrollalpha module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
