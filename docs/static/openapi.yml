@@ -46437,10 +46437,10 @@ paths:
                         }
       tags:
         - Query
-  /poktroll-alpha/poktrollalpha/params:
+  /poktroll/poktroll/params:
     get:
       summary: Parameters queries the parameters of the module.
-      operationId: PoktrollalphaPoktrollalphaParams
+      operationId: PoktrollPoktrollParams
       responses:
         '200':
           description: A successful response.
@@ -75212,10 +75212,10 @@ definitions:
     description: |-
       Version defines the versioning scheme used to negotiate the IBC verison in
       the connection handshake.
-  poktrollalpha.poktrollalpha.Params:
+  poktroll.poktroll.Params:
     type: object
     description: Params defines the parameters for the module.
-  poktrollalpha.poktrollalpha.QueryParamsResponse:
+  poktroll.poktroll.QueryParamsResponse:
     type: object
     properties:
       params:

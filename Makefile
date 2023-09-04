@@ -46,6 +46,7 @@ celestia_localnet: docker_check  ## Run a celestia localnet
 celestia_localnet_auth_token: docker_check  ## Get the auth token for the celestia localnet
 	CELESTIA_CONTAINER_ID=$$(docker ps -qf "name=celestia"); \
 	CELESTIA_AUTH=$$(docker exec $$CELESTIA_CONTAINER_ID celestia bridge --node.store /bridge auth admin); \
+	export AUTH_TOKEN=$$CELESTIA_AUTH
 	echo $$CELESTIA_AUTH
 
 .PHONY: celestia_localnet_balance_check
@@ -58,3 +59,7 @@ celestia_localnet_balance_check: docker_check  ## Check the balance of an accoun
 .PHONY: celestia_localnet_exec_root
 celestia_localnet_exec_root: docker_check  ## Execu into the container as root user in the celestia localnet
 	docker exec -it --user=root celestia /bin/sh
+
+.PHONY: poktroll_start
+poktroll_start: docker_check celestia_localnet_auth_token  ## Start the poktroll container
+	./build/init-local.sh
