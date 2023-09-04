@@ -14,6 +14,20 @@ list:
 help:
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+
+.PHONY: go_version_check
+# Internal helper target - check go version
+go_version_check:
+	@# Extract the version number from the `go version` command.
+	@GO_VERSION=$$(go version | cut -d " " -f 3 | cut -c 3-) && \
+	MAJOR_VERSION=$$(echo $$GO_VERSION | cut -d "." -f 1) && \
+	MINOR_VERSION=$$(echo $$GO_VERSION | cut -d "." -f 2) && \
+	\
+	if [ "$$MAJOR_VERSION" -gt 1 ] || ( [ "$$MAJOR_VERSION" -eq 1 ] && [ "$$MINOR_VERSION" -ge 20 ] ); then \
+		echo "Invalid Go version. Expected 1.19.x but found $$GO_VERSION"; \
+		exit 1; \
+	fi
+
 .PHONY: docker_check
 # Internal helper target - check if docker is installed
 docker_check:
@@ -61,5 +75,20 @@ celestia_localnet_exec_root: docker_check  ## Execu into the container as root u
 	docker exec -it --user=root celestia /bin/sh
 
 .PHONY: poktroll_start
-poktroll_start: docker_check celestia_localnet_auth_token  ## Start the poktroll container
+poktroll_start: docker_check celestia_localnet_auth_token go_version_check  ## Start the poktroll node
 	./build/init-local.sh
+
+.PHONY: poktroll_clear
+poktroll_clear: ## Clear the poktroll state
+	rm -rf ${HOME}/.poktroll
+	rm ${HOME}/go/bin/poktrolld
+
+.PHONY: poktroll_list_keys
+poktroll_list_keys: ## List the poktroll keys
+	poktrolld keys list --keyring-backend test
+
+.PHONY: poktroll_send
+poktroll_send: ## Send tokens from one key to another
+	KEY1=$$(make poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
+	KEY2=$$(make poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
+	poktrolld tx bank send $$KEY1 $$KEY2 42069stake --keyring-backend test --node tcp://127.0.0.1:36657
