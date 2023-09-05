@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package configs;
+
+option go_package = "github.com/pokt-network/cmt-pokt/runtime/configs";
+
+// CLEANUP: Need to make the configuration be "postgres agnostic"
+message PersistenceConfig {
+  string postgres_url = 1;
+  string node_schema = 2; // the postgres schema used to store all the tables for a specific node; useful when multiple nodes share a single postgres instance
+  string block_store_path = 3;
+  string trees_store_dir = 4;
+  int32 max_conns_count = 5;
+  int32 min_conns_count = 6;
+  string max_conn_lifetime = 7; // See pkg.go.dev/time#ParseDuration for reference
+  string max_conn_idle_time = 8; // See pkg.go.dev/time#ParseDuration for reference
+  string health_check_period = 9; // See pkg.go.dev/time#ParseDuration for reference
+}
