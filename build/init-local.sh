@@ -60,7 +60,7 @@ EOF
 # echo variables for the chain
 echo -e "\n\n\n\n\n Your NAMESPACE_ID is $NAMESPACE_ID \n\n Your DA_BLOCK_HEIGHT is $DA_BLOCK_HEIGHT \n\n\n\n\n"
 
-# build the gm chain with Rollkit
+# build the poktroll chain with Rollkit
 ignite chain build
 
 # reset any existing genesis/chain data

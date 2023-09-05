@@ -55,6 +55,15 @@ docker_wipe: docker_check warn_destructive prompt_user ## [WARNING] Remove all t
 celestia_localnet: docker_check  ## Run a celestia localnet
 	docker run --name celestia --platform linux/amd64 -p 26657:26657 -p 26658:26658 -p 26659:26659 ghcr.io/rollkit/local-celestia-devnet:v0.11.0-rc8
 
+.PHONY: celestia_localnet_stop
+celestia_localnet_stop: docker_check  ## Stop the celestia localnet
+	docker stop celestia
+
+.PHONY: celestia_light_client_start
+celestia_light_client_start: docker_check  ## Start the celestia light client
+	echo "See the following link if there's an error https://docs.celestia.org/nodes/light-node/#install-celestia-node"
+	celestia light start --core.ip consensus-validator-arabica-9.celestia-arabica.com --p2p.network arabica
+
 # Intended to be called like so: `export AUTH_TOKEN=$(make celestia_localnet_auth_token)`
 .PHONY: celestia_localnet_auth_token
 celestia_localnet_auth_token: docker_check  ## Get the auth token for the celestia localnet
@@ -73,9 +82,13 @@ celestia_localnet_balance_check: docker_check  ## Check the balance of an accoun
 celestia_localnet_exec_root: docker_check  ## Execu into the container as root user in the celestia localnet
 	docker exec -it --user=root celestia /bin/sh
 
-.PHONY: poktroll_start
-poktroll_start: docker_check go_version_check ## Start the poktroll node
+.PHONY: poktroll_local_start
+poktroll_local_start: docker_check go_version_check ## Start the localnet poktroll node
 	@AUTH_TOKEN=$$(make celestia_localnet_auth_token) ./build/init-local.sh
+
+.PHONY: poktroll_testnet_start
+poktroll_testnet_start: docker_check go_version_check ## Start the testnet poktroll node
+	@AUTH_TOKEN=$$(make celestia_localnet_auth_token) ./build/init-testnet.sh
 
 .PHONY: poktroll_clear
 poktroll_clear: ## Clear the poktroll state
