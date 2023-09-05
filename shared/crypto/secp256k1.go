@@ -1,26 +1,30 @@
 package crypto
 
 import (
-	"crypto/ed25519"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"io"
+
+	cosmosSecp256k1 "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 )
 
 const (
 	AddressLen = 20
-	SeedSize   = ed25519.SeedSize
 )
 
 type (
-	Ed25519PublicKey  ed25519.PublicKey
-	Ed25519PrivateKey ed25519.PrivateKey
+	Secp256k1PublicKey struct {
+		key *cosmosSecp256k1.PubKey
+	}
+	Secp256k1PrivateKey struct {
+		key *cosmosSecp256k1.PrivKey
+	}
 )
 
 var (
-	PublicKeyLen  = ed25519.PublicKeySize
-	PrivateKeyLen = ed25519.PrivateKeySize
+	PublicKeyLen  = cosmosSecp256k1.PubKeySize
+	PrivateKeyLen = cosmosSecp256k1.PrivKeySize
 )
 
 func NewAddress(hexString string) (Address, error) {
@@ -52,68 +56,76 @@ func NewPrivateKey(hexString string) (PrivateKey, error) {
 }
 
 func GeneratePrivateKey() (PrivateKey, error) {
-	_, pk, err := ed25519.GenerateKey(nil)
-	return Ed25519PrivateKey(pk), err
+	pk := cosmosSecp256k1.GenPrivKey()
+	return Secp256k1PrivateKey{key: pk}, nil
 }
 
 func GeneratePrivateKeyWithReader(rand io.Reader) (PrivateKey, error) {
-	_, pk, err := ed25519.GenerateKey(rand)
-	return Ed25519PrivateKey(pk), err
+	// Secret is hashed by `#GenPrivKeyFromSecret`, using a buffer size which is
+	// equivalent to the private key size to provide at least as much entropy.
+	secret := make([]byte, cosmosSecp256k1.PrivKeySize)
+	if _, err := io.ReadFull(rand, secret); err != nil {
+		return nil, err
+	}
+
+	pk := cosmosSecp256k1.GenPrivKeyFromSecret(secret)
+	return Secp256k1PrivateKey{key: pk}, nil
 }
 
 func NewPrivateKeyFromBytes(bz []byte) (PrivateKey, error) {
 	bzLen := len(bz)
-	if bzLen != ed25519.PrivateKeySize {
+	if bzLen != cosmosSecp256k1.PrivKeySize {
 		return nil, ErrInvalidPrivateKeyLen(bzLen)
 	}
-	return Ed25519PrivateKey(bz), nil
+	pk := &cosmosSecp256k1.PrivKey{Key: bz}
+	return Secp256k1PrivateKey{key: pk}, nil
 }
 
 func NewPrivateKeyFromSeed(seed []byte) (PrivateKey, error) {
-	if len(seed) < SeedSize {
+	if len(seed) < cosmosSecp256k1.PrivKeySize {
 		return nil, ErrInvalidPrivateKeySeedLenError(len(seed))
 	}
-	privKey := ed25519.NewKeyFromSeed([]byte(seed[:SeedSize]))
-	return Ed25519PrivateKey(privKey), nil
+	pk := cosmosSecp256k1.GenPrivKeyFromSecret(seed)
+	return Secp256k1PrivateKey{key: pk}, nil
 }
 
-var _ PrivateKey = Ed25519PrivateKey{}
+var _ PrivateKey = Secp256k1PrivateKey{}
 
-func (priv Ed25519PrivateKey) Bytes() []byte {
-	return priv
+func (priv Secp256k1PrivateKey) Bytes() []byte {
+	return priv.key.Bytes()
 }
 
-func (priv Ed25519PrivateKey) String() string {
+func (priv Secp256k1PrivateKey) String() string {
 	return hex.EncodeToString(priv.Bytes())
 }
 
-func (priv Ed25519PrivateKey) Equals(other PrivateKey) bool {
-	return ed25519.PrivateKey(priv).Equal(ed25519.PrivateKey(other.(Ed25519PrivateKey)))
+func (priv Secp256k1PrivateKey) Equals(other PrivateKey) bool {
+	return priv.key.Equals(other.(Secp256k1PrivateKey).key)
 }
 
-func (priv Ed25519PrivateKey) PublicKey() PublicKey {
-	pubKey := ed25519.PrivateKey(priv).Public()
-	return Ed25519PublicKey(pubKey.(ed25519.PublicKey))
+func (priv Secp256k1PrivateKey) PublicKey() PublicKey {
+	pubKey := priv.key.PubKey().(*cosmosSecp256k1.PubKey)
+	return Secp256k1PublicKey{key: pubKey}
 }
 
-func (priv Ed25519PrivateKey) Address() Address {
+func (priv Secp256k1PrivateKey) Address() Address {
 	publicKey := priv.PublicKey()
 	return publicKey.Address()
 }
 
-func (priv Ed25519PrivateKey) Sign(msg []byte) ([]byte, error) {
-	return ed25519.Sign(ed25519.PrivateKey(priv), msg), nil
+func (priv Secp256k1PrivateKey) Sign(msg []byte) ([]byte, error) {
+	return priv.key.Sign(msg)
 }
 
-func (priv Ed25519PrivateKey) Size() int {
-	return ed25519.PrivateKeySize
+func (priv Secp256k1PrivateKey) Size() int {
+	return cosmosSecp256k1.PrivKeySize
 }
 
-func (priv Ed25519PrivateKey) Seed() []byte {
-	return ed25519.PrivateKey(priv).Seed()
+func (priv Secp256k1PrivateKey) Seed() []byte {
+	return priv.key.Key
 }
 
-func (priv *Ed25519PrivateKey) UnmarshalJSON(data []byte) error {
+func (priv *Secp256k1PrivateKey) UnmarshalJSON(data []byte) error {
 	var privateKey string
 	if err := json.Unmarshal(data, &privateKey); err != nil {
 		return err
@@ -121,7 +133,7 @@ func (priv *Ed25519PrivateKey) UnmarshalJSON(data []byte) error {
 	return priv.UnmarshalText([]byte(privateKey))
 }
 
-func (priv *Ed25519PrivateKey) UnmarshalText(data []byte) error {
+func (priv *Secp256k1PrivateKey) UnmarshalText(data []byte) error {
 	privateKey := string(data)
 	keyBytes, err := hex.DecodeString(privateKey)
 	if err != nil {
@@ -131,11 +143,11 @@ func (priv *Ed25519PrivateKey) UnmarshalText(data []byte) error {
 	if err != nil {
 		return err
 	}
-	*priv = privKey.(Ed25519PrivateKey)
+	priv.key = privKey.(*Secp256k1PrivateKey).key
 	return nil
 }
 
-var _ PublicKey = Ed25519PublicKey{}
+var _ PublicKey = Secp256k1PublicKey{}
 
 func NewPublicKey(hexString string) (PublicKey, error) {
 	bz, err := hex.DecodeString(hexString)
@@ -147,35 +159,37 @@ func NewPublicKey(hexString string) (PublicKey, error) {
 
 func NewPublicKeyFromBytes(bz []byte) (PublicKey, error) {
 	bzLen := len(bz)
-	if bzLen != ed25519.PublicKeySize {
+	if bzLen != cosmosSecp256k1.PubKeySize {
 		return nil, ErrInvalidPublicKeyLen(bzLen)
 	}
-	return Ed25519PublicKey(bz), nil
+
+	pubKey := &cosmosSecp256k1.PubKey{Key: bz}
+	return Secp256k1PublicKey{key: pubKey}, nil
 }
 
-func (pub Ed25519PublicKey) Bytes() []byte {
-	return pub
+func (pub Secp256k1PublicKey) Bytes() []byte {
+	return pub.key.Bytes()
 }
 
-func (pub Ed25519PublicKey) String() string {
+func (pub Secp256k1PublicKey) String() string {
 	return hex.EncodeToString(pub.Bytes())
 }
 
-func (pub Ed25519PublicKey) Address() Address {
-	hash := sha256.Sum256(pub[:])
+func (pub Secp256k1PublicKey) Address() Address {
+	hash := sha256.Sum256(pub.key.Key[:])
 	return hash[:AddressLen]
 }
 
-func (pub Ed25519PublicKey) Equals(other PublicKey) bool {
-	return ed25519.PublicKey(pub).Equal(ed25519.PublicKey(other.(Ed25519PublicKey)))
+func (pub Secp256k1PublicKey) Equals(other PublicKey) bool {
+	return pub.key.Equals(other.(Secp256k1PublicKey).key)
 }
 
-func (pub Ed25519PublicKey) Verify(msg, sig []byte) bool {
-	return ed25519.Verify(ed25519.PublicKey(pub), msg, sig)
+func (pub Secp256k1PublicKey) Verify(msg, sig []byte) bool {
+	return pub.key.VerifySignature(msg, sig)
 }
 
-func (pub Ed25519PublicKey) Size() int {
-	return ed25519.PublicKeySize
+func (pub Secp256k1PublicKey) Size() int {
+	return pub.key.Size()
 }
 
 func GeneratePublicKey() (PublicKey, error) {
@@ -194,11 +208,11 @@ func GenerateAddress() (Address, error) {
 	return pk.Address(), nil
 }
 
-func (pub Ed25519PublicKey) MarshalJSON() ([]byte, error) {
+func (pub Secp256k1PublicKey) MarshalJSON() ([]byte, error) {
 	return json.Marshal(pub.String())
 }
 
-func (pub *Ed25519PublicKey) UnmarshalJSON(data []byte) error {
+func (pub *Secp256k1PublicKey) UnmarshalJSON(data []byte) error {
 	var publicKey string
 	if err := json.Unmarshal(data, &publicKey); err != nil {
 		return err
@@ -211,6 +225,6 @@ func (pub *Ed25519PublicKey) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	*pub = pubKey.(Ed25519PublicKey)
+	*pub = pubKey.(Secp256k1PublicKey)
 	return nil
 }

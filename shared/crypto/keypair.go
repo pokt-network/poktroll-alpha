@@ -2,15 +2,15 @@ package crypto
 
 import (
 	"bytes"
-	"crypto/ed25519"
 	"encoding/gob"
 	"encoding/json"
+	cosmosSecp256k1 "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 )
 
 // Gob Encoding is used to serialise the data to store the KeyPairs in the BadgerDB database
 func init() {
-	gob.Register(Ed25519PublicKey{})
-	gob.Register(ed25519.PublicKey{})
+	gob.Register(Secp256k1PublicKey{})
+	gob.Register(cosmosSecp256k1.PubKey{})
 	gob.Register(encKeyPair{})
 }
 
