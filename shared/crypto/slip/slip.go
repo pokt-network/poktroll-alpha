@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pokt-network/pocket/shared/crypto"
+	"poktroll/shared/crypto"
 )
 
 const (
