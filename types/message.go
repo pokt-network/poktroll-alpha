@@ -4,8 +4,10 @@ import (
 	"encoding/hex"
 	"log"
 
-	"github.com/pokt-network/cmt-pokt/codec"
-	cryptoPocket "github.com/pokt-network/cmt-pokt/crypto"
+	"poktroll/codec"
+
+	cryptoPocket "poktroll/crypto"
+
 	"google.golang.org/protobuf/proto"
 )
 

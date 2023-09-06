@@ -1,9 +1,9 @@
 package sessionmanager
 
 import (
-	"github.com/pokt-network/cmt-pokt/modules"
-	"github.com/pokt-network/cmt-pokt/runtime/di"
-	"github.com/pokt-network/cmt-pokt/types"
+	"poktroll/modules"
+	"poktroll/runtime/di"
+	"poktroll/types"
 )
 
 type sessionManager struct {

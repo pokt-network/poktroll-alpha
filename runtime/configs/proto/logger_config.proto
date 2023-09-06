@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package configs;
 
-option go_package = "github.com/pokt-network/cmt-pokt/runtime/configs";
+option go_package = "poktroll/runtime/configs";
 
 message LoggerConfig {
   string level = 1;

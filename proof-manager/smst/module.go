@@ -2,9 +2,9 @@ package smst
 
 import (
 	"hash"
+	"poktroll/modules"
+	"poktroll/runtime/di"
 
-	"github.com/pokt-network/cmt-pokt/modules"
-	"github.com/pokt-network/cmt-pokt/runtime/di"
 	"github.com/pokt-network/smt"
 )
 

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pokt-network/cmt-pokt/utils"
+	"poktroll/utils"
 )
 
 // This file captures basic logic common across all the actors that need to stake regardless of their responsibility.

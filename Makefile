@@ -38,6 +38,15 @@ docker_check:
 	fi; \
 	}
 
+.PHONY: protoc_check
+protoc_check: ## Checks if protoc is installed
+	{ \
+	if ! command -v protoc >/dev/null; then \
+		echo "Follow instructions to install 'protoc': https://grpc.io/docs/protoc-installation/"; \
+	fi; \
+	}
+
+
 .PHONY: warn_destructive
 warn_destructive: ## Print WARNING to the user
 	@echo "This is a destructive action that will affect docker resources outside the scope of this repo!"
@@ -104,3 +113,36 @@ poktroll_send: ## Send tokens from one key to another
 	KEY1=$$(make poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
 	KEY2=$$(make poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
 	poktrolld tx bank send $$KEY1 $$KEY2 42069stake --keyring-backend test --node tcp://127.0.0.1:36657
+
+# Protobuf convenience targets
+
+.PHONY: go_protoc-go-inject-tag
+go_protoc-go-inject-tag: ## Checks if protoc-go-inject-tag is installed
+	{ \
+	if ! command -v protoc-go-inject-tag >/dev/null; then \
+		echo "Install with 'go install github.com/favadi/protoc-go-inject-tag@latest'"; \
+	fi; \
+	}
+
+.PHONY: protogen_show
+protogen_show: ## A simple `find` command that shows you the generated protobufs.
+	find . -name "*.pb.go" | grep -v -e "prototype" -e "vendor"
+
+.PHONY: protogen_clean
+protogen_clean: ## Remove all the generated protobufs.
+	find . -name "*.pb.go" | grep -v -e "prototype" -e "vendor" | xargs -r rm
+
+# IMPROVE: Look into using buf in the future; https://github.com/bufbuild/buf.
+PROTOC = protoc --experimental_allow_proto3_optional --go_opt=paths=source_relative
+PROTOC_SHARED = $(PROTOC) -I=./types/proto
+
+.PHONY: protogen_local
+protogen_local: go_protoc-go-inject-tag ## Generate go structures for all of the protobufs
+# $(PROTOC) -I=./codec/proto           --go_out=./codec           ./codec/proto/*.proto
+	$(PROTOC_SHARED)                     --go_out=./types           ./types/proto/*.proto
+
+	$(PROTOC) -I=./runtime/configs/types/proto				              --go_out=./runtime/configs/types ./runtime/configs/types/proto/*.proto
+	$(PROTOC) -I=./runtime/configs/proto -I=./runtime/configs/types/proto --go_out=./runtime/configs       ./runtime/configs/proto/*.proto
+
+
+	# echo "View generated proto files by running: make protogen_show"

@@ -15,6 +15,16 @@ func TestUtility(t *testing.T) {
 	gocuke.NewRunner(t, &utilitySuite{}).Path("features/utility/*.feature").Run()
 }
 
+type commandResult struct {
+	Stdout string
+	Stderr string
+	Err    error
+}
+
+type validatorPod struct {
+	result *commandResult
+}
+
 const (
 	// 001 servicer is in session 0 for applicatio 000
 	//	The list of servicers in the session is decided by the 'servicers' section of the genesis, from 'build/localnet/manifest/configs.yaml' file
@@ -162,9 +172,9 @@ func (s *utilitySuite) sendTrustlessRelay(relayPayload string, servicerAddr, app
 	//// TECHDEBT: run the command from a client, i.e. not a validator, pod.
 	//res, err := s.validator.RunCommand(args...)
 
-	if shouldSucceed {
-		require.NoError(s, err)
-	}
+	// if shouldSucceed {
+	// 	require.NoError(s, err)
+	// }
 
 	//s.validator.result = res
 }

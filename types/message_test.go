@@ -4,9 +4,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/pokt-network/cmt-pokt/codec"
-	"github.com/pokt-network/cmt-pokt/crypto"
-	"github.com/pokt-network/cmt-pokt/utils"
+	"poktroll/codec"
+	"poktroll/crypto"
+	"poktroll/utils"
+
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/wrapperspb"
