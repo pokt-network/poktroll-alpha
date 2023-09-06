@@ -5,8 +5,8 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/pokt-network/cmt-pokt/codec"
-	"poktroll/shared/crypto"
+	"poktroll/codec"
+	"poktroll/crypto"
 )
 
 var _ ITransaction = &Transaction{}

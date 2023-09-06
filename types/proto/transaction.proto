@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package core;
 
-option go_package = "github.com/pokt-network/cmt-pokt/types";
+option go_package = "poktroll/types";
 
 import "google/protobuf/any.proto";
 

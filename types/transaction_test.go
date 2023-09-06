@@ -2,10 +2,11 @@ package types
 
 import (
 	"fmt"
+	"poktroll/crypto"
 	"testing"
 
-	"github.com/pokt-network/cmt-pokt/codec"
-	"github.com/pokt-network/cmt-pokt/crypto"
+	"poktroll/codec"
+
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 )
@@ -36,6 +37,7 @@ func TestTransaction_BytesAndFromBytes(t *testing.T) {
 func TestTransaction_Sign(t *testing.T) {
 	tx := newUnsignedTestingTransaction(t)
 
+	// TODO IN THIS COMMIT port over testingSenderPrivateKey from cmt-pokt
 	err := tx.Sign(testingSenderPrivateKey)
 	require.NoError(t, err)
 

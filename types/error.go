@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	cryptoPocket "github.com/pokt-network/cmt-pokt/crypto"
+	cryptoPocket "poktroll/crypto"
 )
 
 type Error interface {

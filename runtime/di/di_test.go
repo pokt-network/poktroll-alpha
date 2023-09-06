@@ -1,9 +1,9 @@
 package di_test
 
 import (
+	"poktroll/runtime/di"
 	"testing"
 
-	"github.com/pokt-network/cmt-pokt/runtime/di"
 	"github.com/stretchr/testify/assert"
 )
 

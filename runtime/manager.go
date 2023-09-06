@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"io"
 	"log"
-
-	"github.com/pokt-network/cmt-pokt/modules"
-	"github.com/pokt-network/cmt-pokt/runtime/configs"
-	"github.com/pokt-network/cmt-pokt/runtime/di"
+	"poktroll/runtime/configs"
+	"poktroll/runtime/di"
 )
 
 type Manager struct {
@@ -16,7 +14,7 @@ type Manager struct {
 	genesisState json.RawMessage
 }
 
-func NewManager(config *configs.Config, genesis json.RawMessage) modules.RuntimeMgr {
+func NewManager(config *configs.Config, genesis json.RawMessage) *Manager {
 	mgr := new(Manager)
 	mgr.config = config
 	mgr.genesisState = genesis
@@ -24,7 +22,7 @@ func NewManager(config *configs.Config, genesis json.RawMessage) modules.Runtime
 	return mgr
 }
 
-func NewManagerFromFiles(configPath, genesisPath string) modules.RuntimeMgr {
+func NewManagerFromFiles(configPath, genesisPath string) *Manager {
 	cfg, genesisState, err := parseFiles(configPath, genesisPath)
 	if err != nil {
 		log.Fatalf("[ERROR] Failed to initialize runtime builder: %v", err)
@@ -32,7 +30,7 @@ func NewManagerFromFiles(configPath, genesisPath string) modules.RuntimeMgr {
 	return NewManager(cfg, genesisState)
 }
 
-func NewManagerFromReaders(configReader, genesisReader io.Reader) modules.RuntimeMgr {
+func NewManagerFromReaders(configReader, genesisReader io.Reader) *Manager {
 	cfg, genesisState, err := parseFromReaders(configReader, genesisReader)
 	if err != nil {
 		log.Fatalf("[ERROR] Failed to initialize runtime builder: %v", err)

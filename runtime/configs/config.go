@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"poktroll/runtime/defaults"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/pokt-network/cmt-pokt/runtime/defaults"
 	"github.com/spf13/viper"
 )
 
@@ -103,9 +103,9 @@ func setViperDefaults(cfg *Config) {
 func NewDefaultConfig(options ...func(*Config)) *Config {
 	cfg := &Config{
 		RootDirectory: defaults.DefaultRootDirectory,
-		Persistence: &PersistenceConfig{
-			PostgresUrl:    defaults.DefaultPersistencePostgresURL,
-			BlockStorePath: defaults.DefaultPersistenceBlockStorePath,
+		Persistence:   &PersistenceConfig{
+			// PostgresUrl:    defaults.DefaultPersistencePostgresURL,
+			// BlockStorePath: defaults.DefaultPersistenceBlockStorePath,
 		},
 		Logger: &LoggerConfig{
 			Level:  defaults.DefaultLoggerLevel,

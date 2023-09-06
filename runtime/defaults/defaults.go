@@ -9,21 +9,20 @@ func init() {
 }
 
 func initDefaultRootDirectory() {
-	// use home directory + /.cmt-pokt as root directory
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
-	DefaultRootDirectory = homeDir + "/.cmt-pokt"
+	DefaultRootDirectory = homeDir + "/.poktroll-alpha"
 }
 
 var (
-	// DefaultRootDirectory is root directory for the pocket node is initialized in the init function to be the home directory + /.cmt-pokt
+	// DefaultRootDirectory is root directory for the pocket node is initialized in the init function to be the home directory + /.poktroll-alpha
 	DefaultRootDirectory = ""
 
 	// persistence
-	DefaultPersistencePostgresURL    = "postgres://postgres:postgres@pocket-db:5432/postgres"
-	DefaultPersistenceBlockStorePath = "/var/blockstore"
+	// DefaultPersistencePostgresURL    = "postgres://postgres:postgres@pocket-db:5432/postgres"
+	// DefaultPersistenceBlockStorePath = "/var/blockstore"
 
 	// logger
 	DefaultLoggerLevel  = "debug"
