@@ -1,7 +1,19 @@
 syntax = "proto3";
+
 package poktroll.poktroll;
 
 option go_package = "poktroll/x/poktroll/types";
 
 // Msg defines the Msg service.
-service Msg {}
+service Msg {
+  rpc Stake (MsgStake) returns (MsgStakeResponse);
+}
+message MsgStake {
+  string creator = 1;
+  // TODO: Make it actor-specific
+}
+
+message MsgStakeResponse {
+  bool success = 1;
+}
+
