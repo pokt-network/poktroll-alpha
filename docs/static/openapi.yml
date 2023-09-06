@@ -75247,6 +75247,9 @@ definitions:
       the connection handshake.
   poktroll.poktroll.MsgStakeResponse:
     type: object
+    properties:
+      success:
+        type: boolean
   poktroll.poktroll.Params:
     type: object
     description: Params defines the parameters for the module.

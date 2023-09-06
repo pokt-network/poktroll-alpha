@@ -8,6 +8,9 @@ import (
 )
 
 func (k Keeper) StakeActor(ctx sdk.Context, addr sdk.ValAddress, amount sdk.Coin) error {
+	// TODO: sends coins to the staking module's pool!
+
+	// Update store with new staking amount
 	store := ctx.KVStore(k.storeKey)
 	servStore := prefix.NewStore(store, []byte(types.ServicerPrefix))
 
