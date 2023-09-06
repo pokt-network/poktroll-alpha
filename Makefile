@@ -78,13 +78,13 @@ celestia_light_client_auth_token: ## Get the auth token for the celestia light c
 
 .PHONY: celestia_localnet_balance_check
 celestia_localnet_balance_check: docker_check  ## Check the balance of an account in the celestia localnet
-	AUTH_TOKEN=$$(make celestia_localnet_auth_token); \
+	AUTH_TOKEN=$$(make -s celestia_localnet_auth_token); \
 	CONTAINER_ID=$$(docker ps -qf "name=celestia"); \
 	docker exec $$CONTAINER_ID /bin/sh -c "celestia rpc state Balance --auth $$AUTH_TOKEN"
 
 .PHONY: celestia_testnet_balance_check
 celestia_testnet_balance_check: ## Check the balance of the light client account on celestia arabica testnet
-	AUTH_TOKEN=$$(make celestia_light_client_auth_token); \
+	AUTH_TOKEN=$$(make -s celestia_light_client_auth_token); \
 	celestia rpc state Balance --auth $$AUTH_TOKEN
 
 # Useful if you want to run `apk update &&  apk add busybox-extras`
@@ -94,11 +94,11 @@ celestia_localnet_exec_root: docker_check  ## Execu into the container as root u
 
 .PHONY: poktroll_local_start
 poktroll_local_start: docker_check go_version_check ## Start the localnet poktroll node
-	@AUTH_TOKEN=$$(make celestia_localnet_auth_token) ./build/init-local.sh
+	@AUTH_TOKEN=$$(make -s celestia_localnet_auth_token) ./build/init-local.sh
 
 .PHONY: poktroll_testnet_start
 poktroll_testnet_start: docker_check go_version_check ## Start the testnet poktroll node
-	@AUTH_TOKEN=$$(make celestia_localnet_auth_token) ./build/init-testnet.sh
+	@AUTH_TOKEN=$$(make -s celestia_localnet_auth_token) ./build/init-testnet.sh
 
 .PHONY: poktroll_clear
 poktroll_clear: ## Clear the poktroll state
@@ -111,14 +111,14 @@ poktroll_list_keys: ## List the poktroll keys
 
 .PHONY: poktroll_send
 poktroll_send: ## Send tokens from one key to another
-	KEY1=$$(make poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
-	KEY2=$$(make poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
+	KEY1=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
+	KEY2=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
 	poktrolld tx bank send $$KEY1 $$KEY2 42069stake --keyring-backend test --node tcp://127.0.0.1:36657
 
 .PHONY: poktroll_balance
 poktroll_balance: ## Check the balances of both keys
-	KEY1=$$(make poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
-	KEY2=$$(make poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
+	KEY1=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
+	KEY2=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
 	poktrolld query bank balances $$KEY1 --node tcp://127.0.0.1:36657; \
 	poktrolld query bank balances $$KEY2 --node tcp://127.0.0.1:36657;
 
