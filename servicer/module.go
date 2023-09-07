@@ -27,8 +27,9 @@ func (r *servicer) Module() modules.ServicerModule { return r }
 func (r *servicer) Resolve(injector *di.Injector, path *[]string) {
 	r.pocketNetworkClient = di.Resolve(modules.PocketNetworkClientToken, injector, path)
 	r.relayer = di.Resolve(modules.RelayerToken, injector, path)
-	r.sessionManager = di.Resolve(modules.SessionManagerToken, injector, path)
 	r.miner = di.Resolve(modules.MinerModuleToken, injector, path)
+	r.sessionManager = di.Resolve(modules.SessionManagerToken, injector, path)
+	r.miner.MineRelays(r.relayer.Relays(), r.sessionManager.ClosedSessions())
 	r.PrivateKey = di.Resolve(modules.PrivateKeyInjectionToken, injector, path)
 
 	globalLogger := di.Resolve(modules.LoggerModuleToken, injector, path)
@@ -43,29 +44,5 @@ func (r *servicer) CascadeStart() error {
 }
 
 func (r *servicer) Start() error {
-	go r.handleSessionEnd()
-	go r.handleRelays()
 	return nil
-}
-
-func (r *servicer) handleSessionEnd() {
-	ch := r.sessionManager.OnSessionEnd()
-	for session := range ch {
-		if err := r.miner.SubmitClaim(); err != nil {
-			continue
-		}
-
-		// Wait for some time
-		r.miner.SubmitProof([]byte(session.BlockHash))
-	}
-}
-
-func (r *servicer) handleRelays() {
-	ch := r.relayer.Relays()
-	for relay := range ch {
-		serializedRelay := relay.Serialize()
-		hash := crypto.SHA3Hash([]byte(serializedRelay))
-		r.tempHash = hash
-		r.miner.Update(hash, hash, 1)
-	}
 }

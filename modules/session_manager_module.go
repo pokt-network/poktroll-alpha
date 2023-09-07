@@ -7,8 +7,9 @@ import (
 
 type SessionManager interface {
 	di.Module
+	di.Uninjectable
 	GetSession() *types.Session
-	OnSessionEnd() <-chan *types.Session
+	ClosedSessions() (sessions <-chan *types.Session, close func())
 }
 
 var SessionManagerToken = di.NewInjectionToken[SessionManager]("sessionManager")

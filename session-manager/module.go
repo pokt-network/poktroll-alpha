@@ -4,7 +4,10 @@ import (
 	"poktroll/modules"
 	"poktroll/runtime/di"
 	"poktroll/types"
+	"sync"
 )
+
+var _ modules.SessionManager = &sessionManager{}
 
 type sessionManager struct {
 	pocketNetworkClient modules.PocketNetworkClient
@@ -14,6 +17,8 @@ type sessionManager struct {
 	latestSecret        string
 	started             bool
 	logger              modules.Logger
+	mu                  sync.RWMutex
+	listeners           [](chan<- *types.Session)
 }
 
 func NewSessionManager() modules.SessionManager {
@@ -36,6 +41,22 @@ func (s *sessionManager) Start() error {
 	if s.started {
 		return nil
 	}
+
+	go func() {
+		for session := range s.sessionTicker {
+			s.mu.RLock()
+			for _, ch := range s.listeners {
+				ch <- session
+			}
+			s.mu.RUnlock()
+		}
+		s.mu.Lock()
+		for _, ch := range s.listeners {
+			close(ch)
+		}
+		s.listeners = [](chan<- *types.Session){}
+		s.mu.Unlock()
+	}()
 
 	go func() {
 		for block := range s.pocketNetworkClient.OnNewBlock() {
@@ -64,6 +85,18 @@ func (s *sessionManager) GetSession() *types.Session {
 	return s.session
 }
 
-func (s *sessionManager) OnSessionEnd() <-chan *types.Session {
-	return s.sessionTicker
+func (s *sessionManager) ClosedSessions() (sessions <-chan *types.Session, closeChan func()) {
+	ch := make(chan *types.Session)
+	len := len(s.listeners)
+	s.listeners = append(s.listeners, ch)
+	closeChan = func() {
+		channelToClose := len
+		// remove the channel from the list of listeners
+		s.listeners = append(s.listeners[:channelToClose], s.listeners[channelToClose+1:]...)
+		close(ch)
+	}
+	return ch, closeChan
 }
+
+// Make this module uninjectable due to single consumer return channels
+func (s *sessionManager) Uninjectable() {}

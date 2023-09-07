@@ -3,22 +3,27 @@ package prooflifecycle
 import (
 	"context"
 	"hash"
-	"poktroll/modules"
-	"poktroll/runtime/di"
 
 	"github.com/pokt-network/smt"
+
+	"poktroll/crypto"
+	"poktroll/modules"
+	"poktroll/runtime/di"
+	"poktroll/types"
 )
 
 var SMTHasherToken = di.NewInjectionToken[hash.Hash]("SMTHasher")
 var SMTStoreToken = di.NewInjectionToken[smt.KVStore]("SMTStore")
 
 type miner struct {
-	smst   smt.SMST
-	client modules.PocketNetworkClient
-	logger modules.Logger
+	smst     smt.SMST
+	client   modules.PocketNetworkClient
+	logger   modules.Logger
+	relays   <-chan *types.Relay
+	sessions <-chan *types.Session
 }
 
-func CreateProofLifecycle() modules.MinerModule {
+func CreateMiner() modules.MinerModule {
 	return &miner{}
 }
 
@@ -38,6 +43,30 @@ func (m *miner) SubmitProof(hash []byte) error {
 	return result.Error()
 }
 
+func (m *miner) MineRelays(relays <-chan *types.Relay, sessions <-chan *types.Session) {
+	m.relays = relays
+	m.sessions = sessions
+}
+
+func (m *miner) handleSessionEnd() {
+	for session := range m.sessions {
+		if err := m.SubmitClaim(); err != nil {
+			continue
+		}
+
+		// Wait for some time
+		m.SubmitProof([]byte(session.BlockHash))
+	}
+}
+
+func (m *miner) handleRelays() {
+	for relay := range m.relays {
+		serializedRelay := relay.Serialize()
+		hash := crypto.SHA3Hash([]byte(serializedRelay))
+		m.Update(hash, hash, 1)
+	}
+}
+
 func (m *miner) Update(key []byte, value []byte, weight uint64) error {
 	return m.smst.Update(key, value, weight)
 }
@@ -54,6 +83,8 @@ func (m *miner) Resolve(injector *di.Injector, path *[]string) {
 }
 
 func (t *miner) Start() error {
+	go t.handleSessionEnd()
+	go t.handleRelays()
 	return nil
 }
 

@@ -58,6 +58,9 @@ func Provide[V any](token *InjectionToken[V], value V, injector *Injector) {
 	if injector.sealed {
 		panic("Injector sealed")
 	}
+	if _, ok := value.(Uninjectable); !ok {
+		panic(fmt.Sprintf("Non-injectable module %q", token.Id()))
+	}
 	injector.injections[token.Id()] = value
 }
 
