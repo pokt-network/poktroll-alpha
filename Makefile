@@ -125,3 +125,9 @@ poktroll_balance: ## Check the balances of both keys
 .PHONY: poktroll_get_session
 poktroll_get_session: ## Queries the poktroll node for session data
 	poktrolld query poktroll get-session --node tcp://127.0.0.1:36657
+
+# Ref: https://rollkit.dev/tutorials/gm-world-frontend
+.PHONY: poktroll_cosmology_frontend
+poktroll_cosmology_frontend: ## Start the poktroll cosmology frontend
+	echo "Visit http://localhost:3000/"
+	yarn --cwd ./frontend dev
