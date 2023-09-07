@@ -11,19 +11,17 @@ import (
 func (k msgServer) Stake(goCtx context.Context, msg *types.MsgStake) (*types.MsgStakeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// Convert msg.Amount string to a Coin value
-	amount, err := sdk.ParseDecCoin(msg.Amount)
-	if err != nil {
-		return &types.MsgStakeResponse{Success: false}, err
-	}
-	stake_amt, _ := amount.TruncateDecimal() // TODO: NEed tp deal with better parsing
-
 	// TODO: Define actor-specific logic here. Assuming just servicers for now
-	err = k.StakeActor(ctx, sdk.ValAddress(msg.Creator), stake_amt)
+	err := k.StakeActor(ctx, msg)
+
+	logger := ctx.Logger()
 
 	if err != nil {
+		logger.Info("staking unsuccesful :(")
+		logger.Info(err.Error())
 		return &types.MsgStakeResponse{Success: false}, err
 	}
 
+	logger.Info("staked!")
 	return &types.MsgStakeResponse{Success: true}, nil
 }

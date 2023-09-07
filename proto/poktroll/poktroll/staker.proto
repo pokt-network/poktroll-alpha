@@ -1,0 +1,10 @@
+syntax = "proto3";
+package poktroll.poktroll;
+
+option go_package = "poktroll/x/poktroll/types";
+
+message Staker {
+  string addr = 1; // address of the staker (bech32 prefixed)
+  string coinsStaked = 2; // coins staked
+  // TODO: Add Actor type for servicer, appln, sequencer etc
+}

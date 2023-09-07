@@ -8,41 +8,66 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func (k Keeper) StakeActor(ctx sdk.Context, addr sdk.ValAddress, amount sdk.Coin) error {
+func (k Keeper) StakeActor(ctx sdk.Context, msg *types.MsgStake) error {
 	// TODO: sends coins to the staking module's pool!
 
 	// Update store with new staking amount
 	store := ctx.KVStore(k.storeKey)
-	servStore := prefix.NewStore(store, []byte(types.ServicerPrefix))
+	stakerStore := prefix.NewStore(store, []byte(types.StakerPrefix))
+
+	// Convert msg.Amount string to a Coin value
+	amtToStake, err := parseCoins(msg.Amount)
+	if err != nil {
+		return err
+	}
 
 	// Convert the valAddr to bytes as it will be the key to store validator info
+	addr := sdk.ValAddress(msg.GetCreator())
 	byteKey := addr.Bytes()
+	// Print out the validator address
+	fmt.Println(addr.String())
 
 	// Get existing validator data from store
-	bz := servStore.Get(byteKey)
+	bz := stakerStore.Get(byteKey)
 
-	var servicer types.Servicer
-	if bz == nil {
-		// Create a new Validator object if not found
-		servicer = types.NewServicer(addr, amount)
-	} else {
+	var staker types.Staker
+	if bz != nil {
 		// Deserialize the byte array into a Validator object
-		k.cdc.Unmarshal(bz, &servicer)
-
+		k.cdc.Unmarshal(bz, &staker)
+		// Parse staker coins
+		amtStaked, err := parseCoins(staker.CoinsStaked)
+		if err != nil {
+			return err
+		}
 		// Update staking amount
-		servicer.StakeAmount = servicer.StakeAmount.Add(amount)
+		amtStaked = amtStaked.Add(amtToStake)
+		staker.CoinsStaked = amtStaked.String()
+	} else {
+		// Create a new Staker object if not found
+		staker = types.Staker{
+			Addr:        addr.String(),
+			CoinsStaked: amtToStake.String(),
+		}
 	}
 
 	// Serialize the Validator object back to bytes
-	bz, err := k.cdc.Marshal(&servicer)
+	bz, err = k.cdc.Marshal(&staker)
 	if err != nil {
 		return err
 	}
 
 	// Save the updated Validator object back to the store
-	servStore.Set(byteKey, bz)
+	stakerStore.Set(byteKey, bz)
 
 	return nil
+}
+
+func parseCoins(coins string) (sdk.Coin, error) {
+	amt, err := sdk.ParseCoinNormalized(coins)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+	return amt, nil
 }
 
 func (k Keeper) UnstakeActor(ctx sdk.Context, addr sdk.ValAddress, amount sdk.Coin) error {

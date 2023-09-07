@@ -12,6 +12,9 @@ const (
 
 	// MemStoreKey defines the in-memory store key
 	MemStoreKey = "mem_poktroll"
+
+	// Key to store staker-related data
+	StakerPrefix = "staker-"
 )
 
 func KeyPrefix(p string) []byte {
