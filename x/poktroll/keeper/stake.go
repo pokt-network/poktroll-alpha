@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"poktroll/x/poktroll/types"
 
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -42,4 +43,50 @@ func (k Keeper) StakeActor(ctx sdk.Context, addr sdk.ValAddress, amount sdk.Coin
 	servStore.Set(byteKey, bz)
 
 	return nil
+}
+
+func (k Keeper) UnstakeActor(ctx sdk.Context, addr sdk.ValAddress, amount sdk.Coin) error {
+
+	store := ctx.KVStore(k.storeKey)
+	servStore := prefix.NewStore(store, []byte(types.ServicerPrefix))
+
+	// Convert the valAddr to bytes as it will be the key to store validator info
+	byteKey := addr.Bytes()
+
+	// Get existing validator data from the store
+	bz := servStore.Get(byteKey)
+
+	if bz == nil {
+		// Error: servicer not found
+		return fmt.Errorf("servicer not found")
+	}
+
+	var servicer types.Servicer
+
+	// Deserialize the byte array into a Validator object
+	k.cdc.Unmarshal(bz, &servicer)
+
+	// Update staking amount
+	newStakeAmount := servicer.StakeAmount.Sub(amount)
+	// if err != nil {
+	// 	// Error: trying to unstake more than currently staked
+	// 	return fmt.Errorf("insufficient staking amount to unstake")
+	// }
+
+	servicer.StakeAmount = newStakeAmount
+
+	// Serialize the Validator object back to bytes
+	bz, err := k.cdc.Marshal(&servicer)
+	if err != nil {
+		return err
+	}
+
+	// Save the updated Validator object back to the store
+	servStore.Set(byteKey, bz)
+
+	// TODO: Add logic to transfer the unstaked coins from the module's account to the validator's account
+	// (This is usually done through the bank module)
+
+	return nil
+
 }
