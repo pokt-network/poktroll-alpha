@@ -39,8 +39,6 @@ func NewGlobalLogger(cfg *configs.LoggerConfig) *loggerModule {
 	}
 }
 
-func (m *loggerModule) Module() modules.LoggerModule { return m }
-
 // CreateLoggerForModule implements the respective `modules.Logger` interface member.
 func (m *loggerModule) CreateLoggerForModule(moduleName string) *modules.Logger {
 	logger := m.Logger.With().Str("module", moduleName).Logger()

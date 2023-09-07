@@ -17,14 +17,14 @@ func NewInjector() *Injector {
 	return &Injector{map[string]any{}, map[string]bool{}, false}
 }
 
-func ResolveMain[V Module](token InjectionToken[V], injector *Injector) V {
+func ResolveMain[V Module](token *InjectionToken[V], injector *Injector) V {
 	path := &[]string{}
-	result := Resolve(token, injector, path)
+	result := Resolve[V](token, injector, path)
 	injector.sealed = true
 	return result
 }
 
-func Resolve[V any](token InjectionToken[V], injector *Injector, path *[]string) V {
+func Resolve[V any](token *InjectionToken[V], injector *Injector, path *[]string) V {
 	for _, p := range *path {
 		if p == token.Id() {
 			panic(fmt.Sprintf("Circular dependency detected [ %s -> %s ]", strings.Join(*path, " -> "), token.Id()))
@@ -54,14 +54,14 @@ func Resolve[V any](token InjectionToken[V], injector *Injector, path *[]string)
 	}
 }
 
-func Provide[V any](token InjectionToken[V], value V, injector *Injector) {
+func Provide[V any](token *InjectionToken[V], value V, injector *Injector) {
 	if injector.sealed {
 		panic("Injector sealed")
 	}
 	injector.injections[token.Id()] = value
 }
 
-func Get[V any](token InjectionToken[V], injector *Injector) V {
+func Get[V any](token *InjectionToken[V], injector *Injector) V {
 	if injector.injections[token.Id()] == nil {
 		panic(fmt.Sprintf("Injection not provided %s", token.Id()))
 	}
