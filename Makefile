@@ -131,3 +131,11 @@ poktroll_get_session: ## Queries the poktroll node for session data
 poktroll_cosmology_frontend: ## Start the poktroll cosmology frontend
 	echo "Visit http://localhost:3000/"
 	yarn --cwd ./frontend dev
+
+.PHONY: poktroll_servicer_stake
+poktroll_servicer_stake: ## Queries the poktroll node for session data
+	poktrolld tx poktroll stake 1000 --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
+
+.PHONY: poktroll_servicer_unstake
+poktroll_servicer_unstake: ## Queries the poktroll node for session data
+	poktrolld tx poktroll unstake 1000 --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
