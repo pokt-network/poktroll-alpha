@@ -24,8 +24,6 @@ func (k Keeper) StakeActor(ctx sdk.Context, msg *types.MsgStake) error {
 	// Convert the valAddr to bytes as it will be the key to store validator info
 	addr := sdk.ValAddress(msg.GetCreator())
 	byteKey := addr.Bytes()
-	// Print out the validator address
-	fmt.Println(addr.String())
 
 	// Get existing validator data from store
 	bz := stakerStore.Get(byteKey)
@@ -70,38 +68,50 @@ func parseCoins(coins string) (sdk.Coin, error) {
 	return amt, nil
 }
 
-func (k Keeper) UnstakeActor(ctx sdk.Context, addr sdk.ValAddress, amount sdk.Coin) error {
+func (k Keeper) UnstakeActor(ctx sdk.Context, msg *types.MsgUnstake) error {
 
 	store := ctx.KVStore(k.storeKey)
-	servStore := prefix.NewStore(store, []byte(types.ServicerPrefix))
+	servStore := prefix.NewStore(store, []byte(types.StakerPrefix))
+
+	// Convert msg.Amount string to a Coin value
+	amtToUnstake, err := parseCoins(msg.Amount)
+	if err != nil {
+		return err
+	}
 
 	// Convert the valAddr to bytes as it will be the key to store validator info
+	addr := sdk.ValAddress(msg.GetCreator())
 	byteKey := addr.Bytes()
 
 	// Get existing validator data from the store
 	bz := servStore.Get(byteKey)
 
+	logger := ctx.Logger()
 	if bz == nil {
-		// Error: servicer not found
-		return fmt.Errorf("servicer not found")
+		logger.Info("staker not found")
+		return fmt.Errorf("staker not found")
 	}
 
-	var servicer types.Servicer
+	var staker types.Staker
 
 	// Deserialize the byte array into a Validator object
-	k.cdc.Unmarshal(bz, &servicer)
+	k.cdc.Unmarshal(bz, &staker)
 
+	amtStaked, err := parseCoins(staker.CoinsStaked)
+	if err != nil {
+		return err
+	}
 	// Update staking amount
-	newStakeAmount := servicer.StakeAmount.Sub(amount)
+	newStakeAmount := amtStaked.Sub(amtToUnstake)
+	staker.CoinsStaked = newStakeAmount.String()
+	// TODO: Add staked amount checks here
 	// if err != nil {
 	// 	// Error: trying to unstake more than currently staked
 	// 	return fmt.Errorf("insufficient staking amount to unstake")
 	// }
 
-	servicer.StakeAmount = newStakeAmount
-
 	// Serialize the Validator object back to bytes
-	bz, err := k.cdc.Marshal(&servicer)
+	bz, err = k.cdc.Marshal(&staker)
 	if err != nil {
 		return err
 	}
