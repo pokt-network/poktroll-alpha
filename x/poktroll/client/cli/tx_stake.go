@@ -17,9 +17,10 @@ func CmdStake() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stake",
 		Short: "Broadcast message stake",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argAmount := args[0]
+			argActorType := args[1]
 
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -29,6 +30,7 @@ func CmdStake() *cobra.Command {
 			msg := types.NewMsgStake(
 				clientCtx.GetFromAddress().String(),
 				argAmount,
+				argActorType,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

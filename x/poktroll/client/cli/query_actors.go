@@ -3,18 +3,19 @@ package cli
 import (
 	"strconv"
 
+	"poktroll/x/poktroll/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
-	"poktroll/x/poktroll/types"
 )
 
 var _ = strconv.Itoa(0)
 
-func CmdStakers() *cobra.Command {
+func CmdActors() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "stakers",
-		Short: "Query stakers",
+		Use:   "actors",
+		Short: "Query actors",
 		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 
@@ -25,10 +26,11 @@ func CmdStakers() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			params := &types.QueryStakersRequest{}
+			params := &types.QueryActorsRequest{}
 
-			res, err := queryClient.Stakers(cmd.Context(), params)
+			res, err := queryClient.Actors(cmd.Context(), params)
 			if err != nil {
+				clientCtx.PrintString("could not get actors")
 				return err
 			}
 

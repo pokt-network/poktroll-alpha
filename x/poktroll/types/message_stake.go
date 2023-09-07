@@ -9,10 +9,11 @@ const TypeMsgStake = "stake"
 
 var _ sdk.Msg = &MsgStake{}
 
-func NewMsgStake(creator string, amount string) *MsgStake {
+func NewMsgStake(creator string, amount string, actorType string) *MsgStake {
 	return &MsgStake{
-		Creator: creator,
-		Amount:  amount,
+		Creator:   creator,
+		Amount:    amount,
+		ActorType: actorType,
 	}
 }
 

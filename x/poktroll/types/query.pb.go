@@ -193,23 +193,23 @@ func (m *QueryGetSessionResponse) GetText() string {
 	return ""
 }
 
-type QueryStakersRequest struct {
+type QueryActorsRequest struct {
 	// Adding pagination to request
 	Pagination *query.PageRequest `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
 
-func (m *QueryStakersRequest) Reset()         { *m = QueryStakersRequest{} }
-func (m *QueryStakersRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryStakersRequest) ProtoMessage()    {}
-func (*QueryStakersRequest) Descriptor() ([]byte, []int) {
+func (m *QueryActorsRequest) Reset()         { *m = QueryActorsRequest{} }
+func (m *QueryActorsRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryActorsRequest) ProtoMessage()    {}
+func (*QueryActorsRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_71a7e047b63a0f83, []int{4}
 }
-func (m *QueryStakersRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryActorsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryStakersRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryActorsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryStakersRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryActorsRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -219,44 +219,44 @@ func (m *QueryStakersRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte,
 		return b[:n], nil
 	}
 }
-func (m *QueryStakersRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryStakersRequest.Merge(m, src)
+func (m *QueryActorsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryActorsRequest.Merge(m, src)
 }
-func (m *QueryStakersRequest) XXX_Size() int {
+func (m *QueryActorsRequest) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryStakersRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryStakersRequest.DiscardUnknown(m)
+func (m *QueryActorsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryActorsRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryStakersRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryActorsRequest proto.InternalMessageInfo
 
-func (m *QueryStakersRequest) GetPagination() *query.PageRequest {
+func (m *QueryActorsRequest) GetPagination() *query.PageRequest {
 	if m != nil {
 		return m.Pagination
 	}
 	return nil
 }
 
-type QueryStakersResponse struct {
-	// Returning a list of Stakers (servicers for now)
-	Staker []*Staker `protobuf:"bytes,1,rep,name=Staker,proto3" json:"Staker,omitempty"`
+type QueryActorsResponse struct {
+	// Returning a list of Actors (servicers for now)
+	Actor []*Servicer `protobuf:"bytes,1,rep,name=Actor,proto3" json:"Actor,omitempty"`
 	// Adding pagination to response
 	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
 
-func (m *QueryStakersResponse) Reset()         { *m = QueryStakersResponse{} }
-func (m *QueryStakersResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryStakersResponse) ProtoMessage()    {}
-func (*QueryStakersResponse) Descriptor() ([]byte, []int) {
+func (m *QueryActorsResponse) Reset()         { *m = QueryActorsResponse{} }
+func (m *QueryActorsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryActorsResponse) ProtoMessage()    {}
+func (*QueryActorsResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_71a7e047b63a0f83, []int{5}
 }
-func (m *QueryStakersResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryActorsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryStakersResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryActorsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryStakersResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryActorsResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -266,26 +266,26 @@ func (m *QueryStakersResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte
 		return b[:n], nil
 	}
 }
-func (m *QueryStakersResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryStakersResponse.Merge(m, src)
+func (m *QueryActorsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryActorsResponse.Merge(m, src)
 }
-func (m *QueryStakersResponse) XXX_Size() int {
+func (m *QueryActorsResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryStakersResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryStakersResponse.DiscardUnknown(m)
+func (m *QueryActorsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryActorsResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryStakersResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryActorsResponse proto.InternalMessageInfo
 
-func (m *QueryStakersResponse) GetStaker() []*Staker {
+func (m *QueryActorsResponse) GetActor() []*Servicer {
 	if m != nil {
-		return m.Staker
+		return m.Actor
 	}
 	return nil
 }
 
-func (m *QueryStakersResponse) GetPagination() *query.PageResponse {
+func (m *QueryActorsResponse) GetPagination() *query.PageResponse {
 	if m != nil {
 		return m.Pagination
 	}
@@ -297,44 +297,44 @@ func init() {
 	proto.RegisterType((*QueryParamsResponse)(nil), "poktroll.poktroll.QueryParamsResponse")
 	proto.RegisterType((*QueryGetSessionRequest)(nil), "poktroll.poktroll.QueryGetSessionRequest")
 	proto.RegisterType((*QueryGetSessionResponse)(nil), "poktroll.poktroll.QueryGetSessionResponse")
-	proto.RegisterType((*QueryStakersRequest)(nil), "poktroll.poktroll.QueryStakersRequest")
-	proto.RegisterType((*QueryStakersResponse)(nil), "poktroll.poktroll.QueryStakersResponse")
+	proto.RegisterType((*QueryActorsRequest)(nil), "poktroll.poktroll.QueryActorsRequest")
+	proto.RegisterType((*QueryActorsResponse)(nil), "poktroll.poktroll.QueryActorsResponse")
 }
 
 func init() { proto.RegisterFile("poktroll/poktroll/query.proto", fileDescriptor_71a7e047b63a0f83) }
 
 var fileDescriptor_71a7e047b63a0f83 = []byte{
-	// 466 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x93, 0xbf, 0x8f, 0xd3, 0x30,
-	0x14, 0xc7, 0xe3, 0xbb, 0x23, 0x88, 0xc7, 0x84, 0xa9, 0xa0, 0x0d, 0x87, 0xaf, 0x44, 0xa2, 0x07,
-	0x27, 0x61, 0xab, 0x77, 0x03, 0xfb, 0x0d, 0xdc, 0x86, 0x8e, 0x74, 0x43, 0x42, 0xc8, 0x45, 0x56,
-	0x54, 0xb5, 0x8d, 0xd3, 0xd8, 0x45, 0x2d, 0x03, 0x03, 0x2b, 0x0b, 0x3f, 0xfe, 0xa9, 0x8e, 0x95,
-	0x58, 0x98, 0x10, 0x6a, 0xf9, 0x43, 0x50, 0x6d, 0xa7, 0x6d, 0x94, 0x86, 0xb2, 0x3d, 0xf9, 0x7d,
-	0xdf, 0xfb, 0x7e, 0xfc, 0x9e, 0x0d, 0x0f, 0x53, 0xd9, 0xd7, 0x99, 0x1c, 0x0c, 0xd8, 0x3a, 0x18,
-	0x8d, 0x45, 0x36, 0xa5, 0x69, 0x26, 0xb5, 0xc4, 0x77, 0xf2, 0x53, 0x9a, 0x07, 0x41, 0x2d, 0x96,
-	0xb1, 0x34, 0x59, 0xb6, 0x8a, 0xac, 0x30, 0x38, 0x8e, 0xa5, 0x8c, 0x07, 0x82, 0xf1, 0xb4, 0xc7,
-	0x78, 0x92, 0x48, 0xcd, 0x75, 0x4f, 0x26, 0xca, 0x65, 0xcf, 0xde, 0x49, 0x35, 0x94, 0x8a, 0x75,
-	0xb9, 0x12, 0xb6, 0x3f, 0x7b, 0xdf, 0xee, 0x0a, 0xcd, 0xdb, 0x2c, 0xe5, 0x71, 0x2f, 0x31, 0x62,
-	0xa7, 0x25, 0x65, 0xa2, 0x94, 0x67, 0x7c, 0x98, 0xf7, 0x3a, 0x29, 0xe7, 0x95, 0x50, 0xea, 0x9f,
-	0x0d, 0x94, 0xe6, 0x7d, 0x91, 0xd9, 0x7c, 0x58, 0x03, 0xfc, 0x6a, 0x85, 0x70, 0x6d, 0xba, 0x46,
-	0x62, 0x34, 0x16, 0x4a, 0x87, 0x2f, 0xe1, 0x6e, 0xe1, 0x54, 0xa5, 0x32, 0x51, 0x02, 0x3f, 0x07,
-	0xdf, 0xba, 0xd7, 0x51, 0x13, 0x3d, 0xb9, 0x7d, 0xde, 0xa0, 0xa5, 0x89, 0x50, 0x5b, 0x72, 0x79,
-	0x34, 0xfb, 0x75, 0xe2, 0x45, 0x4e, 0x1e, 0xd6, 0xe1, 0x9e, 0xe9, 0x77, 0x25, 0x74, 0xc7, 0xe2,
-	0xe5, 0x4e, 0xcf, 0xe0, 0x7e, 0x29, 0xe3, 0xdc, 0x30, 0x1c, 0x69, 0x31, 0xd1, 0xc6, 0xeb, 0x56,
-	0x64, 0xe2, 0xf0, 0x8d, 0x03, 0xeb, 0x98, 0x3b, 0xe4, 0xbc, 0xf8, 0x05, 0xc0, 0x66, 0x74, 0x0e,
-	0xae, 0x45, 0xed, 0x9c, 0xe9, 0x6a, 0xce, 0xd4, 0xee, 0xd1, 0xcd, 0x99, 0x5e, 0xf3, 0x58, 0xb8,
-	0xda, 0x68, 0xab, 0x32, 0xfc, 0x86, 0xa0, 0x56, 0xec, 0xef, 0x58, 0xda, 0xe0, 0xdb, 0xa3, 0x3a,
-	0x6a, 0x1e, 0x56, 0xdc, 0xdc, 0x0a, 0x22, 0x27, 0xc4, 0x57, 0x05, 0xa6, 0x03, 0xc3, 0x74, 0xba,
-	0x97, 0xc9, 0xfa, 0x6d, 0x43, 0x9d, 0x7f, 0x3d, 0x84, 0x1b, 0x06, 0x0a, 0x7f, 0x00, 0xdf, 0x8e,
-	0x17, 0x3f, 0xde, 0xe1, 0x5f, 0xde, 0x63, 0xd0, 0xda, 0x27, 0xb3, 0x76, 0xe1, 0xa3, 0x4f, 0x3f,
-	0xfe, 0x7c, 0x3f, 0x78, 0x80, 0x1b, 0xac, 0xea, 0xbd, 0xe1, 0xcf, 0x08, 0x60, 0xb3, 0x24, 0xfc,
-	0xb4, 0xaa, 0x73, 0x69, 0xc5, 0xc1, 0xd9, 0xff, 0x48, 0x1d, 0x48, 0xcb, 0x80, 0x34, 0x31, 0xd9,
-	0x01, 0x12, 0x0b, 0xfd, 0xd6, 0x3d, 0x6e, 0xfc, 0x11, 0x6e, 0xba, 0x15, 0xe1, 0xca, 0x3b, 0x16,
-	0xdf, 0x48, 0x70, 0xba, 0x57, 0xe7, 0x18, 0x42, 0xc3, 0x70, 0x8c, 0x03, 0x56, 0xf5, 0x77, 0xd4,
-	0xe5, 0xc5, 0x6c, 0x41, 0xd0, 0x7c, 0x41, 0xd0, 0xef, 0x05, 0x41, 0x5f, 0x96, 0xc4, 0x9b, 0x2f,
-	0x89, 0xf7, 0x73, 0x49, 0xbc, 0xd7, 0x8d, 0xb5, 0x76, 0xb2, 0x29, 0xd3, 0xd3, 0x54, 0xa8, 0xae,
-	0x6f, 0xbe, 0xdc, 0xc5, 0xdf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x2d, 0x3d, 0xc6, 0x78, 0x67, 0x04,
-	0x00, 0x00,
+	// 470 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x93, 0xcf, 0x8b, 0x13, 0x31,
+	0x14, 0xc7, 0x27, 0xfb, 0xa3, 0x60, 0xf6, 0x64, 0x5c, 0xb4, 0x9d, 0xd5, 0x6c, 0x1d, 0xb0, 0xae,
+	0x0b, 0x26, 0xb4, 0x7b, 0xf0, 0xec, 0x1e, 0xdc, 0x9b, 0xac, 0xd3, 0x9b, 0x08, 0x92, 0x96, 0x30,
+	0x0c, 0xb6, 0x93, 0xe9, 0x24, 0x2d, 0xad, 0x47, 0xaf, 0x22, 0x28, 0xfe, 0x53, 0x3d, 0x16, 0xbc,
+	0x78, 0x12, 0x69, 0xfd, 0x43, 0x64, 0x92, 0x4c, 0xa7, 0xc3, 0xcc, 0x58, 0x6f, 0x21, 0xef, 0xfb,
+	0xde, 0xfb, 0xbc, 0xef, 0x4b, 0xe0, 0xa3, 0x58, 0x7c, 0x50, 0x89, 0x18, 0x8d, 0xe8, 0xf6, 0x30,
+	0x99, 0xf2, 0x64, 0x41, 0xe2, 0x44, 0x28, 0x81, 0xee, 0x66, 0xb7, 0x24, 0x3b, 0xb8, 0xa7, 0x81,
+	0x08, 0x84, 0x8e, 0xd2, 0xf4, 0x64, 0x84, 0xee, 0xc3, 0x40, 0x88, 0x60, 0xc4, 0x29, 0x8b, 0x43,
+	0xca, 0xa2, 0x48, 0x28, 0xa6, 0x42, 0x11, 0x49, 0x1b, 0xbd, 0x1c, 0x0a, 0x39, 0x16, 0x92, 0x0e,
+	0x98, 0xe4, 0xa6, 0x3e, 0x9d, 0x75, 0x07, 0x5c, 0xb1, 0x2e, 0x8d, 0x59, 0x10, 0x46, 0x5a, 0x6c,
+	0xb5, 0xb8, 0x4c, 0x14, 0xb3, 0x84, 0x8d, 0xb3, 0x5a, 0xe7, 0xe5, 0xb8, 0xe4, 0x52, 0xe6, 0x05,
+	0x2a, 0x46, 0x62, 0x43, 0x25, 0x12, 0x13, 0xf6, 0x4e, 0x21, 0x7a, 0x93, 0x12, 0xdc, 0xea, 0xa2,
+	0x3e, 0x9f, 0x4c, 0xb9, 0x54, 0xde, 0x6b, 0x78, 0xaf, 0x70, 0x2b, 0x63, 0x11, 0x49, 0x8e, 0x5e,
+	0xc0, 0x86, 0x69, 0xde, 0x04, 0x6d, 0x70, 0x71, 0xd2, 0x6b, 0x91, 0x92, 0x21, 0xc4, 0xa4, 0x5c,
+	0x1f, 0x2d, 0x7f, 0x9d, 0x3b, 0xbe, 0x95, 0x7b, 0x4d, 0x78, 0x5f, 0xd7, 0xbb, 0xe1, 0xaa, 0x6f,
+	0xe8, 0xb2, 0x4e, 0xcf, 0xe1, 0x83, 0x52, 0xc4, 0x76, 0x43, 0xf0, 0x48, 0xf1, 0xb9, 0xd2, 0xbd,
+	0xee, 0xf8, 0xfa, 0xec, 0xbd, 0xb3, 0xb8, 0x2f, 0xd3, 0x11, 0x32, 0x5c, 0xf4, 0x0a, 0xc2, 0xdc,
+	0x38, 0xcb, 0xd6, 0x21, 0xc6, 0x65, 0x92, 0xba, 0x4c, 0xcc, 0x16, 0xad, 0xcb, 0xe4, 0x96, 0x05,
+	0xdc, 0xe6, 0xfa, 0x3b, 0x99, 0xde, 0x37, 0x60, 0xe7, 0xce, 0xca, 0x5b, 0x92, 0x2e, 0x3c, 0xd6,
+	0x37, 0x4d, 0xd0, 0x3e, 0xbc, 0x38, 0xe9, 0x9d, 0x55, 0x8c, 0xdd, 0xe7, 0xc9, 0x2c, 0x1c, 0xf2,
+	0xc4, 0x37, 0x4a, 0x74, 0x53, 0x40, 0x3a, 0xd0, 0x48, 0x4f, 0xf7, 0x22, 0x99, 0x7e, 0xbb, 0x4c,
+	0xbd, 0x2f, 0x87, 0xf0, 0x58, 0x33, 0xa1, 0x8f, 0xb0, 0x61, 0xcc, 0x45, 0x4f, 0x2a, 0x00, 0xca,
+	0x5b, 0x74, 0x3b, 0xfb, 0x64, 0xa6, 0x9d, 0xf7, 0xf8, 0xd3, 0x8f, 0x3f, 0xdf, 0x0f, 0xce, 0x50,
+	0x8b, 0xd6, 0x3d, 0x36, 0xf4, 0x19, 0x40, 0x98, 0xaf, 0x08, 0x3d, 0xab, 0xab, 0x5c, 0x5a, 0xb0,
+	0x7b, 0xf9, 0x3f, 0x52, 0x0b, 0xd2, 0xd1, 0x20, 0x6d, 0x84, 0x2b, 0x40, 0x02, 0xae, 0xde, 0xdb,
+	0x97, 0x9d, 0x3a, 0x61, 0x36, 0x54, 0xef, 0x44, 0xe1, 0x81, 0xd4, 0x3b, 0x51, 0x5c, 0xf4, 0x3f,
+	0x9d, 0xd0, 0xbf, 0x46, 0x5e, 0x5f, 0x2d, 0xd7, 0x18, 0xac, 0xd6, 0x18, 0xfc, 0x5e, 0x63, 0xf0,
+	0x75, 0x83, 0x9d, 0xd5, 0x06, 0x3b, 0x3f, 0x37, 0xd8, 0x79, 0xdb, 0xda, 0x4a, 0xe7, 0x79, 0x96,
+	0x5a, 0xc4, 0x5c, 0x0e, 0x1a, 0xfa, 0xb3, 0x5d, 0xfd, 0x0d, 0x00, 0x00, 0xff, 0xff, 0xa1, 0x50,
+	0x72, 0x4c, 0x60, 0x04, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -354,7 +354,7 @@ type QueryClient interface {
 	// Queries a list of GetSession items.
 	GetSession(ctx context.Context, in *QueryGetSessionRequest, opts ...grpc.CallOption) (*QueryGetSessionResponse, error)
 	// Queries a list of Stakers items.
-	Stakers(ctx context.Context, in *QueryStakersRequest, opts ...grpc.CallOption) (*QueryStakersResponse, error)
+	Actors(ctx context.Context, in *QueryActorsRequest, opts ...grpc.CallOption) (*QueryActorsResponse, error)
 }
 
 type queryClient struct {
@@ -383,9 +383,9 @@ func (c *queryClient) GetSession(ctx context.Context, in *QueryGetSessionRequest
 	return out, nil
 }
 
-func (c *queryClient) Stakers(ctx context.Context, in *QueryStakersRequest, opts ...grpc.CallOption) (*QueryStakersResponse, error) {
-	out := new(QueryStakersResponse)
-	err := c.cc.Invoke(ctx, "/poktroll.poktroll.Query/Stakers", in, out, opts...)
+func (c *queryClient) Actors(ctx context.Context, in *QueryActorsRequest, opts ...grpc.CallOption) (*QueryActorsResponse, error) {
+	out := new(QueryActorsResponse)
+	err := c.cc.Invoke(ctx, "/poktroll.poktroll.Query/Actors", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +399,7 @@ type QueryServer interface {
 	// Queries a list of GetSession items.
 	GetSession(context.Context, *QueryGetSessionRequest) (*QueryGetSessionResponse, error)
 	// Queries a list of Stakers items.
-	Stakers(context.Context, *QueryStakersRequest) (*QueryStakersResponse, error)
+	Actors(context.Context, *QueryActorsRequest) (*QueryActorsResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -412,8 +412,8 @@ func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParamsReq
 func (*UnimplementedQueryServer) GetSession(ctx context.Context, req *QueryGetSessionRequest) (*QueryGetSessionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSession not implemented")
 }
-func (*UnimplementedQueryServer) Stakers(ctx context.Context, req *QueryStakersRequest) (*QueryStakersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Stakers not implemented")
+func (*UnimplementedQueryServer) Actors(ctx context.Context, req *QueryActorsRequest) (*QueryActorsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Actors not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -456,20 +456,20 @@ func _Query_GetSession_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_Stakers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryStakersRequest)
+func _Query_Actors_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryActorsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).Stakers(ctx, in)
+		return srv.(QueryServer).Actors(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/poktroll.poktroll.Query/Stakers",
+		FullMethod: "/poktroll.poktroll.Query/Actors",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Stakers(ctx, req.(*QueryStakersRequest))
+		return srv.(QueryServer).Actors(ctx, req.(*QueryActorsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -487,8 +487,8 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_GetSession_Handler,
 		},
 		{
-			MethodName: "Stakers",
-			Handler:    _Query_Stakers_Handler,
+			MethodName: "Actors",
+			Handler:    _Query_Actors_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -604,7 +604,7 @@ func (m *QueryGetSessionResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryStakersRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryActorsRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -614,12 +614,12 @@ func (m *QueryStakersRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryStakersRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryActorsRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryStakersRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryActorsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -639,7 +639,7 @@ func (m *QueryStakersRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryStakersResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryActorsResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -649,12 +649,12 @@ func (m *QueryStakersResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryStakersResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryActorsResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryStakersResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryActorsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -671,10 +671,10 @@ func (m *QueryStakersResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Staker) > 0 {
-		for iNdEx := len(m.Staker) - 1; iNdEx >= 0; iNdEx-- {
+	if len(m.Actor) > 0 {
+		for iNdEx := len(m.Actor) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.Staker[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.Actor[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -741,7 +741,7 @@ func (m *QueryGetSessionResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryStakersRequest) Size() (n int) {
+func (m *QueryActorsRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -754,14 +754,14 @@ func (m *QueryStakersRequest) Size() (n int) {
 	return n
 }
 
-func (m *QueryStakersResponse) Size() (n int) {
+func (m *QueryActorsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if len(m.Staker) > 0 {
-		for _, e := range m.Staker {
+	if len(m.Actor) > 0 {
+		for _, e := range m.Actor {
 			l = e.Size()
 			n += 1 + l + sovQuery(uint64(l))
 		}
@@ -1044,7 +1044,7 @@ func (m *QueryGetSessionResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryStakersRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryActorsRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1067,10 +1067,10 @@ func (m *QueryStakersRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryStakersRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryActorsRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryStakersRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryActorsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1130,7 +1130,7 @@ func (m *QueryStakersRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryStakersResponse) Unmarshal(dAtA []byte) error {
+func (m *QueryActorsResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1153,15 +1153,15 @@ func (m *QueryStakersResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryStakersResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryActorsResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryStakersResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryActorsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Staker", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Actor", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1188,8 +1188,8 @@ func (m *QueryStakersResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Staker = append(m.Staker, &Staker{})
-			if err := m.Staker[len(m.Staker)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.Actor = append(m.Actor, &Servicer{})
+			if err := m.Actor[len(m.Actor)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

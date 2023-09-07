@@ -7,7 +7,7 @@ import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "poktroll/poktroll/params.proto";
 import "poktroll/poktroll/session.proto";
-import "poktroll/poktroll/staker.proto";
+import "poktroll/poktroll/actor.proto";
 
 option go_package = "poktroll/x/poktroll/types";
 
@@ -27,8 +27,8 @@ service Query {
   }
   
   // Queries a list of Stakers items.
-  rpc Stakers (QueryStakersRequest) returns (QueryStakersResponse) {
-    option (google.api.http).get = "/poktroll/poktroll/stakers";
+  rpc Actors (QueryActorsRequest) returns (QueryActorsResponse) {
+    option (google.api.http).get = "/poktroll/poktroll/actors";
   
   }
 }
@@ -55,14 +55,14 @@ message QueryGetSessionResponse {
   // Session session = 1;
 }
 
-message QueryStakersRequest {
+message QueryActorsRequest {
   // Adding pagination to request
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 
-message QueryStakersResponse {
-  // Returning a list of Stakers (servicers for now)
-  repeated Staker Staker = 1;
+message QueryActorsResponse {
+  // Returning a list of Actors (servicers for now)
+  repeated Servicer Actor = 1;
   // Adding pagination to response
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

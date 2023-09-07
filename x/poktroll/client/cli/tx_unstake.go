@@ -3,22 +3,24 @@ package cli
 import (
 	"strconv"
 
+	"poktroll/x/poktroll/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
-	"poktroll/x/poktroll/types"
 )
 
 var _ = strconv.Itoa(0)
 
 func CmdUnstake() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "unstake [amount]",
+		Use:   "unstake [amount] [actorType]",
 		Short: "Broadcast message unstake",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argAmount := args[0]
+			argActorType := args[1]
 
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -28,6 +30,7 @@ func CmdUnstake() *cobra.Command {
 			msg := types.NewMsgUnstake(
 				clientCtx.GetFromAddress().String(),
 				argAmount,
+				argActorType,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

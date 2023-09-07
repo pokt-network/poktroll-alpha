@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package poktroll.poktroll;
 
+import "poktroll/poktroll/actor.proto";
+
 option go_package = "poktroll/x/poktroll/types";
 
 // Msg defines the Msg service.
@@ -12,8 +14,7 @@ service Msg {
 message MsgStake {
   string creator = 1;
   string amount  = 2;
-
-  // TODO: Make it actor-specific
+  string actorType = 3;
 }
 
 message MsgStakeResponse {
@@ -23,6 +24,7 @@ message MsgStakeResponse {
 message MsgUnstake {
   string creator = 1;
   string amount  = 2;
+  string actorType = 3;
 }
 
 message MsgUnstakeResponse {
