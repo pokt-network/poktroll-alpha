@@ -62,7 +62,7 @@ func (m *miner) handleRelays() {
 	for relay := range m.relays {
 		m.logger.Debug().Msgf("TODO handle relay 🔂 %+v", relay)
 
-		// TODO get access to a relayer module from the DI
+		// TODO get access to a relayer module
 
 		// TODO get the serialized byte representation of the relay
 		// serializedRelay := relay.Serialize()

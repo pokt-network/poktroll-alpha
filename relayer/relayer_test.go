@@ -24,8 +24,9 @@ func TestRelayWorker(t *testing.T) {
 		}
 
 		// feed a relay in
-		worker.in <- &types.Relay{
+		worker.input <- &types.Relay{
 			Req: &types.RelayRequest{
+				Height: uint64(1),
 				Req: &types.HttpRequest{
 					Url:    u.String(),
 					Method: http.MethodGet,
@@ -34,7 +35,7 @@ func TestRelayWorker(t *testing.T) {
 		}
 
 		// wait for output
-		got := <-worker.relay
+		got := <-worker.output
 		if got.GetRes().Err != "" {
 			t.Errorf("failed to process relay: %+v", got.GetRes().Err)
 		}
@@ -47,7 +48,7 @@ func TestRelayWorker(t *testing.T) {
 		}
 
 		// feed a relay in
-		worker.in <- &types.Relay{
+		worker.input <- &types.Relay{
 			Req: &types.RelayRequest{
 				Req: &types.HttpRequest{
 					Url: u.String(),
@@ -56,17 +57,17 @@ func TestRelayWorker(t *testing.T) {
 		}
 
 		// wait for output
-		got := <-worker.relay
-		if got.Res.Err != "ErrInvalidHeight" {
-			t.Errorf("got: %+v - wanted: %v", got, "ErrInvalidHeight")
+		got := <-worker.output
+		if got.Res.Err != "ErrRelayFailedValidation: ErrInvalidRelayHeight" {
+			t.Errorf("got: %+v - wanted: %v", got, "ErrRelayFailedValidation: ErrInvalidRelayHeight")
 		}
 	})
 }
 
 func setupRelayer(t *testing.T) *relayer {
 	worker := &relayer{
-		in:    make(chan *types.Relay),
-		relay: make(chan *types.Relay),
+		input:  make(chan *types.Relay),
+		output: make(chan *types.Relay),
 	}
 	if err := worker.Start(); err != nil {
 		log.Fatalf("relayer failed to start: %+v", err)
