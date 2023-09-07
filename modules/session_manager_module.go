@@ -7,7 +7,7 @@ import (
 
 type SessionManager interface {
 	di.Module
-	di.Uninjectable
+	// di.Uninjectable
 	GetSession() *types.Session
 	ClosedSessions() (sessions <-chan *types.Session, close func())
 }

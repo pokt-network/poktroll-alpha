@@ -1,9 +1,7 @@
 package relayer
 
 import (
-	"net/http"
-	"net/url"
-	"time"
+	"fmt"
 
 	"poktroll/modules"
 	"poktroll/runtime/di"
@@ -20,16 +18,13 @@ import (
 type relayer struct {
 	// in receives relays
 	in chan *types.Relay
-	// relays are sent on out after they're done being processed
-	out chan *types.Relay
-	// channel signaling a relay has been completed
+	// channel signaling a relay has been completed.
 	relay chan *types.Relay
 }
 
 func NewRelayerModule() modules.RelayerModule {
 	return &relayer{
 		in:    make(chan *types.Relay),
-		out:   make(chan *types.Relay),
 		relay: make(chan *types.Relay),
 	}
 }
@@ -42,67 +37,37 @@ func (r *relayer) CascadeStart() error {
 
 // Start begins listening for requests on its given pipeline and handles them appropriately
 func (r *relayer) Start() error {
-	go func() {
-		// receive incoming relay requests
-		//for req := range r.in {
-		for range time.NewTicker(1000 * time.Millisecond).C {
-			//if err := req.Validate(); err != nil {
-			//	// respond with error
-			//	r.out <- &types.Relay{
-			//		RelayRequest: req.RelayRequest,
-			//		RelayResponse: types.RelayResponse{
-			//			Err: err,
-			//		},
-			//	}
-			//}
-
-			// Execute the relay, return the response and error
-			//res := req.Execute()
-			//done := &types.Relay{
-			//	RelayRequest:  req.RelayRequest,
-			//	RelayResponse: *res,
-			//}
-
-			// Emit it on the output channel
-			// TECHDEBT(dylan): the output channel could be attached to the relay
-			// request instead of the relayer to allow for completely concurrent
-			// handling of all relays
-			//r/.out <- done
-
-			go func() {
-				req := http.Request{}
-				req.URL, _ = url.Parse("http://localhost:8081")
-				r.relay <- &types.Relay{
-					types.RelayRequest{
-						Height: 0,
-						Req:    &req,
-					},
-					types.RelayResponse{
-						Payload:    []byte("123"),
-						StatusCode: 200,
-						Err:        nil,
-						Signature:  []byte("sig"),
-					},
-				}
-
-				type RelayRequest struct {
-					Height uint64
-					Req    *http.Request
-				}
-
-				// RelayResponse returns a payload and status code from a request
-				type RelayResponse struct {
-					Payload    []byte
-					StatusCode int
-					Err        error
-					Signature  []byte
-				}
-			}()
-		}
-	}()
+	go r.start()
 	return nil
 }
 
+func (r *relayer) start() {
+	// receive incoming relay requests
+	for relay := range r.in {
+		if err := r.validate(relay); err != nil {
+			// update the error response and output the relay.
+			relay.Res = &types.RelayResponse{
+				Err:        fmt.Errorf("ErrRelayFailedValidation: %w", err).Error(),
+				Payload:    nil,
+				StatusCode: 400,
+			}
+			r.relay <- relay
+		}
+
+		// Execute the relay, return the response and error
+		completed := r.execute(relay)
+		r.relay <- completed
+
+		// store the relay
+		go func(relay *types.Relay) {
+			if err := r.store(relay); err != nil {
+				fmt.Printf("TODO ADD A LOGGER LOL")
+			}
+		}(relay)
+	}
+}
+
+// Returns a single-listener channel that emits completed relays.
 func (r *relayer) Relays() <-chan *types.Relay {
 	return r.relay
 }
@@ -110,4 +75,23 @@ func (r *relayer) Relays() <-chan *types.Relay {
 func (r *relayer) Stop() error {
 	// TODO: what needs to happen here?
 	return nil
+}
+
+// validate checks if a relay request is formatted correctly and meets requirements
+func (r *relayer) validate(relay *types.Relay) error {
+	return fmt.Errorf("not impl")
+}
+
+// execute runs the relay and returns the error and response, no matter what
+func (r *relayer) execute(relay *types.Relay) *types.Relay {
+	return &types.Relay{
+		Res: &types.RelayResponse{
+			Err: "not impl",
+		},
+	}
+}
+
+// store persists the relay to disk for later reference
+func (r *relayer) store(*types.Relay) error {
+	return fmt.Errorf("not impl")
 }

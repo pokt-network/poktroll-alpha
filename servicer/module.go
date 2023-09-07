@@ -30,7 +30,6 @@ func (r *servicer) Resolve(injector *di.Injector, path *[]string) {
 	r.miner = di.Resolve(modules.MinerModuleToken, injector, path)
 	r.sessionManager = di.Resolve(modules.SessionManagerToken, injector, path)
 	r.PrivateKey = di.Resolve(modules.PrivateKeyInjectionToken, injector, path)
-
 	globalLogger := di.Resolve(modules.LoggerModuleToken, injector, path)
 	r.logger = globalLogger.CreateLoggerForModule(modules.ServicerToken.Id())
 }
