@@ -29,7 +29,6 @@ func (r *servicer) Resolve(injector *di.Injector, path *[]string) {
 	r.relayer = di.Resolve(modules.RelayerToken, injector, path)
 	r.miner = di.Resolve(modules.MinerModuleToken, injector, path)
 	r.sessionManager = di.Resolve(modules.SessionManagerToken, injector, path)
-	r.miner.MineRelays(r.relayer.Relays(), r.sessionManager.ClosedSessions())
 	r.PrivateKey = di.Resolve(modules.PrivateKeyInjectionToken, injector, path)
 
 	globalLogger := di.Resolve(modules.LoggerModuleToken, injector, path)
@@ -44,5 +43,8 @@ func (r *servicer) CascadeStart() error {
 }
 
 func (r *servicer) Start() error {
+	// TODO handle close here better?
+	sessions, _ := r.sessionManager.ClosedSessions()
+	r.miner.MineRelays(r.relayer.Relays(), sessions)
 	return nil
 }

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package types;
 
-option go_package = "poktroll/codec";
+option go_package = "poktroll/types";
 
 enum ActorType {
   ACTOR_TYPE_UNSPECIFIED = 0;
