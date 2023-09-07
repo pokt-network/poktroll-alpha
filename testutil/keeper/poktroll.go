@@ -3,6 +3,9 @@ package keeper
 import (
 	"testing"
 
+	"poktroll/x/poktroll/keeper"
+	"poktroll/x/poktroll/types"
+
 	tmdb "github.com/cometbft/cometbft-db"
 	"github.com/cometbft/cometbft/libs/log"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -13,8 +16,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/stretchr/testify/require"
-	"poktroll/x/poktroll/keeper"
-	"poktroll/x/poktroll/types"
 )
 
 func PoktrollKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
@@ -31,7 +32,6 @@ func PoktrollKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 	cdc := codec.NewProtoCodec(registry)
 
 	paramsSubspace := typesparams.NewSubspace(cdc,
-		types.Amino,
 		storeKey,
 		memStoreKey,
 		"PoktrollParams",

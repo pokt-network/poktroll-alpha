@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	// this line is used by starport scaffolding # 1
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -11,14 +12,15 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 
+	"poktroll/x/poktroll/client/cli"
+	"poktroll/x/poktroll/keeper"
+	"poktroll/x/poktroll/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"poktroll/x/poktroll/client/cli"
-	"poktroll/x/poktroll/keeper"
-	"poktroll/x/poktroll/types"
 )
 
 var (
@@ -42,11 +44,6 @@ func NewAppModuleBasic(cdc codec.BinaryCodec) AppModuleBasic {
 // Name returns the name of the module as a string
 func (AppModuleBasic) Name() string {
 	return types.ModuleName
-}
-
-// RegisterLegacyAminoCodec registers the amino codec for the module, which is used to marshal and unmarshal structs to/from []byte in order to persist them in the module's KVStore
-func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	types.RegisterCodec(cdc)
 }
 
 // RegisterInterfaces registers a module's interface types and their concrete implementations as proto.Message

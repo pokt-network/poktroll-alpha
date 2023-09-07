@@ -113,6 +113,7 @@ import (
 	poktrollmodule "poktroll/x/poktroll"
 	poktrollmodulekeeper "poktroll/x/poktroll/keeper"
 	poktrollmoduletypes "poktroll/x/poktroll/types"
+
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "poktroll/app/params"
@@ -211,7 +212,6 @@ func init() {
 type App struct {
 	*baseapp.BaseApp
 
-	cdc               *codec.LegacyAmino
 	appCodec          codec.Codec
 	interfaceRegistry types.InterfaceRegistry
 	txConfig          client.TxConfig
@@ -274,7 +274,6 @@ func New(
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *App {
 	appCodec := encodingConfig.Marshaler
-	cdc := encodingConfig.Amino
 	interfaceRegistry := encodingConfig.InterfaceRegistry
 	txConfig := encodingConfig.TxConfig
 
@@ -794,14 +793,6 @@ func (app *App) BlockedModuleAccountAddrs() map[string]bool {
 	return modAccAddrs
 }
 
-// LegacyAmino returns SimApp's amino codec.
-//
-// NOTE: This is solely to be used for testing purposes as it may be desirable
-// for modules to register their own custom testing types.
-func (app *App) LegacyAmino() *codec.LegacyAmino {
-	return app.cdc
-}
-
 // AppCodec returns an app codec.
 //
 // NOTE: This is solely to be used for testing purposes as it may be desirable
@@ -888,8 +879,8 @@ func (app *App) RegisterNodeService(clientCtx client.Context) {
 }
 
 // initParamsKeeper init params keeper and its subspaces
-func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino, key, tkey storetypes.StoreKey) paramskeeper.Keeper {
-	paramsKeeper := paramskeeper.NewKeeper(appCodec, legacyAmino, key, tkey)
+func initParamsKeeper(appCodec codec.BinaryCodec, key, tkey storetypes.StoreKey) paramskeeper.Keeper {
+	paramsKeeper := paramskeeper.NewKeeper(appCodec, key, tkey)
 
 	paramsKeeper.Subspace(authtypes.ModuleName)
 	paramsKeeper.Subspace(banktypes.ModuleName)
