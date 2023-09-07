@@ -1,7 +1,17 @@
 syntax = "proto3";
+
 package poktroll.poktroll;
 
 option go_package = "poktroll/x/poktroll/types";
 
 // Msg defines the Msg service.
-service Msg {}
+service Msg {
+  rpc SubmitClaim (MsgSubmitClaim) returns (MsgSubmitClaimResponse);
+}
+message MsgSubmitClaim {
+  string creator = 1;
+  string data    = 2;
+}
+
+message MsgSubmitClaimResponse {}
+
