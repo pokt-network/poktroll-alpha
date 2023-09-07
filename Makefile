@@ -137,8 +137,8 @@ poktroll_servicer_stake: ## Queries the poktroll node for session data
 	poktrolld tx poktroll stake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
 
 .PHONY: poktroll_get_actors
-poktroll_get_stakers: ## Queries the poktroll node for session data
-	poktrolld q poktroll actor --node tcp://127.0.0.1:36657
+poktroll_get_actors: ## Queries the poktroll node for session data
+	poktrolld q poktroll actors --node tcp://127.0.0.1:36657
 
 .PHONY: poktroll_servicer_unstake
 poktroll_servicer_unstake: ## Queries the poktroll node for session data
