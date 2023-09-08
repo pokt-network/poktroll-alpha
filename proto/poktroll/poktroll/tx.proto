@@ -1,7 +1,38 @@
 syntax = "proto3";
+
 package poktroll.poktroll;
+
+import "poktroll/poktroll/actor.proto";
 
 option go_package = "poktroll/x/poktroll/types";
 
 // Msg defines the Msg service.
-service Msg {}
+service Msg {
+  rpc Stake   (MsgStake  ) returns (MsgStakeResponse  );
+  rpc Unstake (MsgUnstake) returns (MsgUnstakeResponse);
+}
+
+// IMPROVE: Need custom stake messages per actor
+// INVESTIGATE: Should we use strings for amounts or use a custom type?
+// INVESTIGATE: Should we use strings for addresses or use a custom type?
+
+message MsgStake {
+  string creator = 1; // TODO: Reconsider naming to `from` or `address` or `signer`
+  string amount  = 2; // TODO: Figure out denomation for this and consider renaming to `amountToStake`
+  string actorType = 3; // TODO: Change `actorType` to an enum defined in `actor.proto`
+}
+
+message MsgStakeResponse {
+  bool success = 1;  // TODO: Need to return success/error codes
+}
+
+message MsgUnstake {
+  string creator = 1; // TODO: Reconsider naming to `from` or `address` or `signer`
+  string amount  = 2; // TODO: Figure out denomation for this
+  string actorType = 3; // TODO: Change `actorType` to an enum defined in `actor.proto`
+}
+
+message MsgUnstakeResponse {
+  bool success = 1;  // TODO: Need to return success/error codes
+}
+

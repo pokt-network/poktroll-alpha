@@ -12,10 +12,10 @@ import (
 
 var _ = strconv.Itoa(0)
 
-func CmdGetSession() *cobra.Command {
+func CmdActors() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get-session",
-		Short: "Query getSession",
+		Use:   "actors",
+		Short: "Query actors",
 		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			clientCtx, err := client.GetClientQueryContext(cmd)
@@ -24,11 +24,11 @@ func CmdGetSession() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
+			request := &types.QueryActorsRequest{}
 
-			params := &types.QueryGetSessionRequest{}
-
-			res, err := queryClient.GetSession(cmd.Context(), params)
+			res, err := queryClient.Actors(cmd.Context(), request)
 			if err != nil {
+				clientCtx.PrintString("could not get actors")
 				return err
 			}
 

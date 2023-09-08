@@ -7,6 +7,7 @@ import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "poktroll/poktroll/params.proto";
 import "poktroll/poktroll/session.proto";
+import "poktroll/poktroll/actor.proto";
 
 option go_package = "poktroll/x/poktroll/types";
 
@@ -24,23 +25,37 @@ service Query {
     option (google.api.http).get = "/poktroll/poktroll/get_session";
 
   }
+
+  // Queries for all stacked Actors
+  rpc Actors (QueryActorsRequest) returns (QueryActorsResponse) {
+    option (google.api.http).get = "/poktroll/poktroll/actors";
+
+  }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
 message QueryParamsRequest {}
 
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
+
   // params holds all the parameters of this module.
   Params params = 1 [(gogoproto.nullable) = false];
 }
 
 message QueryGetSessionRequest {
-  // string application_address = 1;
-  // uint64 session_height = 2;
-  // string relay_chain = 3;
 }
 
 message QueryGetSessionResponse {
-  string text = 1;
-  // Session session = 1;
+  string placeholder_text = 1;
 }
+
+message QueryActorsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryActorsResponse {
+  repeated Servicer servicers = 1;
+  // TODO: Return other ators too
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+

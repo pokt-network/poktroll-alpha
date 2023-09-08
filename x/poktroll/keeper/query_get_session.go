@@ -20,5 +20,5 @@ func (k Keeper) GetSession(goCtx context.Context, req *types.QueryGetSessionRequ
 	// TODO: Process the query
 	_ = ctx
 
-	return &types.QueryGetSessionResponse{Text: "it worked"}, nil
+	return &types.QueryGetSessionResponse{PlaceholderText: "it worked"}, nil
 }
