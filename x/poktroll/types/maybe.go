@@ -1,6 +1,8 @@
 package types
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type Maybe[T any] struct {
 	value T
@@ -21,6 +23,22 @@ func JustError[T any](error error) Maybe[T] {
 	typeT := reflect.TypeOf(zeroT).Elem()
 	zeroValue := reflect.Zero(typeT).Interface().(T)
 	return Maybe[T]{value: zeroValue, error: error}
+}
+
+func JustErrorChan[T any](err error) <-chan Maybe[T] {
+	resultCh := make(chan Maybe[T])
+	go func() {
+		resultCh <- JustError[T](err)
+	}()
+	return resultCh
+}
+
+func JustValueChan[T any](value T) <-chan Maybe[T] {
+	resultCh := make(chan Maybe[T])
+	go func() {
+		resultCh <- Just[T](value)
+	}()
+	return resultCh
 }
 
 func (m Maybe[T]) ValueOrError() (T, error) {
