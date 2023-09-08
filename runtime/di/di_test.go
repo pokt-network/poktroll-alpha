@@ -42,7 +42,7 @@ type mainModuleImpl struct {
 
 func (m *mainModuleImpl) Hydrate(injector *di.Injector, path *[]string) {
 	m.timeout = di.Hydrate(configInjectionToken, injector, path)
-	m.moduleDep = di.Hydrate(moduleInjectionToken, injector, path)
+	m.moduleDep = di.Hydrate(moduleDepInjectionToken, injector, path)
 }
 
 func (m *mainModuleImpl) Module() MainModule { return m }
