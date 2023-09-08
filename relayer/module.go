@@ -20,6 +20,7 @@ import (
 // if passes validation. The request and response are then
 // stored by height.
 type relayer struct {
+	logger *modules.Logger
 	// input receives relays
 	input chan *types.Relay
 	// channel signaling a output has been completed.
@@ -36,7 +37,10 @@ func NewRelayerModule() modules.RelayerModule {
 	}
 }
 
-func (r *relayer) Resolve(injector *di.Injector, path *[]string) {}
+func (r *relayer) Resolve(injector *di.Injector, path *[]string) {
+	globalLogger := di.Resolve(modules.LoggerModuleToken, injector, path)
+	r.logger = globalLogger.CreateLoggerForModule(modules.RelayerToken.Id())
+}
 
 func (r *relayer) CascadeStart() error {
 	return r.Start()
@@ -71,7 +75,7 @@ func (r *relayer) start(ctx context.Context) {
 		// store the relay
 		go func(relay *types.Relay) {
 			if err := r.store(relay); err != nil {
-				fmt.Printf("TODO ADD A LOGGER LOL")
+				r.logger.Err(err).Msg("failed to store relay")
 			}
 		}(relay)
 	}
