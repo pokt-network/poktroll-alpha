@@ -23,6 +23,15 @@ var (
 )
 
 const (
+	opWeightMsgStake = "op_weight_msg_stake"
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgStake int = 100
+
+	opWeightMsgUnstake = "op_weight_msg_unstake"
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgUnstake int = 100
+
+	// this line is used by starport scaffolding # simapp/module/const
 	opWeightMsgSubmitClaim = "op_weight_msg_submit_claim"
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgSubmitClaim int = 100
@@ -59,6 +68,28 @@ func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedP
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
 	operations := make([]simtypes.WeightedOperation, 0)
 
+	var weightMsgStake int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgStake, &weightMsgStake, nil,
+		func(_ *rand.Rand) {
+			weightMsgStake = defaultWeightMsgStake
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgStake,
+		poktrollsimulation.SimulateMsgStake(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
+	var weightMsgUnstake int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgUnstake, &weightMsgUnstake, nil,
+		func(_ *rand.Rand) {
+			weightMsgUnstake = defaultWeightMsgUnstake
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgUnstake,
+		poktrollsimulation.SimulateMsgUnstake(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
 	var weightMsgSubmitClaim int
 	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgSubmitClaim, &weightMsgSubmitClaim, nil,
 		func(_ *rand.Rand) {
@@ -89,6 +120,22 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 // ProposalMsgs returns msgs used for governance proposals for simulations.
 func (am AppModule) ProposalMsgs(simState module.SimulationState) []simtypes.WeightedProposalMsg {
 	return []simtypes.WeightedProposalMsg{
+		simulation.NewWeightedProposalMsg(
+			opWeightMsgStake,
+			defaultWeightMsgStake,
+			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
+				poktrollsimulation.SimulateMsgStake(am.accountKeeper, am.bankKeeper, am.keeper)
+				return nil
+			},
+		),
+		simulation.NewWeightedProposalMsg(
+			opWeightMsgUnstake,
+			defaultWeightMsgUnstake,
+			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
+				poktrollsimulation.SimulateMsgUnstake(am.accountKeeper, am.bankKeeper, am.keeper)
+				return nil
+			},
+		),
 		simulation.NewWeightedProposalMsg(
 			opWeightMsgSubmitClaim,
 			defaultWeightMsgSubmitClaim,

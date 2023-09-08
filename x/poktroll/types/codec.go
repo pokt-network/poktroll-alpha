@@ -8,12 +8,20 @@ import (
 )
 
 func RegisterCodec(cdc *codec.LegacyAmino) {
+	cdc.RegisterConcrete(&MsgStake{}, "poktroll/Stake", nil)
+	cdc.RegisterConcrete(&MsgUnstake{}, "poktroll/Unstake", nil)
 	cdc.RegisterConcrete(&MsgSubmitClaim{}, "poktroll/SubmitClaim", nil)
 	cdc.RegisterConcrete(&MsgSubmitProof{}, "poktroll/SubmitProof", nil)
 	// this line is used by starport scaffolding # 2
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
+	registry.RegisterImplementations((*sdk.Msg)(nil),
+		&MsgStake{},
+	)
+	registry.RegisterImplementations((*sdk.Msg)(nil),
+		&MsgUnstake{},
+	)
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgSubmitClaim{},
 	)

@@ -23,8 +23,8 @@ go_version_check:
 	MAJOR_VERSION=$$(echo $$GO_VERSION | cut -d "." -f 1) && \
 	MINOR_VERSION=$$(echo $$GO_VERSION | cut -d "." -f 2) && \
 	\
-	if [ "$$MAJOR_VERSION" -gt 1 ] || ( [ "$$MAJOR_VERSION" -eq 1 ] && [ "$$MINOR_VERSION" -ge 20 ] ); then \
-		echo "Invalid Go version. Expected 1.19.x but found $$GO_VERSION"; \
+	if [ "$$MAJOR_VERSION" -ne 1 ] || [ "$$MINOR_VERSION" -ge 21 ] ||  [ "$$MINOR_VERSION" -le 18 ] ; then \
+		echo "Invalid Go version. Expected 1.19.x or 1.20.x but found $$GO_VERSION"; \
 		exit 1; \
 	fi
 
@@ -199,3 +199,33 @@ protogen_local: go_protoc-go-inject-tag ## Generate go structures for all of the
 
 
 	# echo "View generated proto files by running: make protogen_show"
+
+# Ref: https://rollkit.dev/tutorials/gm-world-frontend
+.PHONY: poktroll_cosmology_frontend
+poktroll_cosmology_frontend: ## Start the poktroll cosmology frontend
+	echo "Visit http://localhost:3000/"
+	yarn --cwd ./frontend dev
+
+.PHONY: poktroll_servicer_stake
+poktroll_servicer_stake: ## Stake tokens for the servicer specified
+	poktrolld tx poktroll stake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
+
+.PHONY: poktroll_get_actors
+poktroll_get_actors: ## Retrieves all actors from the poktroll state
+	poktrolld q poktroll actors --node tcp://127.0.0.1:36657
+
+.PHONY: poktroll_servicer_unstake
+poktroll_servicer_unstake: ## Unstake tokens for the servicer specified
+	poktrolld tx poktroll unstake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
+
+.PHONY: test_unit_all
+test_unit_all: ## Run all unit tests
+	go test -v ./...
+
+.PHONY: localnet_up
+localnet_up: ## Starts localnet
+	tilt up
+
+.PHONY: localnet_down
+localnet_down: ## Delete resources created by localnet
+	tilt down
