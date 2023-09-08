@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package types;
+package poktroll.poktroll;
 
-option go_package = "poktroll/types";
+option go_package = "poktroll/x/poktroll/types";
 
 message Relay {
     RelayRequest req = 1;

@@ -6,7 +6,7 @@ import (
 	"github.com/pokt-network/smt"
 
 	"poktroll/runtime/di"
-	"poktroll/types"
+	"poktroll/x/poktroll/types"
 )
 
 var PocketNetworkClientToken = di.NewInjectionToken[PocketNetworkClient]("pocketNetworkClient")

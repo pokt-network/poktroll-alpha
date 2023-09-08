@@ -2,13 +2,14 @@ package di_test
 
 import (
 	"fmt"
-	"poktroll/runtime/di"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"poktroll/runtime/di"
 )
 
-var moduleInjectionToken = di.NewInjectionToken[DependencyModule]("depModule")
+var moduleDepInjectionToken = di.NewInjectionToken[DependencyModule]("depModule")
 var mainModuleInjectionToken = di.NewInjectionToken[MainModule]("module")
 var configInjectionToken = di.NewInjectionToken[int]("config")
 
@@ -34,11 +35,6 @@ type MainModule interface {
 	DoThat(int) int
 }
 
-type Deps struct {
-	timeout    int
-	moduleDeps DependencyModule
-}
-
 type mainModuleImpl struct {
 	timeout   int
 	moduleDep DependencyModule
@@ -62,13 +58,13 @@ func (m *mainModuleImpl) DoThat(n int) int { return n }
 func Test_DI_Works(t *testing.T) {
 	injector := di.NewInjector()
 	di.Provide(mainModuleInjectionToken, (&mainModuleImpl{}).Module(), injector)
-	di.Provide(moduleInjectionToken, (&depModuleImpl{}).Module(), injector)
+	di.Provide(moduleDepInjectionToken, (&depModuleImpl{}).Module(), injector)
 	di.Provide(configInjectionToken, 10, injector)
 
 	mainMod := di.HydrateMain(mainModuleInjectionToken, injector)
 	cfg := di.Get(configInjectionToken, injector)
 	mainMod.DoThat(cfg)
-	dep := di.Get(moduleInjectionToken, injector)
+	dep := di.Get(moduleDepInjectionToken, injector)
 
 	assert.Equal(t, 10, cfg)
 	assert.Nil(t, mainMod.Start())
@@ -90,34 +86,28 @@ func Test_DI_MissingDependency(t *testing.T) {
 	di.HydrateMain(mainModuleInjectionToken, injector)
 }
 
-type CircDeps struct {
-	moduleDeps MainModule
-}
-
 type circDepModuleImpl struct {
-	di.ModuleInternals[CircDeps]
+	moduleDeps MainModule
 }
 
 func (m *circDepModuleImpl) Module() DependencyModule { return m }
 func (m *circDepModuleImpl) Start() error             { return nil }
 func (m *circDepModuleImpl) CascadeStart() error {
-	if err := m.Deps().moduleDeps.CascadeStart(); err != nil {
+	if err := m.moduleDeps.CascadeStart(); err != nil {
 		return err
 	}
 	return m.Start()
 }
 func (m *circDepModuleImpl) DoThis(s string) string { return s }
 func (m *circDepModuleImpl) Hydrate(injector *di.Injector, path *[]string) {
-	m.HydrateDeps(&CircDeps{
-		moduleDeps: di.Hydrate(mainModuleInjectionToken, injector, path),
-	})
+	m.moduleDeps = di.Hydrate(mainModuleInjectionToken, injector, path)
 }
 
 func Test_DI_CircularDependencies(t *testing.T) {
 
 	injector := di.NewInjector()
 	di.Provide(mainModuleInjectionToken, (&mainModuleImpl{}).Module(), injector)
-	di.Provide(moduleInjectionToken, (&circDepModuleImpl{}).Module(), injector)
+	di.Provide(moduleDepInjectionToken, (&circDepModuleImpl{}).Module(), injector)
 	di.Provide(configInjectionToken, 10, injector)
 
 	defer func() {

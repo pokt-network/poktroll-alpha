@@ -7,17 +7,6 @@ import (
 	"net/http"
 )
 
-func (r *Relay) Serialize() []byte {
-	return []byte(fmt.Sprintf(
-		"%d:%s:%s:%d:%s",
-		r.Req.Height,
-		r.Req.Req.Url,
-		string(r.Res.Payload),
-		r.Res.StatusCode,
-		string(r.Res.Signature),
-	))
-}
-
 // Validate returns nil if every check has passed
 func (r *RelayRequest) Validate() error {
 	log.Printf("validating request: %+v", r)
