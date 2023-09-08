@@ -143,3 +143,7 @@ poktroll_get_actors: ## Queries the poktroll node for session data
 .PHONY: poktroll_servicer_unstake
 poktroll_servicer_unstake: ## Queries the poktroll node for session data
 	poktrolld tx poktroll unstake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
+
+.PHONY: test_unit_all
+test_unit_all: ## Run all unit tests
+	go test -v ./...

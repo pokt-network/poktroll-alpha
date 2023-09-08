@@ -7,24 +7,24 @@ option go_package = "poktroll/x/poktroll/types";
 
 message StakeInfo {
   string address = 1; // address of the staker (bech32 prefixed)
-  string coinsStaked = 2; // coins staked
+  string coinsStaked = 2;
 }
 
 // Custom parameters for each actor
 message WatcherParams {
-  string watcher_specific_param = 1;
+  // Placeholder for now
 }
 
 message PortalParams {
-  string portal_specific_param = 1;
+  // Placeholder for now
 }
 
 message ServicerParams {
-  string servicer_specific_param = 1;
+  // Placeholder for now
 }
 
 message ApplicationParams {
-  string application_specific_param = 1;
+  // Placeholder for now
 }
 
 // Actor definitions

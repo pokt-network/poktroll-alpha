@@ -46439,7 +46439,7 @@ paths:
         - Query
   /poktroll/poktroll/actors:
     get:
-      summary: Queries a list of Stakers items.
+      summary: Queries for all stacked Actors
       operationId: PoktrollPoktrollActors
       responses:
         '200':
@@ -46447,7 +46447,7 @@ paths:
           schema:
             type: object
             properties:
-              Actor:
+              servicers:
                 type: array
                 items:
                   type: object
@@ -46460,15 +46460,11 @@ paths:
                           title: address of the staker (bech32 prefixed)
                         coinsStaked:
                           type: string
-                          title: coins staked
                     servicer_params:
                       type: object
-                      properties:
-                        servicer_specific_param:
-                          type: string
-                title: Returning a list of Actors (servicers for now)
+                      title: Placeholder for now
               pagination:
-                title: Adding pagination to response
+                title: 'TODO: Return other ators too'
                 type: object
                 properties:
                   next_key:
@@ -46583,9 +46579,8 @@ paths:
           schema:
             type: object
             properties:
-              text:
+              placeholder_text:
                 type: string
-                title: Session session = 1;
         default:
           description: An unexpected error response.
           schema:
@@ -75386,18 +75381,20 @@ definitions:
     properties:
       success:
         type: boolean
+        title: 'TODO: Need to return success/error codes'
   poktroll.poktroll.MsgUnstakeResponse:
     type: object
     properties:
       success:
         type: boolean
+        title: 'TODO: Need to return success/error codes'
   poktroll.poktroll.Params:
     type: object
     description: Params defines the parameters for the module.
   poktroll.poktroll.QueryActorsResponse:
     type: object
     properties:
-      Actor:
+      servicers:
         type: array
         items:
           type: object
@@ -75410,15 +75407,11 @@ definitions:
                   title: address of the staker (bech32 prefixed)
                 coinsStaked:
                   type: string
-                  title: coins staked
             servicer_params:
               type: object
-              properties:
-                servicer_specific_param:
-                  type: string
-        title: Returning a list of Actors (servicers for now)
+              title: Placeholder for now
       pagination:
-        title: Adding pagination to response
+        title: 'TODO: Return other ators too'
         type: object
         properties:
           next_key:
@@ -75447,7 +75440,7 @@ definitions:
   poktroll.poktroll.QueryGetSessionResponse:
     type: object
     properties:
-      text:
+      placeholder_text:
         type: string
   poktroll.poktroll.QueryParamsResponse:
     type: object
@@ -75467,17 +75460,12 @@ definitions:
             title: address of the staker (bech32 prefixed)
           coinsStaked:
             type: string
-            title: coins staked
       servicer_params:
         type: object
-        properties:
-          servicer_specific_param:
-            type: string
+        title: Placeholder for now
   poktroll.poktroll.ServicerParams:
     type: object
-    properties:
-      servicer_specific_param:
-        type: string
+    title: Placeholder for now
   poktroll.poktroll.StakeInfo:
     type: object
     properties:
@@ -75486,4 +75474,3 @@ definitions:
         title: address of the staker (bech32 prefixed)
       coinsStaked:
         type: string
-        title: coins staked

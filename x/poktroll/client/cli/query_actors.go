@@ -18,17 +18,15 @@ func CmdActors() *cobra.Command {
 		Short: "Query actors",
 		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
+			request := &types.QueryActorsRequest{}
 
-			params := &types.QueryActorsRequest{}
-
-			res, err := queryClient.Actors(cmd.Context(), params)
+			res, err := queryClient.Actors(cmd.Context(), request)
 			if err != nil {
 				clientCtx.PrintString("could not get actors")
 				return err

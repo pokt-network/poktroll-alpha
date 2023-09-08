@@ -16,32 +16,24 @@ func (k Keeper) Actors(goCtx context.Context, req *types.QueryActorsRequest) (*t
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	// Define a variable that will store a list of servicers
-	var actors []*types.Servicer //TODO: Add other actor types here
+	logger := ctx.Logger()
 
 	// Get the key-value module store using the store key (in our case store key is "chain")
 	store := ctx.KVStore(k.storeKey)
 
-	servStore := prefix.NewStore(store, []byte(types.ServicerPrefix)) //TODO: Add other actor types here
-
-	logger := ctx.Logger()
+	// TODO: Add other actor types here
+	var servicers []*types.Servicer
+	servicerStore := prefix.NewStore(store, []byte(types.ServicerPrefix))
 
 	// Paginate the recipes store based on PageRequest
-	pageRes, err := query.Paginate(servStore, req.Pagination, func(key []byte, value []byte) error {
-		var actor types.Servicer
-		if err := k.cdc.Unmarshal(value, &actor); err != nil {
-			logger.Error("could not unmarshal actor")
+	pageRes, err := query.Paginate(servicerStore, req.Pagination, func(key []byte, value []byte) error {
+		var servicer types.Servicer
+		if err := k.cdc.Unmarshal(value, &servicer); err != nil {
+			logger.Error("could not unmarshal servicer")
 			return err
 		}
-
-		// Print out staker
-		logger.Info(actor.String())
-
-		actors = append(actors, &actor)
-
+		servicers = append(servicers, &servicer)
 		return nil
 	})
 
@@ -51,5 +43,5 @@ func (k Keeper) Actors(goCtx context.Context, req *types.QueryActorsRequest) (*t
 	}
 
 	// Return a struct containing a list of recipes and pagination info
-	return &types.QueryActorsResponse{Actor: actors, Pagination: pageRes}, nil
+	return &types.QueryActorsResponse{Servicers: servicers, Pagination: pageRes}, nil
 }

@@ -1,5 +1,4 @@
 #!/bin/sh
-echo "AUTH_TOKEN is: $AUTH_TOKEN"
 
 # set variables for the chain
 VALIDATOR_NAME=validator1
@@ -10,10 +9,6 @@ CHAINFLAG="--chain-id ${CHAIN_ID}"
 TOKEN_AMOUNT="10000000000000000000000000stake"
 STAKING_AMOUNT="1000000000stake"
 AUTH_TOKEN=$AUTH_TOKEN
-
-echo "~~~~~"
-echo $AUTH_TOKEN
-echo "~~~~~"
 
 # create a random Namespace ID for your rollup to post blocks to
 NAMESPACE_ID=$(openssl rand -hex 10)

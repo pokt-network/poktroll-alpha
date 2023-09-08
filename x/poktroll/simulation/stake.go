@@ -3,11 +3,12 @@ package simulation
 import (
 	"math/rand"
 
+	"poktroll/x/poktroll/keeper"
+	"poktroll/x/poktroll/types"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"poktroll/x/poktroll/keeper"
-	"poktroll/x/poktroll/types"
 )
 
 func SimulateMsgStake(
@@ -21,9 +22,7 @@ func SimulateMsgStake(
 		msg := &types.MsgStake{
 			Creator: simAccount.Address.String(),
 		}
-
-		// TODO: Handling the Stake simulation
-
+		// TODO: Implement handling staking simulation
 		return simtypes.NoOpMsg(types.ModuleName, msg.Type(), "Stake simulation not implemented"), nil, nil
 	}
 }
