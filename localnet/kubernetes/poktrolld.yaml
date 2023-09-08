@@ -50,17 +50,17 @@ data:
     fi
 
     # start the node
-    poktrolld start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://celestia-rollkit:26658","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE_ID --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:36657 --p2p.laddr "0.0.0.0:36656"
+    poktrolld start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://celestia-rollkit:26658","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE_ID --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://127.0.0.1:31657 --p2p.laddr "0.0.0.0:31656"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: read-secrets
-  namespace: default  # Replace with the namespace where the secret resides
+  namespace: default # Replace with the namespace where the secret resides
 subjects:
-- kind: ServiceAccount
-  name: poktrolld
-  namespace: default  # Replace with the namespace where the service account resides
+  - kind: ServiceAccount
+    name: poktrolld
+    namespace: default # Replace with the namespace where the service account resides
 roleRef:
   kind: Role
   name: secret-reader
@@ -70,16 +70,29 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: secret-reader
-  namespace: default  # Replace with the namespace where the secret resides
+  namespace: default # Replace with the namespace where the secret resides
 rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: poktrolld
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: poktrolld-service
+spec:
+  selector:
+    app: poktrolld
+  ports:
+    - protocol: TCP
+      name: rpc
+      port: 31657
+      targetPort: 31657
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -97,14 +110,16 @@ spec:
     spec:
       serviceAccountName: poktrolld
       containers:
-      - name: poktrolld
-        image: poktrolld
-        command: ["/bin/sh"]
-        args: ["/etc/config/poktroll.sh"]
-        volumeMounts:
-        - name: config-volume
-          mountPath: /etc/config
+        - name: poktrolld
+          image: poktrolld
+          command: ["/bin/sh"]
+          args: ["/etc/config/poktroll.sh"]
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
       volumes:
         - name: config-volume
           configMap:
             name: poktroll-config
+      ports:
+        - containerPort: 316577
