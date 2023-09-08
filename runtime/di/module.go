@@ -1,7 +1,7 @@
 package di
 
 type Module interface {
-	Resolve(*Injector, *[]string)
+	Hydrate(*Injector, *[]string)
 	Start() error
 	CascadeStart() error
 }

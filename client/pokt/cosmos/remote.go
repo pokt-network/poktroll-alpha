@@ -43,7 +43,7 @@ func NewRemoteCosmosPocketClient(
 	}, nil
 }
 
-func (client *remoteCosmosPocketClient) Resolve(injector *di.Injector, path *[]string) {}
+func (client *remoteCosmosPocketClient) Hydrate(injector *di.Injector, path *[]string) {}
 
 func (client *remoteCosmosPocketClient) CascadeStart() error {
 	return nil
@@ -116,7 +116,7 @@ func (client *remoteCosmosPocketClient) Unstake(
 	panic("implement me")
 }
 
-func (client *remoteCosmosPocketClient) OnNewBlock() <-chan *types.Block {
+func (client *remoteCosmosPocketClient) NewBlocks() <-chan *types.Block {
 	panic("implement me")
 }
 

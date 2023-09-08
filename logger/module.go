@@ -45,7 +45,7 @@ func (m *loggerModule) CreateLoggerForModule(moduleName string) *modules.Logger 
 	return &logger
 }
 
-func (m *loggerModule) Resolve(injector *di.Injector, path *[]string) {
+func (m *loggerModule) Hydrate(injector *di.Injector, path *[]string) {
 	m.Create()
 }
 

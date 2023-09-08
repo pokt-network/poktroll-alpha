@@ -2,10 +2,11 @@ package di_test
 
 import (
 	"fmt"
-	"poktroll/runtime/di"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"poktroll/runtime/di"
 )
 
 var moduleDepInjectionToken = di.NewInjectionToken[DependencyModule]("depModule")
@@ -22,7 +23,7 @@ type depModuleImpl struct {
 }
 
 func (m *depModuleImpl) Module() DependencyModule                      { return m }
-func (m *depModuleImpl) Resolve(injector *di.Injector, path *[]string) {}
+func (m *depModuleImpl) Hydrate(injector *di.Injector, path *[]string) {}
 func (m *depModuleImpl) Start() error                                  { return nil }
 func (m *depModuleImpl) CascadeStart() error                           { return nil }
 func (m *depModuleImpl) DoThis(s string) string {
@@ -39,9 +40,9 @@ type mainModuleImpl struct {
 	moduleDep DependencyModule
 }
 
-func (m *mainModuleImpl) Resolve(injector *di.Injector, path *[]string) {
-	m.timeout = di.Resolve(configInjectionToken, injector, path)
-	m.moduleDep = di.Resolve(moduleDepInjectionToken, injector, path)
+func (m *mainModuleImpl) Hydrate(injector *di.Injector, path *[]string) {
+	m.timeout = di.Hydrate(configInjectionToken, injector, path)
+	m.moduleDep = di.Hydrate(moduleInjectionToken, injector, path)
 }
 
 func (m *mainModuleImpl) Module() MainModule { return m }
@@ -60,7 +61,7 @@ func Test_DI_Works(t *testing.T) {
 	di.Provide(moduleDepInjectionToken, (&depModuleImpl{}).Module(), injector)
 	di.Provide(configInjectionToken, 10, injector)
 
-	mainMod := di.ResolveMain(mainModuleInjectionToken, injector)
+	mainMod := di.HydrateMain(mainModuleInjectionToken, injector)
 	cfg := di.Get(configInjectionToken, injector)
 	mainMod.DoThat(cfg)
 	dep := di.Get(moduleDepInjectionToken, injector)
@@ -82,7 +83,7 @@ func Test_DI_MissingDependency(t *testing.T) {
 		}
 	}()
 
-	di.ResolveMain(mainModuleInjectionToken, injector)
+	di.HydrateMain(mainModuleInjectionToken, injector)
 }
 
 type circDepModuleImpl struct {
@@ -98,8 +99,8 @@ func (m *circDepModuleImpl) CascadeStart() error {
 	return m.Start()
 }
 func (m *circDepModuleImpl) DoThis(s string) string { return s }
-func (m *circDepModuleImpl) Resolve(injector *di.Injector, path *[]string) {
-	m.moduleDeps = di.Resolve(mainModuleInjectionToken, injector, path)
+func (m *circDepModuleImpl) Hydrate(injector *di.Injector, path *[]string) {
+	m.moduleDeps = di.Hydrate(mainModuleInjectionToken, injector, path)
 }
 
 func Test_DI_CircularDependencies(t *testing.T) {
@@ -115,5 +116,5 @@ func Test_DI_CircularDependencies(t *testing.T) {
 		}
 	}()
 
-	di.ResolveMain(mainModuleInjectionToken, injector)
+	di.HydrateMain(mainModuleInjectionToken, injector)
 }

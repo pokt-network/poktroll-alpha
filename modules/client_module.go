@@ -13,8 +13,7 @@ var PocketNetworkClientToken = di.NewInjectionToken[PocketNetworkClient]("pocket
 
 type PocketNetworkClient interface {
 	di.Module
-	// Callback listeners anytime a new block is observed
-	OnNewBlock() <-chan *types.Block
+	NewBlocks() <-chan *types.Block
 	Stake(context.Context, *types.Actor, uint64) <-chan types.Maybe[*types.TxResult]
 	Unstake(context.Context, *types.Actor, uint64) <-chan types.Maybe[*types.TxResult]
 	//SubmitClaim(context.Context, *types.Claim) <-chan types.Maybe[*types.TxResult]
