@@ -40,6 +40,7 @@ import (
 
 	"poktroll/app"
 	appparams "poktroll/app/params"
+	"poktroll/servicer"
 )
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
@@ -145,6 +146,8 @@ func initRootCmd(
 		txCommand(),
 		keys.Commands(app.DefaultNodeHome),
 	)
+
+	rootCmd.AddCommand(servicer.GetServicerCmd())
 }
 
 // queryCommand returns the sub-command to send queries to the app
@@ -341,6 +344,7 @@ func (a appCreator) appExport(
 func initAppConfig() (string, interface{}) {
 	// The following code snippet is just for reference.
 
+	// TODO_THIS_COMMIT(@red0ne): add servicer config field/values here
 	type CustomAppConfig struct {
 		serverconfig.Config
 	}
