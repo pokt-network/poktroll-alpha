@@ -33,8 +33,10 @@ type ObservableImpl[V any] struct {
 	closed      bool
 }
 
-func NewControlledObservable[V any]() (Observable[V], chan V) {
-	emitter := make(chan V, 1)
+func NewControlledObservable[V any](emitter chan V) (Observable[V], chan V) {
+	if emitter == nil {
+		emitter = make(chan V, 1)
+	}
 	o := &ObservableImpl[V]{sync.RWMutex{}, []chan V{}, emitter, false}
 	o.listen(emitter)
 

@@ -38,7 +38,7 @@ func (s *sessionManager) Start() error {
 		return nil
 	}
 
-	observable, ticker := utils.NewControlledObservable[*types.Session]()
+	observable, ticker := utils.NewControlledObservable[*types.Session](nil)
 	s.sessionTicker = observable
 
 	go func() {

@@ -10,6 +10,7 @@ import (
 	"poktroll/modules"
 	"poktroll/runtime/di"
 	"poktroll/types"
+	"poktroll/utils"
 )
 
 /////////////
@@ -24,24 +25,27 @@ type relayer struct {
 	// input receives relays
 	input chan *types.Relay
 	// channel signaling a output has been completed.
-	output chan *types.Relay
+	output           chan *types.Relay
+	outputObservable utils.Observable[*types.Relay]
 }
 
 // NewRelayerModule creates a new input and output channel
 // for handling a FIFO queue of relay requests and binds them
 // to a new RelayerModule.
 func NewRelayerModule() modules.RelayerModule {
-	return &relayer{
+	relayer := &relayer{
 		input:  make(chan *types.Relay),
 		output: make(chan *types.Relay),
 	}
 
-	return &relayer
+	relayer.outputObservable, _ = utils.NewControlledObservable[*types.Relay](relayer.output)
+	return relayer
 }
 
 func (r *relayer) Hydrate(injector *di.Injector, path *[]string) {
 	globalLogger := di.Hydrate(modules.LoggerModuleToken, injector, path)
 	r.logger = globalLogger.CreateLoggerForModule(modules.RelayerToken.Id())
+
 }
 
 func (r *relayer) CascadeStart() error {
@@ -84,8 +88,8 @@ func (r *relayer) start(ctx context.Context) {
 }
 
 // Returns a single-listener channel that emits completed relays.
-func (r *relayer) Relays() <-chan *types.Relay {
-	return r.output
+func (r *relayer) Relays() utils.Observable[*types.Relay] {
+	return r.outputObservable
 }
 
 func (r *relayer) Stop() error {
