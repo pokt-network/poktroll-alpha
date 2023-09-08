@@ -1,9 +1,11 @@
 package relayer
 
 import (
+	"context"
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
-	"time"
 
 	"poktroll/modules"
 	"poktroll/runtime/di"
@@ -18,23 +20,27 @@ import (
 // if passes validation. The request and response are then
 // stored by height.
 type relayer struct {
-	// in receives relays
-	in chan *types.Relay
-	// relays are sent on out after they're done being processed
-	out chan *types.Relay
-	// channel signaling a relay has been completed
-	relay chan *types.Relay
+	logger *modules.Logger
+	// input receives relays
+	input chan *types.Relay
+	// channel signaling a output has been completed.
+	output chan *types.Relay
 }
 
+// NewRelayerModule creates a new input and output channel
+// for handling a FIFO queue of relay requests and binds them
+// to a new RelayerModule.
 func NewRelayerModule() modules.RelayerModule {
 	return &relayer{
-		in:    make(chan *types.Relay),
-		out:   make(chan *types.Relay),
-		relay: make(chan *types.Relay),
+		input:  make(chan *types.Relay),
+		output: make(chan *types.Relay),
 	}
 }
 
-func (r *relayer) Resolve(injector *di.Injector, path *[]string) {}
+func (r *relayer) Resolve(injector *di.Injector, path *[]string) {
+	globalLogger := di.Resolve(modules.LoggerModuleToken, injector, path)
+	r.logger = globalLogger.CreateLoggerForModule(modules.RelayerToken.Id())
+}
 
 func (r *relayer) CascadeStart() error {
 	return r.Start()
@@ -42,72 +48,118 @@ func (r *relayer) CascadeStart() error {
 
 // Start begins listening for requests on its given pipeline and handles them appropriately
 func (r *relayer) Start() error {
-	go func() {
-		// receive incoming relay requests
-		//for req := range r.in {
-		for range time.NewTicker(1000 * time.Millisecond).C {
-			//if err := req.Validate(); err != nil {
-			//	// respond with error
-			//	r.out <- &types.Relay{
-			//		RelayRequest: req.RelayRequest,
-			//		RelayResponse: types.RelayResponse{
-			//			Err: err,
-			//		},
-			//	}
-			//}
-
-			// Execute the relay, return the response and error
-			//res := req.Execute()
-			//done := &types.Relay{
-			//	RelayRequest:  req.RelayRequest,
-			//	RelayResponse: *res,
-			//}
-
-			// Emit it on the output channel
-			// TECHDEBT(dylan): the output channel could be attached to the relay
-			// request instead of the relayer to allow for completely concurrent
-			// handling of all relays
-			//r/.out <- done
-
-			go func() {
-				req := http.Request{}
-				req.URL, _ = url.Parse("http://localhost:8081")
-				r.relay <- &types.Relay{
-					types.RelayRequest{
-						Height: 0,
-						Req:    &req,
-					},
-					types.RelayResponse{
-						Payload:    []byte("123"),
-						StatusCode: 200,
-						Err:        nil,
-						Signature:  []byte("sig"),
-					},
-				}
-
-				type RelayRequest struct {
-					Height uint64
-					Req    *http.Request
-				}
-
-				// RelayResponse returns a payload and status code from a request
-				type RelayResponse struct {
-					Payload    []byte
-					StatusCode int
-					Err        error
-					Signature  []byte
-				}
-			}()
-		}
-	}()
+	go r.start(context.TODO())
 	return nil
 }
 
+// start listens for relays on the input channel, validates, then executes them if they're
+// valid and outputs them on the relays channel when they're completed.
+// it is a block channel that is meant to be called in a goroutine.
+func (r *relayer) start(ctx context.Context) {
+	// receive incoming relay requests
+	for relay := range r.input {
+		if err := r.validate(relay); err != nil {
+			// update the error response and output the relay.
+			relay.Res = &types.RelayResponse{
+				Err:        fmt.Errorf("ErrRelayFailedValidation: %w", err).Error(),
+				Payload:    nil,
+				StatusCode: 400,
+			}
+			r.output <- relay
+		}
+
+		// Execute the relay, return the response and error
+		completed := r.execute(relay)
+		r.output <- completed
+
+		// store the relay
+		go func(relay *types.Relay) {
+			if err := r.store(relay); err != nil {
+				r.logger.Err(err).Msg("failed to store relay")
+			}
+		}(relay)
+	}
+}
+
+// Returns a single-listener channel that emits completed relays.
 func (r *relayer) Relays() <-chan *types.Relay {
-	return r.relay
+	return r.output
 }
 
 func (r *relayer) Stop() error {
 	// TODO: what needs to happen here?
 	return nil
+}
+
+// validate checks if a relay request is formatted correctly and meets requirements
+func (r *relayer) validate(relay *types.Relay) error {
+	if relay.Req.Height < 1 {
+		return fmt.Errorf("ErrInvalidRelayHeight")
+	}
+	// DISCUSS is this too heavy handed to parse it through Go's std lib?
+	_, err := url.Parse(relay.Req.Req.Url)
+	if err != nil {
+		return fmt.Errorf("ErrInvalidURL: %s", relay.Req.Req.Url)
+	}
+	return nil
+}
+
+// execute routes the relay to the appropriate handler basedon
+// its protocol and runs the given relay after it has been validated.
+// it returns the finished relay, with any errors that occurred during
+// execution.
+func (r *relayer) execute(relay *types.Relay) *types.Relay {
+	switch relay.Req.Req.Method {
+	case http.MethodGet:
+		return r.handleHTTPGet(relay)
+	case http.MethodPost:
+		// TODO: handleJSONRPC()
+		// TODO: handleHTTPPost()
+	}
+	return &types.Relay{
+		Res: &types.RelayResponse{Err: "method type not supported"},
+	}
+}
+
+// store persists the relay to disk for later reference
+func (r *relayer) store(*types.Relay) error {
+	return fmt.Errorf("not impl")
+}
+
+// handleHTTPGet executes an HTTP GET call to the specified relay's URL
+// and returns the relay response and payload
+func (r *relayer) handleHTTPGet(relay *types.Relay) *types.Relay {
+	res, err := http.Get(relay.Req.Req.Url)
+	if err != nil {
+		return &types.Relay{
+			Req: relay.Req,
+			Res: &types.RelayResponse{
+				Err:        err.Error(),
+				StatusCode: 500,
+			},
+		}
+	}
+	defer res.Body.Close()
+
+	payload, err := io.ReadAll(res.Body)
+	if err != nil {
+		return &types.Relay{
+			Req: relay.Req,
+			Res: &types.RelayResponse{
+				Payload:    payload,
+				Err:        err.Error(),
+				StatusCode: 500,
+				// TODO handle signature correctly
+			},
+		}
+	}
+
+	return &types.Relay{
+		Req: relay.Req,
+		Res: &types.RelayResponse{
+			Payload:    payload,
+			StatusCode: 200,
+			// TODO handle signature correctly
+		},
+	}
 }

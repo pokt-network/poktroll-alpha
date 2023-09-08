@@ -6,7 +6,6 @@ import (
 
 	"github.com/pokt-network/smt"
 
-	"poktroll/crypto"
 	"poktroll/modules"
 	"poktroll/runtime/di"
 	"poktroll/types"
@@ -61,9 +60,16 @@ func (m *miner) handleSessionEnd() {
 
 func (m *miner) handleRelays() {
 	for relay := range m.relays {
-		serializedRelay := relay.Serialize()
-		hash := crypto.SHA3Hash([]byte(serializedRelay))
-		m.Update(hash, hash, 1)
+		m.logger.Debug().Msgf("TODO handle relay 🔂 %+v", relay)
+
+		// TODO get the serialized byte representation of the relay
+		// serializedRelay := relay.Serialize()
+
+		// TODO update the claim and proof tree
+		// key=SHA3HASH(serializedRelay)
+		// value=serializedRelay
+		// hash := crypto.SHA3Hash([]byte(serializedRelay))
+		// m.Update(hash, hash, 1)
 	}
 }
 

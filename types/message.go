@@ -164,18 +164,6 @@ func validatePublicKey(publicKey []byte) Error {
 	return nil
 }
 
-//nolint:unused // TODO: need to figure out why this function was added and never used
-func validateHash(hash []byte) Error {
-	if hash == nil {
-		return ErrEmptyHash()
-	}
-	hashLen := len(hash)
-	if hashLen != cryptoPocket.SHA3HashLen {
-		return ErrInvalidHashLength(hashLen)
-	}
-	return nil
-}
-
 func validateRelayChains(chains []string) Error {
 	if chains == nil {
 		return ErrEmptyRelayChains()

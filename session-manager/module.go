@@ -59,7 +59,9 @@ func (s *sessionManager) Start() error {
 	}()
 
 	go func() {
+		// tick sessions along as new blocks are received
 		for block := range s.pocketNetworkClient.OnNewBlock() {
+			// discover a new session every `blocksPerSession` blocks
 			if block.Height%s.blocksPerSession == 0 {
 				s.session = &types.Session{
 					SessionNumber:      block.Height / s.blocksPerSession,
@@ -68,11 +70,11 @@ func (s *sessionManager) Start() error {
 					BlockHash:          block.Hash,
 				}
 
+				// set the latest secret for claim and proof use
 				s.latestSecret = block.Hash
 				go func() {
 					s.sessionTicker <- s.session
 				}()
-				break
 			}
 		}
 	}()
