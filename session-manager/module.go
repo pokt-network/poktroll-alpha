@@ -75,8 +75,6 @@ func (s *sessionManager) Start() error {
 				go func() {
 					s.sessionTicker <- s.session
 				}()
-				break // do we not want to continue here?
-				// I think break terminates the for loop that's reading off the new sessions and that feels weird?
 			}
 		}
 	}()
