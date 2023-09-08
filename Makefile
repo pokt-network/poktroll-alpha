@@ -131,3 +131,11 @@ poktroll_get_session: ## Queries the poktroll node for session data
 poktroll_cosmology_frontend: ## Start the poktroll cosmology frontend
 	echo "Visit http://localhost:3000/"
 	yarn --cwd ./frontend dev
+
+.PHONY: localnet_up
+localnet_up: ## Starts localnet
+	tilt up
+
+.PHONY: localnet_down
+localnet_down: ## Delete resources created by localnet
+	tilt down

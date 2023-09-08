@@ -6,6 +6,9 @@ This is an alpha version of trying to build Pocket on top of RollKit.
 
 **poktroll** is a rollup built using Cosmos SDK and Tendermint and created with [Ignite CLI](https://ignite.com/cli).
 
+- [Kubernetes LocalNet (WIP)](#kubernetes-localnet-wip)
+  - [TLDR](#tldr)
+  - [More info](#more-info)
 - [LocalNet](#localnet)
 - [Testnet](#testnet)
 - [Poktroll commands](#poktroll-commands)
@@ -17,6 +20,30 @@ This is an alpha version of trying to build Pocket on top of RollKit.
 - [Release](#release)
   - [Install](#install)
 - [Learn more](#learn-more)
+
+## Kubernetes LocalNet (WIP)
+
+### TLDR
+- Install Docker Desktop
+- `kind create cluster`
+- `make localnet_up`
+- press space
+
+### More info
+
+Make sure you have a local Kubernetes cluster, such as [kind](https://kind.sigs.k8s.io/) created and k8s context pointed to this cluster.
+
+Start LocalNet:
+
+```bash
+make localnet_up
+```
+
+To delete resources created by LocalNet:
+
+```bash
+make localnet_down
+```
 
 ## LocalNet
 
