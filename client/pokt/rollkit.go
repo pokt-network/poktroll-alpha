@@ -72,7 +72,11 @@ func (client *rollkitPocketNetworkClient) SubmitClaim(
 func (client *rollkitPocketNetworkClient) SubmitProof(
 	ctx context.Context,
 	// TODO: what type should `claim` be?
+	closestKey []byte,
+	closestValueHash []byte,
+	closestSum uint64,
 	proof *smt.SparseMerkleProof,
+	err error,
 ) <-chan types.Maybe[*types.TxResult] {
 	panic("implement me")
 }

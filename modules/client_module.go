@@ -19,7 +19,14 @@ type PocketNetworkClient interface {
 	Unstake(context.Context, *types.Actor, uint64) <-chan types.Maybe[*types.TxResult]
 	//SubmitClaim(context.Context, *types.Claim) <-chan types.Maybe[*types.TxResult]
 	SubmitClaim(context.Context, []byte) <-chan types.Maybe[*types.TxResult]
-	SubmitProof(context.Context, *smt.SparseMerkleProof) <-chan types.Maybe[*types.TxResult]
+	SubmitProof(
+		ctx context.Context,
+		closestKey []byte,
+		closestValueHash []byte,
+		closestSum uint64,
+		proof *smt.SparseMerkleProof,
+		err error,
+	) <-chan types.Maybe[*types.TxResult]
 }
 
 type ServicerClient interface {

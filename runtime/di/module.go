@@ -17,3 +17,7 @@ func (m *ModuleInternals[Deps]) Deps() *Deps {
 func (m *ModuleInternals[Deps]) ResolveDeps(deps *Deps) {
 	m.deps = deps
 }
+
+type Uninjectable interface {
+	Uninjectable()
+}

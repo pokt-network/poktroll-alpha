@@ -26,3 +26,11 @@ func JustError[T any](error error) Maybe[T] {
 func (m Maybe[T]) ValueOrError() (T, error) {
 	return m.value, m.error
 }
+
+func (m Maybe[T]) Value() T {
+	return m.value
+}
+
+func (m Maybe[T]) Error() error {
+	return m.error
+}

@@ -134,6 +134,38 @@ poktroll_balance: ## Check the balances of both keys
 .PHONY: poktroll_get_session
 poktroll_get_session: ## Queries the poktroll node for session data
 	poktrolld query poktroll get-session --node tcp://127.0.0.1:36657
+# Protobuf convenience targets
+
+.PHONY: go_protoc-go-inject-tag
+go_protoc-go-inject-tag: ## Checks if protoc-go-inject-tag is installed
+	{ \
+	if ! command -v protoc-go-inject-tag >/dev/null; then \
+		echo "Install with 'go install github.com/favadi/protoc-go-inject-tag@latest'"; \
+	fi; \
+	}
+
+.PHONY: protogen_show
+protogen_show: ## A simple `find` command that shows you the generated protobufs.
+	find . -name "*.pb.go" | grep -v -e "prototype" -e "vendor"
+
+.PHONY: protogen_clean
+protogen_clean: ## Remove all the generated protobufs.
+	find . -name "*.pb.go" | grep -v -e "prototype" -e "vendor" | xargs -r rm
+
+# IMPROVE: Look into using buf in the future; https://github.com/bufbuild/buf.
+PROTOC = protoc --experimental_allow_proto3_optional --go_opt=paths=source_relative
+PROTOC_SHARED = $(PROTOC) -I=./types/proto
+
+.PHONY: protogen_local
+protogen_local: go_protoc-go-inject-tag ## Generate go structures for all of the protobufs
+# $(PROTOC) -I=./codec/proto           --go_out=./codec           ./codec/proto/*.proto
+	$(PROTOC_SHARED)                     --go_out=./types           ./types/proto/*.proto
+
+	$(PROTOC) -I=./runtime/configs/types/proto				              --go_out=./runtime/configs/types ./runtime/configs/types/proto/*.proto
+	$(PROTOC) -I=./runtime/configs/proto -I=./runtime/configs/types/proto --go_out=./runtime/configs       ./runtime/configs/proto/*.proto
+
+
+	# echo "View generated proto files by running: make protogen_show"
 
 # Protobuf convenience targets
 
