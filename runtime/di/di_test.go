@@ -1,13 +1,14 @@
 package di_test
 
 import (
+	"fmt"
 	"poktroll/runtime/di"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var moduleInjectionToken = di.NewInjectionToken[DependencyModule]("depModule")
+var moduleDepInjectionToken = di.NewInjectionToken[DependencyModule]("depModule")
 var mainModuleInjectionToken = di.NewInjectionToken[MainModule]("module")
 var configInjectionToken = di.NewInjectionToken[int]("config")
 
@@ -17,40 +18,36 @@ type DependencyModule interface {
 }
 
 type depModuleImpl struct {
-	di.ModuleInternals[Deps]
+	prefix string
 }
 
 func (m *depModuleImpl) Module() DependencyModule                      { return m }
 func (m *depModuleImpl) Resolve(injector *di.Injector, path *[]string) {}
 func (m *depModuleImpl) Start() error                                  { return nil }
 func (m *depModuleImpl) CascadeStart() error                           { return nil }
-func (m *depModuleImpl) DoThis(s string) string                        { return s }
+func (m *depModuleImpl) DoThis(s string) string {
+	return fmt.Sprintf("%s%s", m.prefix, s)
+}
 
 type MainModule interface {
 	di.Module
 	DoThat(int) int
 }
 
-type Deps struct {
-	timeout    int
-	moduleDeps DependencyModule
-}
-
 type mainModuleImpl struct {
-	di.ModuleInternals[Deps]
+	timeout   int
+	moduleDep DependencyModule
 }
 
 func (m *mainModuleImpl) Resolve(injector *di.Injector, path *[]string) {
-	m.ResolveDeps(&Deps{
-		timeout:    di.Resolve(configInjectionToken, injector, path),
-		moduleDeps: di.Resolve(moduleInjectionToken, injector, path),
-	})
+	m.timeout = di.Resolve(configInjectionToken, injector, path)
+	m.moduleDep = di.Resolve(moduleDepInjectionToken, injector, path)
 }
 
 func (m *mainModuleImpl) Module() MainModule { return m }
 func (m *mainModuleImpl) Start() error       { return nil }
 func (m *mainModuleImpl) CascadeStart() error {
-	if err := m.Deps().moduleDeps.CascadeStart(); err != nil {
+	if err := m.moduleDep.CascadeStart(); err != nil {
 		return err
 	}
 	return m.Start()
@@ -60,13 +57,13 @@ func (m *mainModuleImpl) DoThat(n int) int { return n }
 func Test_DI_Works(t *testing.T) {
 	injector := di.NewInjector()
 	di.Provide(mainModuleInjectionToken, (&mainModuleImpl{}).Module(), injector)
-	di.Provide(moduleInjectionToken, (&depModuleImpl{}).Module(), injector)
+	di.Provide(moduleDepInjectionToken, (&depModuleImpl{}).Module(), injector)
 	di.Provide(configInjectionToken, 10, injector)
 
 	mainMod := di.ResolveMain(mainModuleInjectionToken, injector)
 	cfg := di.Get(configInjectionToken, injector)
 	mainMod.DoThat(cfg)
-	dep := di.Get(moduleInjectionToken, injector)
+	dep := di.Get(moduleDepInjectionToken, injector)
 
 	assert.Equal(t, 10, cfg)
 	assert.Nil(t, mainMod.Start())
@@ -88,34 +85,28 @@ func Test_DI_MissingDependency(t *testing.T) {
 	di.ResolveMain(mainModuleInjectionToken, injector)
 }
 
-type CircDeps struct {
-	moduleDeps MainModule
-}
-
 type circDepModuleImpl struct {
-	di.ModuleInternals[CircDeps]
+	moduleDeps MainModule
 }
 
 func (m *circDepModuleImpl) Module() DependencyModule { return m }
 func (m *circDepModuleImpl) Start() error             { return nil }
 func (m *circDepModuleImpl) CascadeStart() error {
-	if err := m.Deps().moduleDeps.CascadeStart(); err != nil {
+	if err := m.moduleDeps.CascadeStart(); err != nil {
 		return err
 	}
 	return m.Start()
 }
 func (m *circDepModuleImpl) DoThis(s string) string { return s }
 func (m *circDepModuleImpl) Resolve(injector *di.Injector, path *[]string) {
-	m.ResolveDeps(&CircDeps{
-		moduleDeps: di.Resolve(mainModuleInjectionToken, injector, path),
-	})
+	m.moduleDeps = di.Resolve(mainModuleInjectionToken, injector, path)
 }
 
 func Test_DI_CircularDependencies(t *testing.T) {
 
 	injector := di.NewInjector()
 	di.Provide(mainModuleInjectionToken, (&mainModuleImpl{}).Module(), injector)
-	di.Provide(moduleInjectionToken, (&circDepModuleImpl{}).Module(), injector)
+	di.Provide(moduleDepInjectionToken, (&circDepModuleImpl{}).Module(), injector)
 	di.Provide(configInjectionToken, 10, injector)
 
 	defer func() {
