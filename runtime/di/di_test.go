@@ -1,6 +1,7 @@
 package di_test
 
 import (
+	"fmt"
 	"poktroll/runtime/di"
 	"testing"
 
@@ -17,14 +18,16 @@ type DependencyModule interface {
 }
 
 type depModuleImpl struct {
-	di.ModuleInternals[Deps]
+	prefix string
 }
 
 func (m *depModuleImpl) Module() DependencyModule                      { return m }
-func (m *depModuleImpl) Resolve(injector *di.Injector, path *[]string) {}
+func (m *depModuleImpl) Hydrate(injector *di.Injector, path *[]string) {}
 func (m *depModuleImpl) Start() error                                  { return nil }
 func (m *depModuleImpl) CascadeStart() error                           { return nil }
-func (m *depModuleImpl) DoThis(s string) string                        { return s }
+func (m *depModuleImpl) DoThis(s string) string {
+	return fmt.Sprintf("%s%s", m.prefix, s)
+}
 
 type MainModule interface {
 	di.Module
@@ -37,20 +40,19 @@ type Deps struct {
 }
 
 type mainModuleImpl struct {
-	di.ModuleInternals[Deps]
+	timeout   int
+	moduleDep DependencyModule
 }
 
-func (m *mainModuleImpl) Resolve(injector *di.Injector, path *[]string) {
-	m.ResolveDeps(&Deps{
-		timeout:    di.Resolve(configInjectionToken, injector, path),
-		moduleDeps: di.Resolve(moduleInjectionToken, injector, path),
-	})
+func (m *mainModuleImpl) Hydrate(injector *di.Injector, path *[]string) {
+	m.timeout = di.Hydrate(configInjectionToken, injector, path)
+	m.moduleDep = di.Hydrate(moduleInjectionToken, injector, path)
 }
 
 func (m *mainModuleImpl) Module() MainModule { return m }
 func (m *mainModuleImpl) Start() error       { return nil }
 func (m *mainModuleImpl) CascadeStart() error {
-	if err := m.Deps().moduleDeps.CascadeStart(); err != nil {
+	if err := m.moduleDep.CascadeStart(); err != nil {
 		return err
 	}
 	return m.Start()
@@ -63,7 +65,7 @@ func Test_DI_Works(t *testing.T) {
 	di.Provide(moduleInjectionToken, (&depModuleImpl{}).Module(), injector)
 	di.Provide(configInjectionToken, 10, injector)
 
-	mainMod := di.ResolveMain(mainModuleInjectionToken, injector)
+	mainMod := di.HydrateMain(mainModuleInjectionToken, injector)
 	cfg := di.Get(configInjectionToken, injector)
 	mainMod.DoThat(cfg)
 	dep := di.Get(moduleInjectionToken, injector)
@@ -85,7 +87,7 @@ func Test_DI_MissingDependency(t *testing.T) {
 		}
 	}()
 
-	di.ResolveMain(mainModuleInjectionToken, injector)
+	di.HydrateMain(mainModuleInjectionToken, injector)
 }
 
 type CircDeps struct {
@@ -105,9 +107,9 @@ func (m *circDepModuleImpl) CascadeStart() error {
 	return m.Start()
 }
 func (m *circDepModuleImpl) DoThis(s string) string { return s }
-func (m *circDepModuleImpl) Resolve(injector *di.Injector, path *[]string) {
-	m.ResolveDeps(&CircDeps{
-		moduleDeps: di.Resolve(mainModuleInjectionToken, injector, path),
+func (m *circDepModuleImpl) Hydrate(injector *di.Injector, path *[]string) {
+	m.HydrateDeps(&CircDeps{
+		moduleDeps: di.Hydrate(mainModuleInjectionToken, injector, path),
 	})
 }
 
@@ -124,5 +126,5 @@ func Test_DI_CircularDependencies(t *testing.T) {
 		}
 	}()
 
-	di.ResolveMain(mainModuleInjectionToken, injector)
+	di.HydrateMain(mainModuleInjectionToken, injector)
 }

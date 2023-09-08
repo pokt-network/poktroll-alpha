@@ -40,7 +40,7 @@ func NewManagerFromReaders(configReader, genesisReader io.Reader) *Manager {
 
 func (m *Manager) Start() error                        { return nil }
 func (m *Manager) CascadeStart() error                 { return nil }
-func (m *Manager) Resolve(_ *di.Injector, _ *[]string) {}
+func (m *Manager) Hydrate(_ *di.Injector, _ *[]string) {}
 
 func (m *Manager) GetConfig() *configs.Config {
 	return m.config

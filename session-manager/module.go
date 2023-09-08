@@ -4,31 +4,27 @@ import (
 	"poktroll/modules"
 	"poktroll/runtime/di"
 	"poktroll/types"
-	"sync"
+	"poktroll/utils"
 )
-
-var _ modules.SessionManager = &sessionManager{}
 
 type sessionManager struct {
 	pocketNetworkClient modules.PocketNetworkClient
 	blocksPerSession    uint64
 	session             *types.Session
-	sessionTicker       chan *types.Session
+	sessionTicker       utils.Observable[*types.Session]
 	latestSecret        string
 	started             bool
 	logger              modules.Logger
-	mu                  sync.RWMutex
-	listeners           [](chan<- *types.Session)
 }
 
 func NewSessionManager() modules.SessionManager {
-	return &sessionManager{session: &types.Session{}, sessionTicker: make(chan *types.Session, 1)}
+	return &sessionManager{session: &types.Session{}}
 }
 
-func (s *sessionManager) Resolve(injector *di.Injector, path *[]string) {
-	s.pocketNetworkClient = di.Resolve(modules.PocketNetworkClientToken, injector, path)
-	s.blocksPerSession = di.Resolve(modules.RuntimeManagerToken, injector, path).GetConfig().BlocksPerSession
-	s.logger = *di.Resolve(modules.LoggerModuleToken, injector, path).
+func (s *sessionManager) Hydrate(injector *di.Injector, path *[]string) {
+	s.pocketNetworkClient = di.Hydrate(modules.PocketNetworkClientToken, injector, path)
+	s.blocksPerSession = di.Hydrate(modules.RuntimeManagerToken, injector, path).GetConfig().BlocksPerSession
+	s.logger = *di.Hydrate(modules.LoggerModuleToken, injector, path).
 		CreateLoggerForModule(modules.ServicerToken.Id())
 }
 
@@ -42,25 +38,12 @@ func (s *sessionManager) Start() error {
 		return nil
 	}
 
-	go func() {
-		for session := range s.sessionTicker {
-			s.mu.RLock()
-			for _, ch := range s.listeners {
-				ch <- session
-			}
-			s.mu.RUnlock()
-		}
-		s.mu.Lock()
-		for _, ch := range s.listeners {
-			close(ch)
-		}
-		s.listeners = [](chan<- *types.Session){}
-		s.mu.Unlock()
-	}()
+	observable, ticker := utils.NewControlledObservable[*types.Session]()
+	s.sessionTicker = observable
 
 	go func() {
 		// tick sessions along as new blocks are received
-		for block := range s.pocketNetworkClient.OnNewBlock() {
+		for block := range s.pocketNetworkClient.NewBlocks() {
 			// discover a new session every `blocksPerSession` blocks
 			if block.Height%s.blocksPerSession == 0 {
 				s.session = &types.Session{
@@ -73,7 +56,7 @@ func (s *sessionManager) Start() error {
 				// set the latest secret for claim and proof use
 				s.latestSecret = block.Hash
 				go func() {
-					s.sessionTicker <- s.session
+					ticker <- s.session
 				}()
 			}
 		}
@@ -87,18 +70,6 @@ func (s *sessionManager) GetSession() *types.Session {
 	return s.session
 }
 
-func (s *sessionManager) ClosedSessions() (sessions <-chan *types.Session, closeChan func()) {
-	ch := make(chan *types.Session)
-	len := len(s.listeners)
-	s.listeners = append(s.listeners, ch)
-	closeChan = func() {
-		channelToClose := len
-		// remove the channel from the list of listeners
-		s.listeners = append(s.listeners[:channelToClose], s.listeners[channelToClose+1:]...)
-		close(ch)
-	}
-	return ch, closeChan
+func (s *sessionManager) ClosedSessions() utils.Observable[*types.Session] {
+	return s.sessionTicker
 }
-
-// Make this module uninjectable due to single consumer return channels
-func (s *sessionManager) Uninjectable() {}

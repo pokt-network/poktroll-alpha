@@ -21,9 +21,9 @@ type rollkitPocketNetworkClient struct {
 	di.ModuleInternals[deps]
 }
 
-func (client *rollkitPocketNetworkClient) Resolve(injector *di.Injector, path *[]string) {
-	client.ResolveDeps(&deps{
-		// cosmosClient: di.Resolve(cosmos.ClientToken, injector, path),
+func (client *rollkitPocketNetworkClient) Hydrate(injector *di.Injector, path *[]string) {
+	client.HydrateDeps(&deps{
+		// cosmosClient: di.Hydrate(cosmos.ClientToken, injector, path),
 	})
 
 	panic("implement me")
@@ -57,7 +57,7 @@ func (client *rollkitPocketNetworkClient) Unstake(
 	panic("implement me")
 }
 
-func (client *rollkitPocketNetworkClient) OnNewBlock() <-chan *types.Block {
+func (client *rollkitPocketNetworkClient) NewBlocks() <-chan *types.Block {
 	panic("implement me")
 }
 

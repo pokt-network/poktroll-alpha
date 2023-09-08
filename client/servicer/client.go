@@ -18,7 +18,7 @@ func NewServicerClient() modules.ServicerClient {
 	return &servicerClient{}
 }
 
-func (sc *servicerClient) Resolve(injector *di.Injector, path *[]string) {
+func (sc *servicerClient) Hydrate(injector *di.Injector, path *[]string) {
 
 }
 

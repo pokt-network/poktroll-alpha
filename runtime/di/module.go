@@ -1,7 +1,7 @@
 package di
 
 type Module interface {
-	Resolve(*Injector, *[]string)
+	Hydrate(*Injector, *[]string)
 	Start() error
 	CascadeStart() error
 }
@@ -14,7 +14,7 @@ func (m *ModuleInternals[Deps]) Deps() *Deps {
 	return m.deps
 }
 
-func (m *ModuleInternals[Deps]) ResolveDeps(deps *Deps) {
+func (m *ModuleInternals[Deps]) HydrateDeps(deps *Deps) {
 	m.deps = deps
 }
 

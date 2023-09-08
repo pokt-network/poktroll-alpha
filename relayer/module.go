@@ -35,10 +35,12 @@ func NewRelayerModule() modules.RelayerModule {
 		input:  make(chan *types.Relay),
 		output: make(chan *types.Relay),
 	}
+
+	return &relayer
 }
 
-func (r *relayer) Resolve(injector *di.Injector, path *[]string) {
-	globalLogger := di.Resolve(modules.LoggerModuleToken, injector, path)
+func (r *relayer) Hydrate(injector *di.Injector, path *[]string) {
+	globalLogger := di.Hydrate(modules.LoggerModuleToken, injector, path)
 	r.logger = globalLogger.CreateLoggerForModule(modules.RelayerToken.Id())
 }
 
