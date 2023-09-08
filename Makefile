@@ -147,3 +147,11 @@ poktroll_servicer_unstake: ## Queries the poktroll node for session data
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests
 	go test -v ./...
+
+.PHONY: localnet_up
+localnet_up: ## Starts localnet
+	tilt up
+
+.PHONY: localnet_down
+localnet_down: ## Delete resources created by localnet
+	tilt down
