@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"poktroll/app"
 	"reflect"
+	"strconv"
 
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
@@ -46,7 +47,7 @@ func NewRemoteCosmosPocketClient(
 func (client *remoteCosmosPocketClient) Hydrate(injector *di.Injector, path *[]string) {}
 
 func (client *remoteCosmosPocketClient) CascadeStart() error {
-	return nil
+	return client.Start()
 }
 
 func (client *remoteCosmosPocketClient) Start() error {
@@ -62,49 +63,51 @@ func (client *remoteCosmosPocketClient) Stake(
 	ctx context.Context,
 	actor *types.Actor,
 	amount uint64,
-) <-chan types.Maybe[*types.TxResult] {
+) <-chan types.Maybe[*types.MsgStakeResponse] {
 	var (
-		creator   string
-		amount    uint64
 		actorType string
-		stakeInfo types.StakeInfo
-		resultCh  = make(chan types.Maybe[*types.TxResult], 1)
+		stakeInfo *types.StakeInfo
+		result    types.Maybe[*types.TxResult]
+		resultCh  = make(chan types.Maybe[*types.MsgStakeResponse], 1)
 	)
 
 	// TODO_THIS_COMMIT: provide encoding config via DI (?)
+	switch actor.GetActorType().(type) {
+	case *types.Actor_Servicer:
+		stakeInfo = actor.GetServicer().GetStakeInfo()
+
+		// TECHDEBT: align this once actorType is a go enum in the message handler
+		servicerType := reflect.TypeOf(types.Actor_Servicer{})
+		actorType = servicerType.Name()
+	default:
+		result = types.JustError[*types.TxResult](
+			fmt.Errorf(errInvalidActorTypeFmt, actor.GetActorType()),
+		)
+	}
+
+	msg := types.NewMsgStake(stakeInfo.Address, strconv.FormatUint(amount, 10), actorType)
+
+	txConfig := app.MakeEncodingConfig().TxConfig
+	txBuilder := txConfig.NewTxBuilder()
+	if err := txBuilder.SetMsgs(msg); err != nil {
+		result = types.JustError[*types.TxResult](err)
+	}
+
+	txBz, err := txConfig.TxEncoder()(txBuilder.GetTx())
+	bcastTxResp, err := client.txClient.BroadcastTx(ctx, &tx.BroadcastTxRequest{
+		TxBytes: txBz,
+		Mode:    tx.BroadcastMode_BROADCAST_MODE_SYNC,
+	})
+
+	if err != nil {
+		result = types.JustError[*types.TxResult](err)
+	}
+
+	result = types.Just(txResultFromTxResponse(bcastTxResp.GetTxResponse()))
 	go func() {
-		switch actor.GetActorType().(type) {
-		case types.Actor_Servicer:
-			stakeInfo = actor.GetServicer().GetStakeInfo()
-
-			// TECHDEBT: align this once actorType is a go enum in the message handler
-			servicerType := reflect.TypeOf(types.Actor_Servicer{})
-			actorType = servicerType.Name()
-		default:
-			resultCh <- types.JustError[*types.TxResult](
-				fmt.Errorf(errInvalidActorTypeFmt, actor.GetActorType()),
-			)
-		}
-		msg := types.NewMsgStake(actor.GetServicer().GetSta)
-
-		txConfig := app.MakeEncodingConfig().TxConfig
-		txBuilder := txConfig.NewTxBuilder()
-		if err := txBuilder.SetMsgs(msg); err != nil {
-			resultCh <- types.JustError[*types.TxResult](err)
-		}
-
-		txBz, err := txConfig.TxEncoder()(txBuilder.GetTx())
-		bcastTxResp, err := client.txClient.BroadcastTx(ctx, &tx.BroadcastTxRequest{
-			TxBytes: txBz,
-			Mode:    tx.BroadcastMode_BROADCAST_MODE_SYNC,
-		})
-
-		if err != nil {
-			resultCh <- types.JustError[*types.TxResult](err)
-		}
-
-		resultCh <- types.Just(txResultFromTxResponse(bcastTxResp.GetTxResponse()))
+		resultCh <- result
 	}()
+
 	return resultCh
 }
 
