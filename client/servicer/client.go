@@ -5,7 +5,7 @@ import (
 
 	"poktroll/modules"
 	"poktroll/runtime/di"
-	"poktroll/types"
+	"poktroll/x/poktroll/types"
 )
 
 var _ modules.ServicerClient = &servicerClient{}
