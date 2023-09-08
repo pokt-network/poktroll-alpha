@@ -133,15 +133,15 @@ poktroll_cosmology_frontend: ## Start the poktroll cosmology frontend
 	yarn --cwd ./frontend dev
 
 .PHONY: poktroll_servicer_stake
-poktroll_servicer_stake: ## Queries the poktroll node for session data
+poktroll_servicer_stake: ## Stake tokens for the servicer specified
 	poktrolld tx poktroll stake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
 
 .PHONY: poktroll_get_actors
-poktroll_get_actors: ## Queries the poktroll node for session data
+poktroll_get_actors: ## Retrieves all actors from the poktroll state
 	poktrolld q poktroll actors --node tcp://127.0.0.1:36657
 
 .PHONY: poktroll_servicer_unstake
-poktroll_servicer_unstake: ## Queries the poktroll node for session data
+poktroll_servicer_unstake: ## Unstake tokens for the servicer specified
 	poktrolld tx poktroll unstake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
 
 .PHONY: test_unit_all
