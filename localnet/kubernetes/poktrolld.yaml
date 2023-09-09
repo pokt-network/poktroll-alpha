@@ -99,12 +99,19 @@ spec:
       containers:
       - name: poktrolld
         image: poktrolld
+        ports:
+        - containerPort: 36657
         command: ["/bin/sh"]
         args: ["/etc/config/poktroll.sh"]
         volumeMounts:
         - name: config-volume
           mountPath: /etc/config
+        - name: keys-volume
+          mountPath: /root/.poktroll/keyring-test/
       volumes:
-        - name: config-volume
-          configMap:
-            name: poktroll-config
+      - name: config-volume
+        configMap:
+          name: poktroll-config
+      - name: keys-volume
+        configMap:
+          name: poktroll-keys
