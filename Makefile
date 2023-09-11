@@ -155,3 +155,4 @@ localnet_up: ## Starts localnet
 .PHONY: localnet_down
 localnet_down: ## Delete resources created by localnet
 	tilt down
+	kubectl delete secret celestia-secret || exit 1
