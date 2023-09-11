@@ -18,6 +18,6 @@ func (k msgServer) Stake(goCtx context.Context, msg *types.MsgStake) (*types.Msg
 		logger.Error("Error staking", err.Error())
 		return &types.MsgStakeResponse{Success: false}, err
 	}
-	logger.Info(fmt.Sprintf("%s Staked %s %s", msg.Creator, msg.Amount, msg.ActorType))
+	logger.Info(fmt.Sprintf("%s %s Staked %s", msg.ActorType, msg.Creator, msg.Amount))
 	return &types.MsgStakeResponse{Success: true}, nil
 }
