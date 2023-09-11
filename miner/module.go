@@ -8,8 +8,8 @@ import (
 
 	"poktroll/modules"
 	"poktroll/runtime/di"
-	"poktroll/types"
 	"poktroll/utils"
+	"poktroll/x/poktroll/types"
 )
 
 var SMTHasherToken = di.NewInjectionToken[hash.Hash]("SMTHasher")
