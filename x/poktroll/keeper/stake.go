@@ -2,10 +2,11 @@ package keeper
 
 import (
 	"fmt"
-	"poktroll/x/poktroll/types"
 
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"poktroll/x/poktroll/types"
 )
 
 func (k Keeper) StakeActor(ctx sdk.Context, msg *types.MsgStake) error {

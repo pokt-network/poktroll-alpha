@@ -14,8 +14,26 @@ var PocketNetworkClientToken = di.NewInjectionToken[PocketNetworkClient]("pocket
 type PocketNetworkClient interface {
 	di.Module
 	NewBlocks() <-chan *types.Block
-	Stake(context.Context, *types.Actor, uint64) <-chan types.Maybe[*types.TxResult]
-	Unstake(context.Context, *types.Actor, uint64) <-chan types.Maybe[*types.TxResult]
+	StakeServicer(
+		ctx context.Context,
+		servicer *types.Servicer,
+		amount string,
+	) <-chan types.Maybe[*types.TxResult]
+	StakeApplication(
+		ctx context.Context,
+		application *types.Application,
+		amount string,
+	) <-chan types.Maybe[*types.TxResult]
+	UnstakeServicer(
+		ctx context.Context,
+		servicer *types.Servicer,
+		amount string,
+	) <-chan types.Maybe[*types.TxResult]
+	UnstakeApplication(
+		ctx context.Context,
+		application *types.Application,
+		amount string,
+	) <-chan types.Maybe[*types.TxResult]
 	//SubmitClaim(context.Context, *types.Claim) <-chan types.Maybe[*types.TxResult]
 	SubmitClaim(context.Context, []byte) <-chan types.Maybe[*types.TxResult]
 	SubmitProof(

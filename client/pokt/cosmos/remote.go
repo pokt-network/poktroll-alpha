@@ -2,24 +2,20 @@ package cosmos
 
 import (
 	"context"
-	"fmt"
-	"poktroll/app"
-	"reflect"
-
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/pokt-network/smt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"poktroll/app"
 	"poktroll/modules"
 	"poktroll/runtime/di"
 	"poktroll/x/poktroll/types"
 )
 
 var (
-	_                      modules.PocketNetworkClient = &remoteCosmosPocketClient{}
-	errInvalidActorTypeFmt                             = "invalid actor type: %s"
+	_ modules.PocketNetworkClient = &remoteCosmosPocketClient{}
 )
 
 type remoteCosmosPocketClient struct {
@@ -58,62 +54,78 @@ func (client *remoteCosmosPocketClient) Stop() {
 	_ = client.grpcConn.Close()
 }
 
-func (client *remoteCosmosPocketClient) Stake(
+func (client *remoteCosmosPocketClient) StakeServicer(
 	ctx context.Context,
-	actor *types.Actor,
-	amount uint64,
+	servicer *types.Servicer,
+	amount string,
 ) <-chan types.Maybe[*types.TxResult] {
 	var (
-		creator   string
-		amount    uint64
-		actorType string
-		stakeInfo types.StakeInfo
-		resultCh  = make(chan types.Maybe[*types.TxResult], 1)
+		resultCh = make(chan types.Maybe[*types.TxResult], 1)
 	)
 
-	// TODO_THIS_COMMIT: provide encoding config via DI (?)
-	go func() {
-		switch actor.GetActorType().(type) {
-		case types.Actor_Servicer:
-			stakeInfo = actor.GetServicer().GetStakeInfo()
+	msg := types.NewMsgStake(
+		servicer.StakeInfo.GetAddress(),
+		amount,
+		// TECHDEBT: update once `poktroll.Keeper#StakeActor()` is refactored.
+		types.ServicerPrefix,
+	)
 
-			// TECHDEBT: align this once actorType is a go enum in the message handler
-			servicerType := reflect.TypeOf(types.Actor_Servicer{})
-			actorType = servicerType.Name()
-		default:
-			resultCh <- types.JustError[*types.TxResult](
-				fmt.Errorf(errInvalidActorTypeFmt, actor.GetActorType()),
-			)
-		}
-		msg := types.NewMsgStake(actor.GetServicer().GetSta)
-
-		txConfig := app.MakeEncodingConfig().TxConfig
-		txBuilder := txConfig.NewTxBuilder()
-		if err := txBuilder.SetMsgs(msg); err != nil {
-			resultCh <- types.JustError[*types.TxResult](err)
-		}
-
-		txBz, err := txConfig.TxEncoder()(txBuilder.GetTx())
-		bcastTxResp, err := client.txClient.BroadcastTx(ctx, &tx.BroadcastTxRequest{
-			TxBytes: txBz,
-			Mode:    tx.BroadcastMode_BROADCAST_MODE_SYNC,
-		})
-
-		if err != nil {
-			resultCh <- types.JustError[*types.TxResult](err)
-		}
-
-		resultCh <- types.Just(txResultFromTxResponse(bcastTxResp.GetTxResponse()))
-	}()
+	go client.broadcastMessageTx(ctx, resultCh, msg)
 	return resultCh
 }
 
-func (client *remoteCosmosPocketClient) Unstake(
+func (client *remoteCosmosPocketClient) StakeApplication(
 	ctx context.Context,
-	actor *types.Actor,
-	amount uint64,
+	application *types.Application,
+	amount string,
 ) <-chan types.Maybe[*types.TxResult] {
-	panic("implement me")
+	resultCh := make(chan types.Maybe[*types.TxResult], 1)
+
+	// TODO_THIS_COMMIT: provide encoding config via DI (?)
+	msg := types.NewMsgStake(
+		application.StakeInfo.GetAddress(),
+		amount,
+		// TECHDEBT: update once `poktroll.Keeper#StakeActor()` is refactored.
+		types.ServicerPrefix,
+	)
+
+	go client.broadcastMessageTx(ctx, resultCh, msg)
+	return resultCh
+}
+
+func (client *remoteCosmosPocketClient) UnstakeServicer(
+	ctx context.Context,
+	servicer *types.Servicer,
+	amount string,
+) <-chan types.Maybe[*types.TxResult] {
+	resultCh := make(chan types.Maybe[*types.TxResult], 1)
+
+	msg := types.NewMsgUnstake(
+		servicer.StakeInfo.GetAddress(),
+		amount,
+		// TECHDEBT: update once `poktroll.Keeper#StakeActor()` is refactored.
+		types.ServicerPrefix,
+	)
+
+	go client.broadcastMessageTx(ctx, resultCh, msg)
+	return resultCh
+}
+func (client *remoteCosmosPocketClient) UnstakeApplication(
+	ctx context.Context,
+	application *types.Application,
+	amount string,
+) <-chan types.Maybe[*types.TxResult] {
+	resultCh := make(chan types.Maybe[*types.TxResult], 1)
+
+	msg := types.NewMsgUnstake(
+		application.StakeInfo.GetAddress(),
+		amount,
+		// TECHDEBT: update once `poktroll.Keeper#StakeActor()` is refactored.
+		types.ServicerPrefix,
+	)
+
+	go client.broadcastMessageTx(ctx, resultCh, msg)
+	return resultCh
 }
 
 func (client *remoteCosmosPocketClient) NewBlocks() <-chan *types.Block {
@@ -138,6 +150,33 @@ func (client *remoteCosmosPocketClient) SubmitProof(
 	err error,
 ) <-chan types.Maybe[*types.TxResult] {
 	panic("implement me")
+}
+
+func (client *remoteCosmosPocketClient) broadcastMessageTx(
+	ctx context.Context,
+	resultCh chan<- types.Maybe[*types.TxResult],
+	msg cosmosTypes.Msg,
+) {
+
+	// CONSIDERATION: provide encoding config via DI instead of importing the
+	// cosmos app here (?)
+	txConfig := app.MakeEncodingConfig().TxConfig
+	txBuilder := txConfig.NewTxBuilder()
+	if err := txBuilder.SetMsgs(msg); err != nil {
+		resultCh <- types.JustError[*types.TxResult](err)
+	}
+
+	txBz, err := txConfig.TxEncoder()(txBuilder.GetTx())
+	bcastTxResp, err := client.txClient.BroadcastTx(ctx, &tx.BroadcastTxRequest{
+		TxBytes: txBz,
+		Mode:    tx.BroadcastMode_BROADCAST_MODE_SYNC,
+	})
+
+	if err != nil {
+		resultCh <- types.JustError[*types.TxResult](err)
+	}
+
+	resultCh <- types.Just(txResultFromTxResponse(bcastTxResp.GetTxResponse()))
 }
 
 func txResultFromTxResponse(txResp *cosmosTypes.TxResponse) *types.TxResult {
