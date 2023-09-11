@@ -12,10 +12,10 @@ import (
 
 var _ = strconv.Itoa(0)
 
-func CmdActors() *cobra.Command {
+func CmdServicers() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "actors",
-		Short: "Query actors",
+		Use:   "servicers",
+		Short: "Query Servicers",
 		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			clientCtx, err := client.GetClientQueryContext(cmd)
@@ -24,11 +24,11 @@ func CmdActors() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			request := &types.QueryActorsRequest{}
+			request := &types.QueryServicersRequest{}
 
-			res, err := queryClient.Actors(cmd.Context(), request)
+			res, err := queryClient.Servicers(cmd.Context(), request)
 			if err != nil {
-				clientCtx.PrintString("could not get actors")
+				clientCtx.PrintString("could not get servicers")
 				return err
 			}
 

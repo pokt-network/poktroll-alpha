@@ -136,13 +136,25 @@ poktroll_cosmology_frontend: ## Start the poktroll cosmology frontend
 poktroll_servicer_stake: ## Stake tokens for the servicer specified
 	poktrolld --home=./localnet/.poktrolld tx poktroll stake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
 
-.PHONY: poktroll_get_actors
-poktroll_get_actors: ## Retrieves all actors from the poktroll state
-	poktrolld --home=./localnet/.poktrolld q poktroll actors --node tcp://127.0.0.1:36657
+.PHONY: poktroll_get_servicers
+poktroll_get_servicers: ## Retrieves all servicers from the poktroll state
+	poktrolld --home=./localnet/.poktrolld q poktroll servicers --node tcp://127.0.0.1:36657
 
 .PHONY: poktroll_servicer_unstake
 poktroll_servicer_unstake: ## Unstake tokens for the servicer specified
 	poktrolld --home=./localnet/.poktrolld tx poktroll unstake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
+
+.PHONY: poktroll_appln_stake
+poktroll_appln_stake: ## Stake tokens for the servicer specified
+	poktrolld --home=./localnet/.poktrolld tx poktroll stake 1000stake application --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
+
+.PHONY: poktroll_get_applns
+poktroll_get_applns: ## Retrieves all servicers from the poktroll state
+	poktrolld --home=./localnet/.poktrolld q poktroll application --node tcp://127.0.0.1:36657
+
+.PHONY: poktroll_appln_unstake
+poktroll_appln_unstake: ## Unstake tokens for the servicer specified
+	poktrolld --home=./localnet/.poktrolld tx poktroll unstake 1000stake application --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
 
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests
