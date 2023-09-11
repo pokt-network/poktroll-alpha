@@ -42,8 +42,9 @@ local_resource('hot-reload: poktrolld - local cli', 'ignite chain build --skip-p
 docker_build_with_restart(
     "poktrolld",
     '.',
-    dockerfile_contents="""FROM debian:bullseye
+    dockerfile_contents="""FROM golang:1.20.8
 RUN apt-get -q update && apt-get install -qyy curl jq
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
 COPY bin/poktrolld /usr/local/bin/poktrolld
 WORKDIR /
 """,
