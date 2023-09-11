@@ -171,13 +171,6 @@ func (client *remoteCosmosPocketClient) broadcastMessageTx(
 		resultCh <- types.JustError[*types.TxResult](err)
 	}
 
-	// TECHDEBT: sign the tx!
-	//txClient.SignWithPrivKey(
-	//
-	//)
-
-	txClient.GenerateOrBroadcastTxWithFactory()
-
 	txBz, err := txConfig.TxEncoder()(txBuilder.GetTx())
 	bcastTxResp, err := client.txClient.BroadcastTx(ctx, &tx.BroadcastTxRequest{
 		TxBytes: txBz,
