@@ -2,11 +2,12 @@ package cosmos
 
 import (
 	"context"
+
 	txClient "github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/tx"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/pokt-network/smt"
-	"google.golang.org/grpc"
 
 	"poktroll/app"
 	"poktroll/modules"
@@ -15,51 +16,39 @@ import (
 )
 
 var (
-	_ modules.PocketNetworkClient = &remoteCosmosPocketClient{}
+	_ modules.PocketNetworkClient = &localCosmosPocketClient{}
 )
 
-type remoteCosmosPocketClient struct {
-	//privateKey  *secp256k1.PrivKey
-	txFactory   txClient.Factory
-	grpcConn    *grpc.ClientConn
-	txClient    tx.ServiceClient
-	queryClient types.QueryClient
+type localCosmosPocketClient struct {
+	privateKey *secp256k1.PrivKey
+	//txFactory txClient.Factory
+	//clientCtx cosmosClient.Context
 }
 
-func NewRemoteCosmosPocketClient(
-	ctx context.Context,
-	grpcURI string,
-) (modules.PocketNetworkClient, error) {
-	grpcConn, err := newGRPCConn(ctx, grpcURI)
-	if err != nil {
-		return nil, err
-	}
-
-	return &remoteCosmosPocketClient{
-		txClient:    tx.NewServiceClient(grpcConn),
-		queryClient: types.NewQueryClient(grpcConn),
-	}, nil
+func NewLocalCosmosPocketClient(ctx context.Context) (modules.PocketNetworkClient, error) {
+	return &localCosmosPocketClient{}, nil
 }
 
-func (client *remoteCosmosPocketClient) Hydrate(injector *di.Injector, path *[]string) {
-	//client.privateKey = di.Hydrate(modules.PrivateKeyInjectionToken, injector, path)
-	client.txFactory = di.Hydrate(modules.TxFactoryInjectionToken, injector, path)
+func (client *localCosmosPocketClient) Hydrate(injector *di.Injector, path *[]string) {
+	client.privateKey = di.Hydrate(modules.PrivateKeyInjectionToken, injector, path)
+	//client.txFactory = di.Hydrate(modules.TxFactoryInjectionToken, injector, path)
+	//client.clientCtx = di.Hydrate(modules.ClientCtxInjectionToken, injector, path)
 }
 
-func (client *remoteCosmosPocketClient) CascadeStart() error {
+func (client *localCosmosPocketClient) CascadeStart() error {
 	return nil
 }
 
-func (client *remoteCosmosPocketClient) Start() error {
+func (client *localCosmosPocketClient) Start() error {
 	// CONSIDERATION: could move grpc dialing to here instead of the constructor.
 	return nil
 }
 
-func (client *remoteCosmosPocketClient) Stop() {
-	_ = client.grpcConn.Close()
+func (client *localCosmosPocketClient) Stop() {
+	//_ = client.grpcConn.Close()
 }
 
-func (client *remoteCosmosPocketClient) StakeServicer(
+func (client *localCosmosPocketClient) StakeServicer(
 	ctx context.Context,
 	servicer *types.Servicer,
 	amount string,
@@ -79,7 +68,7 @@ func (client *remoteCosmosPocketClient) StakeServicer(
 	return resultCh
 }
 
-func (client *remoteCosmosPocketClient) StakeApplication(
+func (client *localCosmosPocketClient) StakeApplication(
 	ctx context.Context,
 	application *types.Application,
 	amount string,
@@ -98,7 +87,7 @@ func (client *remoteCosmosPocketClient) StakeApplication(
 	return resultCh
 }
 
-func (client *remoteCosmosPocketClient) UnstakeServicer(
+func (client *localCosmosPocketClient) UnstakeServicer(
 	ctx context.Context,
 	servicer *types.Servicer,
 	amount string,
@@ -115,7 +104,7 @@ func (client *remoteCosmosPocketClient) UnstakeServicer(
 	go client.broadcastMessageTx(ctx, resultCh, msg)
 	return resultCh
 }
-func (client *remoteCosmosPocketClient) UnstakeApplication(
+func (client *localCosmosPocketClient) UnstakeApplication(
 	ctx context.Context,
 	application *types.Application,
 	amount string,
@@ -133,11 +122,11 @@ func (client *remoteCosmosPocketClient) UnstakeApplication(
 	return resultCh
 }
 
-func (client *remoteCosmosPocketClient) NewBlocks() <-chan *types.Block {
+func (client *localCosmosPocketClient) NewBlocks() <-chan *types.Block {
 	panic("implement me")
 }
 
-func (client *remoteCosmosPocketClient) SubmitClaim(
+func (client *localCosmosPocketClient) SubmitClaim(
 	ctx context.Context,
 	// TODO: what type should `claim` be?
 	claim []byte,
@@ -145,7 +134,7 @@ func (client *remoteCosmosPocketClient) SubmitClaim(
 	panic("implement me")
 }
 
-func (client *remoteCosmosPocketClient) SubmitProof(
+func (client *localCosmosPocketClient) SubmitProof(
 	ctx context.Context,
 	closestKey []byte,
 	closestValueHash []byte,
@@ -157,36 +146,38 @@ func (client *remoteCosmosPocketClient) SubmitProof(
 	panic("implement me")
 }
 
-func (client *remoteCosmosPocketClient) broadcastMessageTx(
+func (client *localCosmosPocketClient) broadcastMessageTx(
 	ctx context.Context,
 	resultCh chan<- types.Maybe[*types.TxResult],
 	msg cosmosTypes.Msg,
 ) {
+	//client.clientCtx.BroadcastMode
+	//if err := txClient.GenerateOrBroadcastTxWithFactory(
+	//	client.clientCtx,
+	//	client.txFactory,
+	//	msg,
+	//); err != nil {
+	//	resultCh <- types.JustError[*types.TxResult](err)
+	//}
 
-	// CONSIDERATION: provide encoding config via DI instead of importing the
-	// cosmos app here (?)
+	// TODO_THIS_COMMIT: use DI to get updated client context!
 	txConfig := app.MakeEncodingConfig().TxConfig
 	txBuilder := txConfig.NewTxBuilder()
 	if err := txBuilder.SetMsgs(msg); err != nil {
 		resultCh <- types.JustError[*types.TxResult](err)
 	}
 
-	// TECHDEBT: sign the tx!
-	//txClient.SignWithPrivKey(
-	//
-	//)
-
-	txClient.GenerateOrBroadcastTxWithFactory()
-
-	txBz, err := txConfig.TxEncoder()(txBuilder.GetTx())
-	bcastTxResp, err := client.txClient.BroadcastTx(ctx, &tx.BroadcastTxRequest{
-		TxBytes: txBz,
-		Mode:    tx.BroadcastMode_BROADCAST_MODE_SYNC,
+	txBuilder.SetSignatures(signing.SignatureV2{
+		PubKey: client.privateKey.PubKey(),
+		Data: &signing.SingleSignatureData{
+			// TODO: what is this / how does it work?
+			SignMode:  txConfig.SignModeHandler().DefaultMode(),
+			Signature: nil,
+		},
+		Sequence:
 	})
 
-	if err != nil {
-		resultCh <- types.JustError[*types.TxResult](err)
-	}
+	txClient.SignWithPrivKey()
 
 	resultCh <- types.Just(txResultFromTxResponse(bcastTxResp.GetTxResponse()))
 }

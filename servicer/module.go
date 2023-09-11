@@ -3,7 +3,6 @@ package servicer
 import (
 	"poktroll/modules"
 	"poktroll/runtime/di"
-	"poktroll/shared/crypto"
 )
 
 type servicer struct {
@@ -12,7 +11,6 @@ type servicer struct {
 	sessionManager      modules.SessionManager
 	miner               modules.MinerModule
 	logger              *modules.Logger
-	PrivateKey          crypto.PrivateKey
 }
 
 func NewServicerModule() modules.ServicerModule {
@@ -24,7 +22,6 @@ func (r *servicer) Hydrate(injector *di.Injector, path *[]string) {
 	r.relayer = di.Hydrate(modules.RelayerToken, injector, path)
 	r.miner = di.Hydrate(modules.MinerModuleToken, injector, path)
 	r.sessionManager = di.Hydrate(modules.SessionManagerToken, injector, path)
-	r.PrivateKey = di.Hydrate(modules.PrivateKeyInjectionToken, injector, path)
 	globalLogger := di.Hydrate(modules.LoggerModuleToken, injector, path)
 	r.logger = globalLogger.CreateLoggerForModule(modules.ServicerToken.Id())
 }

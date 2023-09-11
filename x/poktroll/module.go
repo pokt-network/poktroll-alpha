@@ -144,5 +144,7 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // EndBlock contains the logic that is automatically triggered at the end of each block
 func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	// TODO: send on a channel
+	// What are instantiating or getting from DI to do that?
 	return []abci.ValidatorUpdate{}
 }

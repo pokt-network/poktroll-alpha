@@ -1,10 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"errors"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	"io"
 	"os"
 	"path/filepath"
+	"poktroll/modules"
+	"poktroll/runtime/di"
 	"strings"
 
 	dbm "github.com/cometbft/cometbft-db"
@@ -43,6 +47,9 @@ import (
 	"poktroll/servicer"
 )
 
+// TODO: Move
+var PoktrollDepInjectorContextKey = "poktroll_di_injector"
+
 // NewRootCmd creates a new root command for a Cosmos SDK application
 func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 	encodingConfig := app.MakeEncodingConfig()
@@ -71,6 +78,25 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 			if err != nil {
 				return err
 			}
+
+			injector := di.NewInjector()
+			ctx := context.WithValue(cmd.Context(), PoktrollDepInjectorContextKey, injector)
+			cmd.SetContext(ctx)
+
+			//di.Provide(modules.ClientCtxInjectionToken, initClientCtx, injector)
+
+			// get key name from clientCtx
+			factory, err := tx.NewFactoryCLI(initClientCtx, cmd.Flags())
+			if err != nil {
+				return err
+			}
+			//di.Provide(modules.TxFactoryInjectionToken, factory, injector)
+
+			key, err := factory.Keybase().Key(initClientCtx.GetFromName())
+			if err != nil {
+				return err
+			}
+			di.Provide(modules.PrivateKeyInjectionToken, key, injector)
 
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
