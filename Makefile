@@ -155,3 +155,8 @@ localnet_up: ## Starts localnet
 .PHONY: localnet_down
 localnet_down: ## Delete resources created by localnet
 	tilt down
+	kubectl delete secret celestia-secret || exit 1
+
+.PHONY: localnet_poktrolld_dlv_attach
+localnet_poktrolld_dlv_attach: ## Attaches dlv to the process and listens on `40004` for you to connect with debug tool of a choice (gdlv/visual studio)
+	kubectl exec deploy/poktrolld -- sh -c "dlv attach \$(pgrep poktrolld) --listen :40004 --headless --api-version=2 --accept-multiclient"

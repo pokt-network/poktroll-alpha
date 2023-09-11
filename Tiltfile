@@ -42,8 +42,9 @@ local_resource('hot-reload: poktrolld - local cli', 'ignite chain build --skip-p
 docker_build_with_restart(
     "poktrolld",
     '.',
-    dockerfile_contents="""FROM debian:bullseye
+    dockerfile_contents="""FROM golang:1.20.8
 RUN apt-get -q update && apt-get install -qyy curl jq
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
 COPY bin/poktrolld /usr/local/bin/poktrolld
 WORKDIR /
 """,
@@ -60,4 +61,4 @@ k8s_yaml('localnet/kubernetes/poktrolld.yaml')
 # Configure tilt resources for nodes
 # TODO(@okdas): add port forwarding to be able to query the endpoints on localhost
 k8s_resource('celestia-rollkit', labels=["blockchains"], port_forwards=['26657', '26658', '26659'])
-k8s_resource('poktrolld', labels=["blockchains"], resource_deps=['celestia-rollkit'], port_forwards=['36657'])
+k8s_resource('poktrolld', labels=["blockchains"], resource_deps=['celestia-rollkit'], port_forwards=['36657', '40004'])
