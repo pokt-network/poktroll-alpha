@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"testing"
 
+	cosmosSecp256k1 "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	"github.com/regen-network/gocuke"
 	"github.com/stretchr/testify/require"
-
-	cryptoPocket "poktroll/shared/crypto"
 )
 
 func TestUtility(t *testing.T) {
@@ -101,7 +100,7 @@ func (s *utilitySuite) TheApplicationSendsAGetBalanceRelayAtASpecificHeightToAnE
 	servicerPrivateKey := s.getServicerPrivateKey(s.servicerKey)
 	appPrivateKey := s.getAppPrivateKey(appA)
 
-	s.sendTrustlessRelay(checkBalanceRelay, servicerPrivateKey.Address().String(), appPrivateKey.Address().String(), serviceA, true)
+	s.sendTrustlessRelay(checkBalanceRelay, servicerPrivateKey.PubKey().Address().String(), appPrivateKey.PubKey().Address().String(), serviceA, true)
 }
 func (s *utilitySuite) TheRelayResponseContains(relayResponse string) {
 	require.Contains(s, s.validator.result.Stdout, relayResponse)
@@ -115,7 +114,7 @@ func (s *utilitySuite) TheApplicationSendsAGetBalanceRelayAtASpecificHeightToThe
 	servicerPrivateKey := s.getServicerPrivateKey(s.servicerKey)
 	appPrivateKey := s.getAppPrivateKey(appA)
 
-	s.sendTrustlessRelay(checkBalanceRelay, servicerPrivateKey.Address().String(), appPrivateKey.Address().String(), timeoutService, false)
+	s.sendTrustlessRelay(checkBalanceRelay, servicerPrivateKey.PubKey().String(), appPrivateKey.PubKey().String(), timeoutService, false)
 }
 
 // TheApplicationHasAValidEthereumRelaychaindHeight fullfils the following condition from feature file:
@@ -136,10 +135,9 @@ func (s *utilitySuite) TheApplicationHasAValidServicer() {
 // getServicerPrivateKey generates a new keypair from the servicer private hex key that we get from the clientset
 func (s *utilitySuite) getServicerPrivateKey(
 	servicerId string,
-) cryptoPocket.PrivateKey {
+) *cosmosSecp256k1.PrivKey {
 	privHexString := s.servicerKeys[servicerId]
-	privateKey, err := cryptoPocket.NewPrivateKey(privHexString)
-	require.NoErrorf(s, err, "failed to extract privkey for servicer with id %s", servicerId)
+	privateKey := cosmosSecp256k1.GenPrivKeyFromSecret([]byte(privHexString))
 
 	return privateKey
 }
@@ -147,10 +145,9 @@ func (s *utilitySuite) getServicerPrivateKey(
 // getAppPrivateKey generates a new keypair from the application private hex key that we get from the clientset
 func (s *utilitySuite) getAppPrivateKey(
 	appId string,
-) cryptoPocket.PrivateKey {
+) *cosmosSecp256k1.PrivKey {
 	privHexString := s.appKeys[appId]
-	privateKey, err := cryptoPocket.NewPrivateKey(privHexString)
-	require.NoErrorf(s, err, "failed to extract privkey for app with id %s", appId)
+	privateKey := cosmosSecp256k1.GenPrivKeyFromSecret([]byte(privHexString))
 
 	return privateKey
 }

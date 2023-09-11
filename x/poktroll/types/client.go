@@ -3,11 +3,11 @@ package types
 // TODO: move these to more appripriate places and/or define as protobufs
 
 type Block struct {
-	Height uint64
-	Hash   string
+	Height int64
+	Hash   []byte
 }
 
 type TxResult struct {
 	Hash   string
-	Height uint64
+	Height int64
 }

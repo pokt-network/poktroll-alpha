@@ -25,8 +25,8 @@ type localCosmosPocketClient struct {
 	clientCtx cosmosClient.Context
 }
 
-func NewLocalCosmosPocketClient(ctx context.Context) (modules.PocketNetworkClient, error) {
-	return &localCosmosPocketClient{}, nil
+func NewLocalCosmosPocketClient() modules.PocketNetworkClient {
+	return &localCosmosPocketClient{}
 }
 
 func (client *localCosmosPocketClient) Hydrate(injector *di.Injector, path *[]string) {

@@ -3,10 +3,10 @@ package cmd
 import (
 	"context"
 	"errors"
-	"github.com/cosmos/cosmos-sdk/client/tx"
 	"io"
 	"os"
 	"path/filepath"
+	"poktroll/client/pokt/cosmos"
 	"poktroll/modules"
 	"poktroll/runtime/di"
 	"strings"
@@ -23,6 +23,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
@@ -40,6 +41,7 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
 	// this line is used by starport scaffolding # root/moduleImport
 
 	"poktroll/app"
@@ -49,6 +51,8 @@ import (
 
 // TODO: Move
 var PoktrollDepInjectorContextKey = "poktroll_di_injector"
+
+var ClientCtxInjectionToken = di.NewInjectionToken[client.Context]("clientCtx")
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
 func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
@@ -61,6 +65,7 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithHomeDir(app.DefaultNodeHome).
+		WithKeyringDir("localnet/.poktrolld/keyring-test").
 		WithViper("")
 
 	rootCmd := &cobra.Command{
@@ -83,21 +88,16 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 			ctx := context.WithValue(cmd.Context(), PoktrollDepInjectorContextKey, injector)
 			cmd.SetContext(ctx)
 
-			//di.Provide(modules.ClientCtxInjectionToken, initClientCtx, injector)
-
 			// get key name from clientCtx
 			factory, err := tx.NewFactoryCLI(initClientCtx, cmd.Flags())
 			if err != nil {
 				return err
 			}
-			//di.Provide(modules.TxFactoryInjectionToken, factory, injector)
-
 			// QUESTION: does `initClientCtx.GetFromName()` get a default value?
 			key, err := factory.Keybase().Key(initClientCtx.GetFromName())
 			if err != nil {
 				return err
 			}
-			di.Provide(modules.PrivateKeyInjectionToken, key, injector)
 
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
@@ -105,6 +105,16 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 
 			customAppTemplate, customAppConfig := initAppConfig()
 			customTMConfig := initTendermintConfig()
+
+			di.Provide(modules.ClientCtxInjectionToken, initClientCtx, injector)
+			di.Provide(modules.TxFactoryInjectionToken, factory, injector)
+			di.Provide(modules.PocketNetworkClientToken, cosmos.NewLocalCosmosPocketClient(), injector)
+			di.Provide(modules.KeyNameInjectionToken, key.Name, injector)
+			di.Provide(modules.ServicerToken, servicer.NewServicerModule(), injector)
+
+			servicer := di.HydrateMain(modules.ServicerToken, injector)
+			servicer.Start()
+
 			return server.InterceptConfigsPreRunHandler(
 				cmd, customAppTemplate, customAppConfig, customTMConfig,
 			)

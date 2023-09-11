@@ -7,12 +7,10 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-
 	"poktroll/modules"
 	"poktroll/runtime/di"
-	"poktroll/types"
 	"poktroll/utils"
+	"poktroll/x/poktroll/types"
 )
 
 /////////////
@@ -29,8 +27,6 @@ type relayer struct {
 	// channel signaling a output has been completed.
 	output           chan *types.Relay
 	outputObservable utils.Observable[*types.Relay]
-	// CONSIDERATION: use "pocket" key interface types instead of cosmos-sdk's.
-	privateKey secp256k1.PrivKey
 }
 
 // NewRelayerModule creates a new input and output channel
@@ -50,7 +46,6 @@ func (r *relayer) Hydrate(injector *di.Injector, path *[]string) {
 	globalLogger := di.Hydrate(modules.LoggerModuleToken, injector, path)
 	r.logger = globalLogger.CreateLoggerForModule(modules.RelayerToken.Id())
 
-	r.privateKey = di.Hydrate(modules.PrivateKeyInjectionToken, injector, path)
 }
 
 func (r *relayer) CascadeStart() error {

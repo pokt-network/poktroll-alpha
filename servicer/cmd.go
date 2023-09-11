@@ -2,6 +2,7 @@ package servicer
 
 import (
 	"fmt"
+	"poktroll/x/poktroll/types"
 
 	"github.com/spf13/cobra"
 )

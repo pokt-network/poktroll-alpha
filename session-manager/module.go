@@ -3,16 +3,16 @@ package sessionmanager
 import (
 	"poktroll/modules"
 	"poktroll/runtime/di"
-	"poktroll/types"
 	"poktroll/utils"
+	"poktroll/x/poktroll/types"
 )
 
 type sessionManager struct {
 	pocketNetworkClient modules.PocketNetworkClient
-	blocksPerSession    uint64
+	blocksPerSession    int64
 	session             *types.Session
 	sessionTicker       utils.Observable[*types.Session]
-	latestSecret        string
+	latestSecret        []byte
 	started             bool
 	logger              modules.Logger
 }
@@ -47,10 +47,9 @@ func (s *sessionManager) Start() error {
 			// discover a new session every `blocksPerSession` blocks
 			if block.Height%s.blocksPerSession == 0 {
 				s.session = &types.Session{
-					SessionNumber:      block.Height / s.blocksPerSession,
-					SessionBlockHeight: s.session.SessionNumber * s.blocksPerSession,
-					BlockHeight:        block.Height,
-					BlockHash:          block.Hash,
+					SessionNumber: block.Height / s.blocksPerSession,
+					SessionHeight: s.session.SessionNumber * s.blocksPerSession,
+					BlockHash:     block.Hash,
 				}
 
 				// set the latest secret for claim and proof use

@@ -21,7 +21,7 @@ type Config struct {
 
 	Persistence      *PersistenceConfig `json:"persistence"`
 	Logger           *LoggerConfig      `json:"logger"`
-	BlocksPerSession uint64             `json:"blocks_per_session"`
+	BlocksPerSession int64              `json:"blocks_per_session"`
 }
 
 // ParseConfig parses the config file and returns a Config struct

@@ -2,8 +2,8 @@ package modules
 
 import (
 	"poktroll/runtime/di"
-	"poktroll/types"
 	"poktroll/utils"
+	"poktroll/x/poktroll/types"
 )
 
 type SessionManager interface {

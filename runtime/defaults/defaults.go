@@ -29,5 +29,5 @@ var (
 	DefaultLoggerFormat = "pretty"
 
 	// blocks per session
-	DefaultBlocksPerSession = uint64(2)
+	DefaultBlocksPerSession = int64(2)
 )

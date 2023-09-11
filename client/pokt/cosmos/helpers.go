@@ -2,16 +2,17 @@ package cosmos
 
 import (
 	"context"
+	types2 "poktroll/x/poktroll/types"
+
 	"github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	types2 "poktroll/x/poktroll/types"
 )
 
 func txResultFromTxResponse(txResp *types.TxResponse) *types2.TxResult {
 	return &types2.TxResult{
 		Hash:   txResp.TxHash,
-		Height: uint64(txResp.Height),
+		Height: txResp.Height,
 	}
 }
 

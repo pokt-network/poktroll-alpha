@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package poktroll.poktroll;
 
-import "poktroll/poktroll/actor.proto";
-
 option go_package = "poktroll/x/poktroll/types";
 
 // Msg defines the Msg service.

@@ -4,9 +4,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"poktroll/x/poktroll/types"
 	"testing"
-
-	"poktroll/types"
 )
 
 // localAnvil points to the default URL of a locally run anvil node
