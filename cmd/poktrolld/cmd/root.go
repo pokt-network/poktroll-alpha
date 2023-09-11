@@ -92,6 +92,7 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 			}
 			//di.Provide(modules.TxFactoryInjectionToken, factory, injector)
 
+			// QUESTION: does `initClientCtx.GetFromName()` get a default value?
 			key, err := factory.Keybase().Key(initClientCtx.GetFromName())
 			if err != nil {
 				return err

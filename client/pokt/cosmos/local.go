@@ -3,10 +3,10 @@ package cosmos
 import (
 	"context"
 
+	cosmosClient "github.com/cosmos/cosmos-sdk/client"
 	txClient "github.com/cosmos/cosmos-sdk/client/tx"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/tx/signing"
+	authClient "github.com/cosmos/cosmos-sdk/x/auth/client"
 	"github.com/pokt-network/smt"
 
 	"poktroll/app"
@@ -20,9 +20,9 @@ var (
 )
 
 type localCosmosPocketClient struct {
-	privateKey *secp256k1.PrivKey
-	//txFactory txClient.Factory
-	//clientCtx cosmosClient.Context
+	keyName   string
+	txFactory txClient.Factory
+	clientCtx cosmosClient.Context
 }
 
 func NewLocalCosmosPocketClient(ctx context.Context) (modules.PocketNetworkClient, error) {
@@ -30,9 +30,9 @@ func NewLocalCosmosPocketClient(ctx context.Context) (modules.PocketNetworkClien
 }
 
 func (client *localCosmosPocketClient) Hydrate(injector *di.Injector, path *[]string) {
-	client.privateKey = di.Hydrate(modules.PrivateKeyInjectionToken, injector, path)
-	//client.txFactory = di.Hydrate(modules.TxFactoryInjectionToken, injector, path)
-	//client.clientCtx = di.Hydrate(modules.ClientCtxInjectionToken, injector, path)
+	client.keyName = di.Hydrate(modules.KeyNameInjectionToken, injector, path)
+	client.txFactory = di.Hydrate(modules.TxFactoryInjectionToken, injector, path)
+	client.clientCtx = di.Hydrate(modules.ClientCtxInjectionToken, injector, path)
 }
 
 func (client *localCosmosPocketClient) CascadeStart() error {
@@ -64,8 +64,7 @@ func (client *localCosmosPocketClient) StakeServicer(
 		types.ServicerPrefix,
 	)
 
-	go client.broadcastMessageTx(ctx, resultCh, msg)
-	return resultCh
+	return client.broadcastMessageTx(ctx, resultCh, msg)
 }
 
 func (client *localCosmosPocketClient) StakeApplication(
@@ -83,8 +82,7 @@ func (client *localCosmosPocketClient) StakeApplication(
 		types.ServicerPrefix,
 	)
 
-	go client.broadcastMessageTx(ctx, resultCh, msg)
-	return resultCh
+	return client.broadcastMessageTx(ctx, resultCh, msg)
 }
 
 func (client *localCosmosPocketClient) UnstakeServicer(
@@ -101,8 +99,7 @@ func (client *localCosmosPocketClient) UnstakeServicer(
 		types.ServicerPrefix,
 	)
 
-	go client.broadcastMessageTx(ctx, resultCh, msg)
-	return resultCh
+	return client.broadcastMessageTx(ctx, resultCh, msg)
 }
 func (client *localCosmosPocketClient) UnstakeApplication(
 	ctx context.Context,
@@ -118,8 +115,7 @@ func (client *localCosmosPocketClient) UnstakeApplication(
 		types.ServicerPrefix,
 	)
 
-	go client.broadcastMessageTx(ctx, resultCh, msg)
-	return resultCh
+	return client.broadcastMessageTx(ctx, resultCh, msg)
 }
 
 func (client *localCosmosPocketClient) NewBlocks() <-chan *types.Block {
@@ -148,36 +144,56 @@ func (client *localCosmosPocketClient) SubmitProof(
 
 func (client *localCosmosPocketClient) broadcastMessageTx(
 	ctx context.Context,
-	resultCh chan<- types.Maybe[*types.TxResult],
+	resultCh chan types.Maybe[*types.TxResult],
 	msg cosmosTypes.Msg,
-) {
-	//client.clientCtx.BroadcastMode
-	//if err := txClient.GenerateOrBroadcastTxWithFactory(
-	//	client.clientCtx,
-	//	client.txFactory,
-	//	msg,
-	//); err != nil {
-	//	resultCh <- types.JustError[*types.TxResult](err)
-	//}
-
+) <-chan types.Maybe[*types.TxResult] {
+	// construct tx
 	// TODO_THIS_COMMIT: use DI to get updated client context!
 	txConfig := app.MakeEncodingConfig().TxConfig
 	txBuilder := txConfig.NewTxBuilder()
 	if err := txBuilder.SetMsgs(msg); err != nil {
 		resultCh <- types.JustError[*types.TxResult](err)
+		return resultCh
 	}
 
-	txBuilder.SetSignatures(signing.SignatureV2{
-		PubKey: client.privateKey.PubKey(),
-		Data: &signing.SingleSignatureData{
-			// TODO: what is this / how does it work?
-			SignMode:  txConfig.SignModeHandler().DefaultMode(),
-			Signature: nil,
-		},
-		Sequence:
-	})
+	// sign tx
+	if err := authClient.SignTx(
+		client.txFactory,
+		client.clientCtx,
+		client.keyName,
+		txBuilder,
+		false,
+		false,
+	); err != nil {
+		resultCh <- types.JustError[*types.TxResult](err)
+		return resultCh
+	}
 
-	txClient.SignWithPrivKey()
+	// serialize tx
+	txBz, err := txConfig.TxEncoder()(txBuilder.GetTx())
+	if err != nil {
+		resultCh <- types.JustError[*types.TxResult](err)
+		return resultCh
+	}
 
-	resultCh <- types.Just(txResultFromTxResponse(bcastTxResp.GetTxResponse()))
+	go client.broadcastTxAsync(ctx, txBz, resultCh)
+
+	return resultCh
+}
+
+// broadcastTxAsync broadcasts a (signed) transaction asynchronously from the
+// caller's perspective.
+func (client *localCosmosPocketClient) broadcastTxAsync(
+	ctx context.Context,
+	txBz []byte,
+	resultCh chan<- types.Maybe[*types.TxResult],
+) {
+	txBcastResponse, err := client.clientCtx.BroadcastTxSync(txBz)
+	if err != nil {
+		resultCh <- types.JustError[*types.TxResult](err)
+		return
+	}
+
+	txResult := txResultFromTxResponse(txBcastResponse)
+	resultCh <- types.Just(txResult)
 }
