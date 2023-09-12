@@ -1,13 +1,24 @@
 package types_test
 
 import (
-	"testing"
-
-	"github.com/stretchr/testify/require"
+	"math/rand"
 	"poktroll/x/application/types"
+	"testing"
+	"time"
+
+	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenesisState_Validate(t *testing.T) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	accs := simtypes.RandomAccounts(r, 2)
+
+	coin1 := sdk.NewCoin("upokt", math.NewInt(1))
+	coin2 := sdk.NewCoin("upokt", math.NewInt(12))
+
 	tests := []struct {
 		desc     string
 		genState *types.GenesisState
@@ -24,10 +35,12 @@ func TestGenesisState_Validate(t *testing.T) {
 
 				ApplicationList: []types.Application{
 					{
-						Index: "0",
+						Address: accs[0].Address.String(),
+						Stake:   &coin1,
 					},
 					{
-						Index: "1",
+						Address: accs[1].Address.String(),
+						Stake:   &coin2,
 					},
 				},
 				// this line is used by starport scaffolding # types/genesis/validField
@@ -39,10 +52,12 @@ func TestGenesisState_Validate(t *testing.T) {
 			genState: &types.GenesisState{
 				ApplicationList: []types.Application{
 					{
-						Index: "0",
+						Address: accs[0].Address.String(),
+						Stake:   &coin1,
 					},
 					{
-						Index: "0",
+						Address: accs[0].Address.String(),
+						Stake:   &coin2,
 					},
 				},
 			},

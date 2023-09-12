@@ -31,21 +31,21 @@ func TestApplicationQuerySingle(t *testing.T) {
 		{
 			desc: "First",
 			request: &types.QueryGetApplicationRequest{
-				Index: msgs[0].Index,
+				Address: msgs[0].Address,
 			},
 			response: &types.QueryGetApplicationResponse{Application: msgs[0]},
 		},
 		{
 			desc: "Second",
 			request: &types.QueryGetApplicationRequest{
-				Index: msgs[1].Index,
+				Address: msgs[1].Address,
 			},
 			response: &types.QueryGetApplicationResponse{Application: msgs[1]},
 		},
 		{
 			desc: "KeyNotFound",
 			request: &types.QueryGetApplicationRequest{
-				Index: strconv.Itoa(100000),
+				Address: strconv.Itoa(100000),
 			},
 			err: status.Error(codes.NotFound, "not found"),
 		},

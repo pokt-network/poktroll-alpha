@@ -4,25 +4,31 @@ import (
 	"strconv"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
 	keepertest "poktroll/testutil/keeper"
 	"poktroll/testutil/nullify"
 	"poktroll/x/application/keeper"
 	"poktroll/x/application/types"
+
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
 )
 
 // Prevent strconv unused error
 var _ = strconv.IntSize
 
 func createNApplication(keeper *keeper.Keeper, ctx sdk.Context, n int) []types.Application {
-	items := make([]types.Application, n)
-	for i := range items {
-		items[i].Index = strconv.Itoa(i)
+	addresses := simtestutil.CreateRandomAccounts(n)
 
-		keeper.SetApplication(ctx, items[i])
+	applications := make([]types.Application, n)
+	for i := range applications {
+		coins := sdk.NewCoin("upokt", sdk.NewInt(int64(i)))
+		applications[i].Address = addresses[i].String()
+		applications[i].Stake = &coins
+
+		keeper.SetApplication(ctx, applications[i])
 	}
-	return items
+	return applications
 }
 
 func TestApplicationGet(t *testing.T) {
@@ -30,7 +36,7 @@ func TestApplicationGet(t *testing.T) {
 	items := createNApplication(keeper, ctx, 10)
 	for _, item := range items {
 		rst, found := keeper.GetApplication(ctx,
-			item.Index,
+			item.Address,
 		)
 		require.True(t, found)
 		require.Equal(t,
@@ -44,10 +50,10 @@ func TestApplicationRemove(t *testing.T) {
 	items := createNApplication(keeper, ctx, 10)
 	for _, item := range items {
 		keeper.RemoveApplication(ctx,
-			item.Index,
+			item.Address,
 		)
 		_, found := keeper.GetApplication(ctx,
-			item.Index,
+			item.Address,
 		)
 		require.False(t, found)
 	}

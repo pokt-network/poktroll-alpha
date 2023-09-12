@@ -2,12 +2,17 @@ package cli_test
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 	"testing"
+	"time"
 
+	"cosmossdk.io/math"
 	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -25,9 +30,16 @@ func networkWithApplicationObjects(t *testing.T, n int) (*network.Network, []typ
 	t.Helper()
 	cfg := network.DefaultConfig()
 	state := types.GenesisState{}
-	for i := 0; i < n; i++ {
+
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	accounts := simtypes.RandomAccounts(r, n)
+
+	for i := int64(0); i < int64(n); i++ {
+		account := accounts[i].Address.String()
+		coin := sdk.NewCoin("upokt", math.NewInt(i))
 		application := types.Application{
-			Index: strconv.Itoa(i),
+			Address: account,
+			Stake:   &coin,
 		}
 		nullify.Fill(&application)
 		state.ApplicationList = append(state.ApplicationList, application)
@@ -55,7 +67,7 @@ func TestShowApplication(t *testing.T) {
 	}{
 		{
 			desc:    "found",
-			idIndex: objs[0].Index,
+			idIndex: objs[0].Address,
 
 			args: common,
 			obj:  objs[0],

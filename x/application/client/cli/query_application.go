@@ -60,7 +60,7 @@ func CmdShowApplication() *cobra.Command {
 			argIndex := args[0]
 
 			params := &types.QueryGetApplicationRequest{
-				Index: argIndex,
+				Address: argIndex,
 			}
 
 			res, err := queryClient.Application(cmd.Context(), params)
