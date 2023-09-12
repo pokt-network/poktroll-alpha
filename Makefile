@@ -1,5 +1,8 @@
 .SILENT:
 
+POKTROLLD_HOME := ./localnet/.poktrolld
+POKTROLLD_NODE := tcp://127.0.0.1:36657
+
 .PHONY: prompt_user
 # Internal helper target - prompt the user before continuing
 prompt_user:
@@ -50,6 +53,11 @@ docker_wipe: docker_check warn_destructive prompt_user ## [WARNING] Remove all t
 	docker images -q | xargs -r -I {} docker rmi {}
 	docker volume ls -q | xargs -r -I {} docker volume rm {}
 
+.PHONY: celestia_light_client_auth_token
+celestia_light_client_auth_token: ## Get the auth token for the celestia light client on arabica testnet
+	AUTH_TOKEN=$$(celestia light auth admin --p2p.network arabica); \
+	echo $$AUTH_TOKEN
+
 # Reference: https://github.com/rollkit/local-celestia-devnet
 .PHONY: celestia_localnet
 celestia_localnet: docker_check  ## Run a celestia localnet
@@ -59,11 +67,6 @@ celestia_localnet: docker_check  ## Run a celestia localnet
 celestia_localnet_stop: docker_check  ## Stop the celestia localnet
 	docker stop celestia
 
-.PHONY: celestia_light_client_start
-celestia_light_client_start: docker_check  ## Start the celestia light client
-	echo "See the following link if there's an error https://docs.celestia.org/nodes/light-node/#install-celestia-node"
-	celestia light start --core.ip consensus-validator-arabica-9.celestia-arabica.com --p2p.network arabica
-
 # Intended to be called like so: `export AUTH_TOKEN=$(make celestia_localnet_auth_token)`
 .PHONY: celestia_localnet_auth_token
 celestia_localnet_auth_token: docker_check  ## Get the auth token for the celestia localnet
@@ -71,16 +74,16 @@ celestia_localnet_auth_token: docker_check  ## Get the auth token for the celest
 	AUTH_TOKEN=$$(docker exec $$CONTAINER_ID celestia bridge --node.store /bridge auth admin); \
 	echo $$AUTH_TOKEN
 
-.PHONY: celestia_light_client_auth_token
-celestia_light_client_auth_token: ## Get the auth token for the celestia light client on arabica testnet
-	AUTH_TOKEN=$$(celestia light auth admin --p2p.network arabica); \
-	echo $$AUTH_TOKEN
-
 .PHONY: celestia_localnet_balance_check
 celestia_localnet_balance_check: docker_check  ## Check the balance of an account in the celestia localnet
 	AUTH_TOKEN=$$(make -s celestia_localnet_auth_token); \
 	CONTAINER_ID=$$(docker ps -qf "name=celestia"); \
 	docker exec $$CONTAINER_ID /bin/sh -c "celestia rpc state Balance --auth $$AUTH_TOKEN"
+
+.PHONY: celestia_light_client_start
+celestia_light_client_start: docker_check  ## Start the celestia light client
+	echo "See the following link if there's an error https://docs.celestia.org/nodes/light-node/#install-celestia-node"
+	celestia light start --core.ip consensus-validator-arabica-9.celestia-arabica.com --p2p.network arabica
 
 .PHONY: celestia_testnet_balance_check
 celestia_testnet_balance_check: ## Check the balance of the light client account on celestia arabica testnet
@@ -107,24 +110,24 @@ poktroll_clear: ## Clear the poktroll state
 
 .PHONY: poktroll_list_keys
 poktroll_list_keys: ## List the poktroll keys
-	poktrolld --home=./localnet/.poktrolld keys list --keyring-backend test
+	poktrolld --home=$(POKTROLLD_HOME) keys list --keyring-backend test
 
 .PHONY: poktroll_send
 poktroll_send: ## Send tokens from one key to another
 	KEY1=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
 	KEY2=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
-	poktrolld --home=./localnet/.poktrolld tx bank send $$KEY1 $$KEY2 42069stake --keyring-backend test --node tcp://127.0.0.1:36657
+	poktrolld --home=$(POKTROLLD_HOME) tx bank send $$KEY1 $$KEY2 42069stake --keyring-backend test --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_balance
 poktroll_balance: ## Check the balances of both keys
 	KEY1=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
 	KEY2=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
-	poktrolld --home=./localnet/.poktrolld query bank balances $$KEY1 --node tcp://127.0.0.1:36657; \
-	poktrolld --home=./localnet/.poktrolld query bank balances $$KEY2 --node tcp://127.0.0.1:36657;
+	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY1 --node $(POKTROLLD_NODE); \
+	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY2 --node $(POKTROLLD_NODE);
 
 .PHONY: poktroll_get_session
 poktroll_get_session: ## Queries the poktroll node for session data
-	poktrolld --home=./localnet/.poktrolld query poktroll get-session --node tcp://127.0.0.1:36657
+	poktrolld --home=$(POKTROLLD_HOME) query poktroll get-session --node $(POKTROLLD_NODE)
 
 # Ref: https://rollkit.dev/tutorials/gm-world-frontend
 .PHONY: poktroll_cosmology_frontend
@@ -134,15 +137,27 @@ poktroll_cosmology_frontend: ## Start the poktroll cosmology frontend
 
 .PHONY: poktroll_servicer_stake
 poktroll_servicer_stake: ## Stake tokens for the servicer specified
-	poktrolld --home=./localnet/.poktrolld tx poktroll stake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
+	poktrolld --home=$(POKTROLLD_HOME) tx poktroll stake 1000stake servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
-.PHONY: poktroll_get_actors
-poktroll_get_actors: ## Retrieves all actors from the poktroll state
-	poktrolld --home=./localnet/.poktrolld q poktroll actors --node tcp://127.0.0.1:36657
+.PHONY: poktroll_servicers_get
+poktroll_servicers_get: ## Retrieves all servicers from the poktroll state
+	poktrolld --home=$(POKTROLLD_HOME) q poktroll servicers --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_servicer_unstake
 poktroll_servicer_unstake: ## Unstake tokens for the servicer specified
-	poktrolld --home=./localnet/.poktrolld tx poktroll unstake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
+	poktrolld --home=$(POKTROLLD_HOME) tx poktroll unstake 1000stake servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+
+.PHONY: poktroll_app_stake
+poktroll_app_stake: ## Stake tokens for the application specified
+	poktrolld --home=$(POKTROLLD_HOME) tx poktroll stake 1000stake application --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+
+.PHONY: poktroll_apps_get
+poktroll_apps_get: ## Retrieves all applications from the poktroll state
+	poktrolld --home=$(POKTROLLD_HOME) q poktroll application --node $(POKTROLLD_NODE)
+
+.PHONY: poktroll_app_unstake
+poktroll_app_unstake: ## Unstake tokens for the application specified
+	poktrolld --home=$(POKTROLLD_HOME) tx poktroll unstake 1000stake application --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests

@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (k Keeper) Actors(goCtx context.Context, req *types.QueryActorsRequest) (*types.QueryActorsResponse, error) {
+func (k Keeper) Servicers(goCtx context.Context, req *types.QueryServicersRequest) (*types.QueryServicersResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
@@ -43,5 +43,5 @@ func (k Keeper) Actors(goCtx context.Context, req *types.QueryActorsRequest) (*t
 	}
 
 	// Return a struct containing a list of recipes and pagination info
-	return &types.QueryActorsResponse{Servicers: servicers, Pagination: pageRes}, nil
+	return &types.QueryServicersResponse{Servicers: servicers, Pagination: pageRes}, nil
 }
