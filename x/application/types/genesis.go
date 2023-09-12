@@ -22,12 +22,12 @@ func (gs GenesisState) Validate() error {
 	// Check for duplicated index in application
 	applicationIndexMap := make(map[string]struct{})
 
-	for _, elem := range gs.ApplicationList {
-		index := string(ApplicationKey(elem.Index))
-		if _, ok := applicationIndexMap[index]; ok {
+	for _, app := range gs.ApplicationList {
+		addr := string(ApplicationKey(app.Address))
+		if _, ok := applicationIndexMap[addr]; ok {
 			return fmt.Errorf("duplicated index for application")
 		}
-		applicationIndexMap[index] = struct{}{}
+		applicationIndexMap[addr] = struct{}{}
 	}
 	// this line is used by starport scaffolding # genesis/types/validate
 

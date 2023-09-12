@@ -3,12 +3,13 @@ package keeper
 import (
 	"context"
 
+	"poktroll/x/application/types"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"poktroll/x/application/types"
 )
 
 func (k Keeper) ApplicationAll(goCtx context.Context, req *types.QueryAllApplicationRequest) (*types.QueryAllApplicationResponse, error) {
@@ -47,7 +48,7 @@ func (k Keeper) Application(goCtx context.Context, req *types.QueryGetApplicatio
 
 	val, found := k.GetApplication(
 		ctx,
-		req.Index,
+		req.Address,
 	)
 	if !found {
 		return nil, status.Error(codes.NotFound, "not found")

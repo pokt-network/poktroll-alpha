@@ -1,9 +1,10 @@
 package keeper
 
 import (
+	"poktroll/x/application/types"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"poktroll/x/application/types"
 )
 
 // SetApplication set a specific application in the store from its index
@@ -11,7 +12,7 @@ func (k Keeper) SetApplication(ctx sdk.Context, application types.Application) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ApplicationKeyPrefix))
 	b := k.cdc.MustMarshal(&application)
 	store.Set(types.ApplicationKey(
-		application.Index,
+		application.Address,
 	), b)
 }
 
