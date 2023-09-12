@@ -147,16 +147,16 @@ poktroll_get_servicers: ## Retrieves all servicers from the poktroll state
 poktroll_servicer_unstake: ## Unstake tokens for the servicer specified
 	poktrolld --home=$(POKTROLLD_HOME) tx poktroll unstake 1000stake servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
-.PHONY: poktroll_appln_stake
-poktroll_appln_stake: ## Stake tokens for the servicer specified
+.PHONY: poktroll_app_stake
+poktroll_app_stake: ## Stake tokens for the servicer specified
 	poktrolld --home=./localnet/.poktrolld tx poktroll stake 1000stake application --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
 
-.PHONY: poktroll_get_applns
-poktroll_get_applns: ## Retrieves all servicers from the poktroll state
+.PHONY: poktroll_get_apps
+poktroll_get_apps: ## Retrieves all servicers from the poktroll state
 	poktrolld --home=./localnet/.poktrolld q poktroll application --node tcp://127.0.0.1:36657
 
-.PHONY: poktroll_appln_unstake
-poktroll_appln_unstake: ## Unstake tokens for the servicer specified
+.PHONY: poktroll_app_unstake
+poktroll_app_unstake: ## Unstake tokens for the servicer specified
 	poktrolld --home=./localnet/.poktrolld tx poktroll unstake 1000stake application --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
 
 .PHONY: test_unit_all
