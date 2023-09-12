@@ -1,14 +1,10 @@
 package cmd
 
 import (
-	"context"
 	"errors"
 	"io"
 	"os"
 	"path/filepath"
-	"poktroll/client/pokt/cosmos"
-	"poktroll/modules"
-	"poktroll/runtime/di"
 	"strings"
 
 	dbm "github.com/cometbft/cometbft-db"
@@ -23,7 +19,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
-	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
@@ -48,11 +43,6 @@ import (
 	appparams "poktroll/app/params"
 	"poktroll/servicer"
 )
-
-// TODO: Move
-var PoktrollDepInjectorContextKey = "poktroll_di_injector"
-
-var ClientCtxInjectionToken = di.NewInjectionToken[client.Context]("clientCtx")
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
 func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
@@ -84,41 +74,12 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 				return err
 			}
 
-			injector := di.NewInjector()
-			ctx := context.WithValue(cmd.Context(), PoktrollDepInjectorContextKey, injector)
-			cmd.SetContext(ctx)
-
-			factory, err := tx.NewFactoryCLI(initClientCtx, cmd.Flags())
-			if err != nil {
-				return err
-			}
-
-			// NB: while we don't need to inject the key itself (just the name),
-			// we should ensure that a key with the given name exists, otherwise
-			// return the error.
-			// QUESTION: does `initClientCtx.GetFromName()` get a default value?
-			key, err := factory.Keybase().Key(initClientCtx.GetFromName())
-			if err != nil {
-				return err
-			}
-
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
 
 			customAppTemplate, customAppConfig := initAppConfig()
 			customTMConfig := initTendermintConfig()
-
-			di.Provide(modules.ClientCtxInjectionToken, initClientCtx, injector)
-			di.Provide(modules.TxFactoryInjectionToken, factory, injector)
-			di.Provide(modules.PocketNetworkClientToken, cosmos.NewLocalCosmosPocketClient(), injector)
-			di.Provide(modules.KeyNameInjectionToken, key.Name, injector)
-			di.Provide(modules.ServicerToken, servicer.NewServicerModule(), injector)
-
-			srvcr := di.HydrateMain(modules.ServicerToken, injector)
-			if err := srvcr.Start(); err != nil {
-				return err
-			}
 
 			return server.InterceptConfigsPreRunHandler(
 				cmd, customAppTemplate, customAppConfig, customTMConfig,
