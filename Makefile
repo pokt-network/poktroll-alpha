@@ -1,5 +1,8 @@
 .SILENT:
 
+POKTROLLD_HOME := ./localnet/.poktrolld
+POKTROLLD_NODE := tcp://127.0.0.1:36657
+
 .PHONY: prompt_user
 # Internal helper target - prompt the user before continuing
 prompt_user:
@@ -107,24 +110,24 @@ poktroll_clear: ## Clear the poktroll state
 
 .PHONY: poktroll_list_keys
 poktroll_list_keys: ## List the poktroll keys
-	poktrolld --home=./localnet/.poktrolld keys list --keyring-backend test
+	poktrolld --home=$(POKTROLLD_HOME) keys list --keyring-backend test
 
 .PHONY: poktroll_send
 poktroll_send: ## Send tokens from one key to another
 	KEY1=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
 	KEY2=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
-	poktrolld --home=./localnet/.poktrolld tx bank send $$KEY1 $$KEY2 42069stake --keyring-backend test --node tcp://127.0.0.1:36657
+	poktrolld --home=$(POKTROLLD_HOME) tx bank send $$KEY1 $$KEY2 42069stake --keyring-backend test --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_balance
 poktroll_balance: ## Check the balances of both keys
 	KEY1=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
 	KEY2=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
-	poktrolld --home=./localnet/.poktrolld query bank balances $$KEY1 --node tcp://127.0.0.1:36657; \
-	poktrolld --home=./localnet/.poktrolld query bank balances $$KEY2 --node tcp://127.0.0.1:36657;
+	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY1 --node $(POKTROLLD_NODE); \
+	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY2 --node $(POKTROLLD_NODE);
 
 .PHONY: poktroll_get_session
 poktroll_get_session: ## Queries the poktroll node for session data
-	poktrolld --home=./localnet/.poktrolld query poktroll get-session --node tcp://127.0.0.1:36657
+	poktrolld --home=$(POKTROLLD_HOME) query poktroll get-session --node $(POKTROLLD_NODE)
 
 # Ref: https://rollkit.dev/tutorials/gm-world-frontend
 .PHONY: poktroll_cosmology_frontend
@@ -134,15 +137,15 @@ poktroll_cosmology_frontend: ## Start the poktroll cosmology frontend
 
 .PHONY: poktroll_servicer_stake
 poktroll_servicer_stake: ## Stake tokens for the servicer specified
-	poktrolld --home=./localnet/.poktrolld tx poktroll stake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
+	poktrolld --home=$(POKTROLLD_HOME) tx poktroll stake 1000stake servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_get_actors
 poktroll_get_actors: ## Retrieves all actors from the poktroll state
-	poktrolld --home=./localnet/.poktrolld q poktroll actors --node tcp://127.0.0.1:36657
+	poktrolld --home=$(POKTROLLD_HOME) q poktroll actors --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_servicer_unstake
 poktroll_servicer_unstake: ## Unstake tokens for the servicer specified
-	poktrolld --home=./localnet/.poktrolld tx poktroll unstake 1000stake servicer --keyring-backend test --from poktroll-key --node tcp://127.0.0.1:36657
+	poktrolld --home=$(POKTROLLD_HOME) tx poktroll unstake 1000stake servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests
