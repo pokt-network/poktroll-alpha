@@ -46451,8 +46451,23 @@ paths:
                 items:
                   type: object
                   properties:
-                    index:
+                    address:
                       type: string
+                    stake:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
               pagination:
                 type: object
                 properties:
@@ -46558,7 +46573,7 @@ paths:
           type: boolean
       tags:
         - Query
-  /poktroll/application/application/{index}:
+  /poktroll/application/application/{address}:
     get:
       summary: Queries a list of Application items.
       operationId: PoktrollApplicationApplication
@@ -46571,8 +46586,23 @@ paths:
               application:
                 type: object
                 properties:
-                  index:
+                  address:
                     type: string
+                  stake:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
         default:
           description: An unexpected error response.
           schema:
@@ -46592,7 +46622,7 @@ paths:
                       type: string
                   additionalProperties: {}
       parameters:
-        - name: index
+        - name: address
           in: path
           required: true
           type: string
@@ -75778,8 +75808,22 @@ definitions:
   poktroll.application.Application:
     type: object
     properties:
-      index:
+      address:
         type: string
+      stake:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+  poktroll.application.MsgStakeApplicationResponse:
+    type: object
   poktroll.application.Params:
     type: object
     description: Params defines the parameters for the module.
@@ -75791,8 +75835,23 @@ definitions:
         items:
           type: object
           properties:
-            index:
+            address:
               type: string
+            stake:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
       pagination:
         type: object
         properties:
@@ -75825,8 +75884,23 @@ definitions:
       application:
         type: object
         properties:
-          index:
+          address:
             type: string
+          stake:
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+            description: >-
+              Coin defines a token with a denomination and an amount.
+
+
+              NOTE: The amount field is an Int which implements the custom
+              method
+
+              signatures required by gogoproto.
   poktroll.application.QueryParamsResponse:
     type: object
     properties:
