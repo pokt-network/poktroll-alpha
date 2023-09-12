@@ -13,7 +13,7 @@ import (
 
 func (k msgServer) Unstake(goCtx context.Context, msg *types.MsgUnstake) (*types.MsgUnstakeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	logger := ctx.Logger()
+	logger := ctx.Logger().With("message", "Unstake")
 	if err := k.UnstakeActor(ctx, msg); err != nil {
 		logger.Error("Error unstaking", err.Error())
 		return &types.MsgUnstakeResponse{Success: false}, err

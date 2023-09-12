@@ -13,7 +13,7 @@ import (
 
 func (k msgServer) Stake(goCtx context.Context, msg *types.MsgStake) (*types.MsgStakeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	logger := ctx.Logger()
+	logger := ctx.Logger().With("message", "Stake")
 	if err := k.StakeActor(ctx, msg); err != nil {
 		logger.Error("Error staking", err.Error())
 		return &types.MsgStakeResponse{Success: false}, err

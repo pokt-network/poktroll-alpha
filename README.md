@@ -120,7 +120,7 @@ Stake/unstake and query servicers with:
 
 ```bash
     make poktroll_servicer_stake
-    make poktroll_get_servicers
+    make poktroll_servicers_get
     make poktroll_servicer_unstake
 ```
 
@@ -128,7 +128,7 @@ Stake/unstake and query applications with:
 
 ```bash
     make poktroll_app_stake
-    make poktroll_get_apps
+    make poktroll_apps_get
     make poktroll_app_unstake
 ```
 
