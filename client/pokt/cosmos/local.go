@@ -147,6 +147,8 @@ func (client *localCosmosPocketClient) broadcastMessageTx(
 	msg cosmosTypes.Msg,
 ) <-chan types.Maybe[*types.TxResult] {
 	// construct tx
+	// CONSIDERATION: we can dependency inject the encoding config from
+	// `initRootCmd` instead.
 	txConfig := app.MakeEncodingConfig().TxConfig
 	txBuilder := txConfig.NewTxBuilder()
 	if err := txBuilder.SetMsgs(msg); err != nil {
