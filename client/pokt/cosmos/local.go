@@ -74,7 +74,6 @@ func (client *localCosmosPocketClient) StakeApplication(
 ) <-chan types.Maybe[*types.TxResult] {
 	resultCh := make(chan types.Maybe[*types.TxResult], 1)
 
-	// TODO_THIS_COMMIT: provide encoding config via DI (?)
 	msg := types.NewMsgStake(
 		application.StakeInfo.GetAddress(),
 		amount,
@@ -148,7 +147,6 @@ func (client *localCosmosPocketClient) broadcastMessageTx(
 	msg cosmosTypes.Msg,
 ) <-chan types.Maybe[*types.TxResult] {
 	// construct tx
-	// TODO_THIS_COMMIT: use DI to get updated client context!
 	txConfig := app.MakeEncodingConfig().TxConfig
 	txBuilder := txConfig.NewTxBuilder()
 	if err := txBuilder.SetMsgs(msg); err != nil {
