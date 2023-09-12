@@ -28,10 +28,12 @@ func GetServicerCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        "servicer",
 		Short:                      fmt.Sprintf("Servicer commands for the %s module", types.ModuleName),
-		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
 		RunE:                       servicerCmd,
 	}
+
+	cmd.PersistentFlags().String(flags.FlagFrom, "", "Name or address of private key with which to sign")
+	flags.AddKeyringFlags(cmd.PersistentFlags())
 
 	return cmd
 }
@@ -48,12 +50,18 @@ func servicerCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// TECHDEBT: we probably "should" be updating the client context instead of
+	// reaching for the commands flag directly.
+	fromFlagStr, err := cmd.Flags().GetString(flags.FlagFrom)
+	if err != nil {
+		// TECHDEBT: return more useful errors.
+		return err
+	}
+
 	// NB: while we don't need to inject the key itself (just the name),
 	// we should ensure that a key with the given name exists, otherwise
 	// return the error.
-	// QUESTION: does `clientCtx.GetFromName()` get a default value?
-	fmt.Printf("key: %s\n", clientCtx.GetFromName())
-	key, err := factory.Keybase().Key(clientCtx.GetFromName())
+	_, err = factory.Keybase().Key(fromFlagStr)
 	if err != nil {
 		// TECHDEBT: return more useful errors.
 		return err
