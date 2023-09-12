@@ -32,7 +32,7 @@ var logFormatToEnum = map[string]configs.LogFormat{
 	"pretty": configs.LogFormat_LOG_FORMAT_PRETTY,
 }
 
-func NewGlobalLogger(cfg *configs.LoggerConfig) *loggerModule {
+func NewGlobalLogger(cfg *configs.LoggerConfig) modules.LoggerModule {
 	return &loggerModule{
 		Logger: zerolog.New(os.Stdout).With().Timestamp().Logger(),
 		config: cfg,

@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-
+	"poktroll/logger"
 	"poktroll/modules"
 	"poktroll/runtime/di"
 	"poktroll/utils"
@@ -21,7 +21,9 @@ import (
 // if passes validation. The request and response are then
 // stored by height.
 type relayer struct {
-	logger *modules.Logger
+	// TECHDEBT: update after switching to logger module (i.e. once
+	// servicer is external to poktrolld)
+	logger *logger.Logger
 	// input receives relays
 	input chan *types.Relay
 	// channel signaling a output has been completed.
@@ -43,7 +45,7 @@ func NewRelayerModule() modules.RelayerModule {
 }
 
 func (r *relayer) Hydrate(injector *di.Injector, path *[]string) {
-	globalLogger := di.Hydrate(modules.LoggerModuleToken, injector, path)
+	globalLogger := di.Hydrate(logger.CosmosLoggerToken, injector, path)
 	r.logger = globalLogger.CreateLoggerForModule(modules.RelayerToken.Id())
 
 }
@@ -81,7 +83,10 @@ func (r *relayer) start(ctx context.Context) {
 		// store the relay
 		go func(relay *types.Relay) {
 			if err := r.store(relay); err != nil {
-				r.logger.Err(err).Msg("failed to store relay")
+				// TECHDEBT: update after switching to logger module (i.e. once
+				// servicer is external to poktrolld)
+				// r.logger.Err(err).Msg("failed to store relay")
+				r.logger.Error("failed to store relay: %s", err)
 			}
 		}(relay)
 	}
