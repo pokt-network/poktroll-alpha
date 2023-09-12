@@ -11,34 +11,37 @@ import (
 func (k Keeper) StakeActor(ctx sdk.Context, msg *types.MsgStake) error {
 	logger := ctx.Logger().With("function", "StakeActor")
 
+	// Do some basic parsing and validation on the message
+	coinsToStake, err := parseCoins(msg.Amount)
+	if err != nil {
+		logger.Error("Error parsing coins", err.Error())
+		return err
+	}
+	actorAddress := sdk.ValAddress(msg.GetCreator())
+
 	// TODO: Add other actor types by creating a map for actorType->prefix
-	var storePrefix string
 	switch msg.GetActorType() {
 	case types.ServicerPrefix:
-		storePrefix = types.ServicerPrefix
+		return k.stakeServicer(ctx, actorAddress, coinsToStake)
+	case types.ApplicationPrefix:
+		return k.stakeApplication(ctx, actorAddress, coinsToStake)
 	default:
 		return fmt.Errorf("invalid actor type")
 	}
 
-	// Convert msg.Amount string to a Coin value
-	coinsToStake, err := parseCoins(msg.Amount)
-	if err != nil {
-		return err
-	}
+	// TODO: sends coins to the staking module's pool!
 
-	// Convert the valAddr to bytes as it will be the key to store validator info
-	addr := sdk.ValAddress(msg.GetCreator())
-	byteKey := addr.Bytes()
-	logger = logger.With("actor", addr.String())
+}
 
-	// Update store with new staking amount
+func (k Keeper) stakeServicer(ctx sdk.Context, servicerAddress sdk.ValAddress, coinsToStake sdk.Coin) error {
+	logger := ctx.Logger().With("servicer", servicerAddress.String())
+
 	store := ctx.KVStore(k.storeKey)
-	actorStore := prefix.NewStore(store, []byte(storePrefix))
+	servicerStore := prefix.NewStore(store, []byte(types.ServicerPrefix))
 
-	// Get existing validator data from store
-	bz := actorStore.Get(byteKey)
+	byteKey := servicerAddress.Bytes()
+	bz := servicerStore.Get(byteKey)
 
-	// Support only servicer staking for now.
 	var servicer types.Servicer
 	if bz != nil {
 		k.cdc.Unmarshal(bz, &servicer)
@@ -53,22 +56,61 @@ func (k Keeper) StakeActor(ctx sdk.Context, msg *types.MsgStake) error {
 		// Create a new Servicer object if not found
 		servicer = types.Servicer{
 			StakeInfo: &types.StakeInfo{
-				Address:     addr.String(),
+				Address:     servicerAddress.String(),
 				CoinsStaked: coinsToStake.String(),
 			},
 		}
+		logger.Info(fmt.Sprintf("Registered new servicer %s", servicerAddress.String()))
 	}
 
 	// Serialize the Servicer object back to bytes
-	bz, err = k.cdc.Marshal(&servicer)
+	bz, err := k.cdc.Marshal(&servicer)
 	if err != nil {
 		return err
 	}
 
-	// Save the updated Actor object back to the store
-	actorStore.Set(byteKey, bz)
+	// Save the Servicer object bytes to the store
+	servicerStore.Set(byteKey, bz)
+	return nil
+}
 
-	// TODO: sends coins to the staking module's pool!
+func (k Keeper) stakeApplication(ctx sdk.Context, applicationAddress sdk.ValAddress, coinsToStake sdk.Coin) error {
+	logger := ctx.Logger().With("application", applicationAddress.String())
 
+	store := ctx.KVStore(k.storeKey)
+	applicationStore := prefix.NewStore(store, []byte(types.ApplicationPrefix))
+
+	byteKey := applicationAddress.Bytes()
+	bz := applicationStore.Get(byteKey)
+
+	var application types.Application
+	if bz != nil {
+		k.cdc.Unmarshal(bz, &application)
+		coinsStaked, err := parseCoins(application.GetStakeInfo().GetCoinsStaked())
+		if err != nil {
+			return err
+		}
+		// Update staking amount
+		coinsStaked = coinsStaked.Add(coinsToStake)
+		application.GetStakeInfo().CoinsStaked = coinsStaked.String()
+	} else {
+		// Create a new Servicer object if not found
+		application = types.Application{
+			StakeInfo: &types.StakeInfo{
+				Address:     applicationAddress.String(),
+				CoinsStaked: coinsToStake.String(),
+			},
+		}
+		logger.Info(fmt.Sprintf("Registered new application %s", applicationAddress.String()))
+	}
+
+	// Serialize the Servicer object back to bytes
+	bz, err := k.cdc.Marshal(&application)
+	if err != nil {
+		return err
+	}
+
+	// Save the Servicer object bytes to the store
+	applicationStore.Set(byteKey, bz)
 	return nil
 }
