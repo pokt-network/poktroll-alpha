@@ -6,6 +6,7 @@ import (
 
 	"github.com/pokt-network/smt"
 
+	"poktroll/logger"
 	"poktroll/modules"
 	"poktroll/runtime/di"
 	"poktroll/utils"
@@ -16,9 +17,11 @@ var SMTHasherToken = di.NewInjectionToken[hash.Hash]("SMTHasher")
 var SMTStoreToken = di.NewInjectionToken[smt.KVStore]("SMTStore")
 
 type miner struct {
-	smst     smt.SMST
-	client   modules.PocketNetworkClient
-	logger   modules.Logger
+	smst   smt.SMST
+	client modules.PocketNetworkClient
+	// TECHDEBT: update after switching to logger module (i.e. once
+	// servicer is external to poktrolld)
+	logger   logger.CosmosLogger
 	relays   utils.Observable[*types.Relay]
 	sessions utils.Observable[*types.Session]
 }
@@ -63,7 +66,7 @@ func (m *miner) handleSessionEnd() {
 func (m *miner) handleRelays() {
 	ch := m.relays.Subscribe().Ch()
 	for relay := range ch {
-		m.logger.Debug().Msgf("TODO handle relay 🔂 %+v", relay)
+		m.logger.Info("TODO handle relay 🔂 %+v", relay)
 
 		// TODO get the serialized byte representation of the relay
 		// serializedRelay := relay.Serialize()
@@ -85,7 +88,7 @@ func (m *miner) Hydrate(injector *di.Injector, path *[]string) {
 	store := di.Hydrate(SMTStoreToken, injector, path)
 	m.smst = *smt.NewSparseMerkleSumTree(store, hasher)
 
-	m.logger = *di.Hydrate(modules.LoggerModuleToken, injector, path).
+	m.logger = *di.Hydrate(logger.CosmosLoggerToken, injector, path).
 		CreateLoggerForModule(modules.MinerModuleToken.Id())
 
 	m.client = di.Hydrate(modules.PocketNetworkClientToken, injector, path)

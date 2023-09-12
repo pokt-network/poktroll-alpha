@@ -1,6 +1,7 @@
 package servicer
 
 import (
+	"poktroll/logger"
 	"poktroll/modules"
 	"poktroll/runtime/di"
 )
@@ -10,7 +11,7 @@ type servicer struct {
 	relayer             modules.RelayerModule
 	sessionManager      modules.SessionManager
 	miner               modules.MinerModule
-	logger              *modules.Logger
+	logger              logger.CosmosLogger
 }
 
 func NewServicerModule() modules.ServicerModule {
@@ -22,8 +23,8 @@ func (r *servicer) Hydrate(injector *di.Injector, path *[]string) {
 	r.relayer = di.Hydrate(modules.RelayerToken, injector, path)
 	r.miner = di.Hydrate(modules.MinerModuleToken, injector, path)
 	r.sessionManager = di.Hydrate(modules.SessionManagerToken, injector, path)
-	globalLogger := di.Hydrate(modules.LoggerModuleToken, injector, path)
-	r.logger = globalLogger.CreateLoggerForModule(modules.ServicerToken.Id())
+	globalLogger := di.Hydrate(logger.CosmosLoggerToken, injector, path)
+	r.logger = *globalLogger.CreateLoggerForModule(modules.ServicerToken.Id())
 }
 
 func (r *servicer) CascadeStart() error {

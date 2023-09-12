@@ -23,7 +23,7 @@ import (
 type relayer struct {
 	// TECHDEBT: update after switching to logger module (i.e. once
 	// servicer is external to poktrolld)
-	logger *logger.Logger
+	logger *logger.CosmosLogger
 	// input receives relays
 	input chan *types.Relay
 	// channel signaling a output has been completed.

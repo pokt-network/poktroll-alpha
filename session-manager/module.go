@@ -1,6 +1,7 @@
 package sessionmanager
 
 import (
+	"poktroll/logger"
 	"poktroll/modules"
 	"poktroll/runtime/di"
 	"poktroll/servicer/config"
@@ -15,7 +16,9 @@ type sessionManager struct {
 	sessionTicker       utils.Observable[*types.Session]
 	latestSecret        []byte
 	started             bool
-	logger              modules.Logger
+	// TECHDEBT: update after switching to logger module (i.e. once
+	// servicer is external to poktrolld)
+	logger logger.CosmosLogger
 }
 
 func NewSessionManager() modules.SessionManager {
@@ -26,7 +29,7 @@ func (s *sessionManager) Hydrate(injector *di.Injector, path *[]string) {
 	s.pocketNetworkClient = di.Hydrate(modules.PocketNetworkClientToken, injector, path)
 	servicerCfg := di.Hydrate(config.ServicerConfigToken, injector, path)
 	s.blocksPerSession = servicerCfg.BlocksPerSession
-	s.logger = *di.Hydrate(modules.LoggerModuleToken, injector, path).
+	s.logger = *di.Hydrate(logger.CosmosLoggerToken, injector, path).
 		CreateLoggerForModule(modules.ServicerToken.Id())
 }
 

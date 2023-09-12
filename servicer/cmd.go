@@ -39,7 +39,13 @@ func GetServicerCmd() *cobra.Command {
 }
 
 func servicerCmd(cmd *cobra.Command, args []string) error {
-	injector := di.NewInjector()
+	injectorCtxValue := cmd.Context().Value(config.PoktrollDepInjectorContextKey)
+	injector, ok := injectorCtxValue.(*di.Injector)
+	if !ok {
+		// TECHDEBT: return more useful errors.
+		return fmt.Errorf("Invalid injcetor type %T", injectorCtxValue)
+	}
+
 	ctx := context.WithValue(cmd.Context(), config.PoktrollDepInjectorContextKey, injector)
 	cmd.SetContext(ctx)
 

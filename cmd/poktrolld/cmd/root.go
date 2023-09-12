@@ -58,7 +58,6 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithHomeDir(app.DefaultNodeHome).
-		WithKeyringDir("localnet/.poktrolld/keyring-test").
 		WithViper("")
 
 	rootCmd := &cobra.Command{
