@@ -75824,6 +75824,8 @@ definitions:
           signatures required by gogoproto.
   poktroll.application.MsgStakeApplicationResponse:
     type: object
+  poktroll.application.MsgUnstakeApplicationResponse:
+    type: object
   poktroll.application.Params:
     type: object
     description: Params defines the parameters for the module.
