@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package configs;
+package runtime.configs;
 
 option go_package = "poktroll/runtime/configs";
 
