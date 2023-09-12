@@ -1,4 +1,4 @@
-package prooflifecycle
+package miner
 
 import (
 	"context"
@@ -23,7 +23,7 @@ type miner struct {
 	sessions utils.Observable[*types.Session]
 }
 
-func CreateMiner() modules.MinerModule {
+func NewMinerModule() modules.MinerModule {
 	return &miner{}
 }
 
