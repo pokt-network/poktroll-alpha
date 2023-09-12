@@ -3,6 +3,7 @@ package sessionmanager
 import (
 	"poktroll/modules"
 	"poktroll/runtime/di"
+	"poktroll/servicer/config"
 	"poktroll/utils"
 	"poktroll/x/poktroll/types"
 )
@@ -23,7 +24,8 @@ func NewSessionManager() modules.SessionManager {
 
 func (s *sessionManager) Hydrate(injector *di.Injector, path *[]string) {
 	s.pocketNetworkClient = di.Hydrate(modules.PocketNetworkClientToken, injector, path)
-	s.blocksPerSession = di.Hydrate(modules.RuntimeManagerToken, injector, path).GetConfig().BlocksPerSession
+	servicerCfg := di.Hydrate(config.ServicerConfigToken, injector, path)
+	s.blocksPerSession = servicerCfg.BlocksPerSession
 	s.logger = *di.Hydrate(modules.LoggerModuleToken, injector, path).
 		CreateLoggerForModule(modules.ServicerToken.Id())
 }

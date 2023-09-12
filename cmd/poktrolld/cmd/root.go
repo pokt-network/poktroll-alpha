@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"io"
 	"os"
@@ -41,7 +42,9 @@ import (
 
 	"poktroll/app"
 	appparams "poktroll/app/params"
+	"poktroll/runtime/di"
 	"poktroll/servicer"
+	"poktroll/servicer/config"
 )
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
@@ -78,7 +81,14 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 				return err
 			}
 
-			customAppTemplate, customAppConfig := initAppConfig()
+			// NB: injector can always be retrieved from the cmd or its context:
+			// injector, ok := cmd.Context().Value(config.PoktrollDepInjectorContextKey).(*di.Injector)
+			// TECHDEBT: factor out to helper function(s)
+			injector := di.NewInjector()
+			ctx := context.WithValue(cmd.Context(), config.PoktrollDepInjectorContextKey, injector)
+			cmd.SetContext(ctx)
+
+			customAppTemplate, customAppConfig := initAppConfig(injector)
 			customTMConfig := initTendermintConfig()
 
 			return server.InterceptConfigsPreRunHandler(
@@ -347,9 +357,9 @@ func (a appCreator) appExport(
 func initAppConfig() (string, interface{}) {
 	// The following code snippet is just for reference.
 
-	// TODO_THIS_COMMIT(@red0ne): add servicer config field/values here
-	type CustomAppConfig struct {
-		serverconfig.Config
+	type AppConfig struct {
+		cosmosServerCfg.Config
+		Servicer config.ServicerConfig
 	}
 
 	// Optionally allow the chain developer to overwrite the SDK's default
@@ -369,10 +379,17 @@ func initAppConfig() (string, interface{}) {
 	// In simapp, we set the min gas prices to 0.
 	srvCfg.MinGasPrices = "0stake"
 
-	customAppConfig := CustomAppConfig{
-		Config: *srvCfg,
+	customAppConfig := AppConfig{
+		Config:   *srvCfg,
+		Servicer: config.DefaultConfig(),
 	}
-	customAppTemplate := serverconfig.DefaultConfigTemplate
+
+	// Provide Servicer config via dependency injector
+	di.Provide(config.ServicerConfigToken, customAppConfig.Servicer, injector)
+
+	// TODO_THIS_COMMIT: update template to interpolate fields off of the
+	// runtime config.
+	customAppTemplate := cosmosServerCfg.DefaultConfigTemplate
 
 	return customAppTemplate, customAppConfig
 }

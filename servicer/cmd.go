@@ -14,8 +14,6 @@ import (
 	"poktroll/x/poktroll/types"
 )
 
-var PoktrollDepInjectorContextKey = "poktroll_di_injector"
-
 func GetServicerCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        types.ModuleName,
@@ -30,7 +28,7 @@ func GetServicerCmd() *cobra.Command {
 
 func servicerCmd(cmd *cobra.Command, args []string) error {
 	injector := di.NewInjector()
-	ctx := context.WithValue(cmd.Context(), PoktrollDepInjectorContextKey, injector)
+	ctx := context.WithValue(cmd.Context(), config.PoktrollDepInjectorContextKey, injector)
 	cmd.SetContext(ctx)
 
 	clientCtx := client.GetClientContextFromCmd(cmd)
