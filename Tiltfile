@@ -50,7 +50,7 @@ WORKDIR /
 """,
     only=["./bin/poktrolld"],
     entrypoint=[
-        "/bin/sh", "/etc/config/poktroll.sh"
+        "/bin/sh", "/scripts/poktroll.sh"
     ],
     live_update=[sync("bin/poktrolld", "/usr/local/bin/poktrolld")],
 )

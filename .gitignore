@@ -1,3 +1,4 @@
+# Don't commit binaries
 bin
 !bin/.keep
 
@@ -6,3 +7,6 @@ bin
 localnet/.poktrolld/*
 !localnet/.poktrolld/keyring-test/
 !localnet/.poktrolld/keyring-test/*
+
+# Macos
+.DS_Store
