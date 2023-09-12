@@ -15,18 +15,18 @@ import (
 	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/config"
+	cosmosClientCfg "github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/debug"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
-	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
-	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	cosmosServerCfg "github.com/cosmos/cosmos-sdk/server/config"
+	cosmosServerTypes "github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/snapshots"
 	snapshottypes "github.com/cosmos/cosmos-sdk/snapshots/types"
 	"github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -72,7 +72,7 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 			if err != nil {
 				return err
 			}
-			initClientCtx, err = config.ReadFromClientConfig(initClientCtx)
+			initClientCtx, err = cosmosClientCfg.ReadFromClientConfig(initClientCtx)
 			if err != nil {
 				return err
 			}
@@ -135,7 +135,7 @@ func initRootCmd(
 		AddGenesisAccountCmd(app.DefaultNodeHome),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
-		config.Cmd(),
+		cosmosClientCfg.Cmd(),
 		// this line is used by starport scaffolding # root/commands
 	)
 
@@ -245,9 +245,9 @@ func (a appCreator) newApp(
 	logger log.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
-	appOpts servertypes.AppOptions,
-) servertypes.Application {
-	var cache sdk.MultiStorePersistentCache
+	appOpts cosmosServerTypes.AppOptions,
+) cosmosServerTypes.Application {
+	var cache cosmosTypes.MultiStorePersistentCache
 
 	if cast.ToBool(appOpts.Get(server.FlagInterBlockCache)) {
 		cache = store.NewCommitKVStoreCacheManager()
@@ -323,12 +323,12 @@ func (a appCreator) appExport(
 	height int64,
 	forZeroHeight bool,
 	jailAllowedAddrs []string,
-	appOpts servertypes.AppOptions,
+	appOpts cosmosServerTypes.AppOptions,
 	modulesToExport []string,
-) (servertypes.ExportedApp, error) {
+) (cosmosServerTypes.ExportedApp, error) {
 	homePath, ok := appOpts.Get(flags.FlagHome).(string)
 	if !ok || homePath == "" {
-		return servertypes.ExportedApp{}, errors.New("application home not set")
+		return cosmosServerTypes.ExportedApp{}, errors.New("application home not set")
 	}
 
 	app := app.New(
@@ -345,7 +345,7 @@ func (a appCreator) appExport(
 
 	if height != -1 {
 		if err := app.LoadHeight(height); err != nil {
-			return servertypes.ExportedApp{}, err
+			return cosmosServerTypes.ExportedApp{}, err
 		}
 	}
 
@@ -354,7 +354,7 @@ func (a appCreator) appExport(
 
 // initAppConfig helps to override default appConfig template and configs.
 // return "", nil if no custom configuration is required for the application.
-func initAppConfig() (string, interface{}) {
+func initAppConfig(injector *di.Injector) (string, interface{}) {
 	// The following code snippet is just for reference.
 
 	type AppConfig struct {
@@ -364,7 +364,7 @@ func initAppConfig() (string, interface{}) {
 
 	// Optionally allow the chain developer to overwrite the SDK's default
 	// server config.
-	srvCfg := serverconfig.DefaultConfig()
+	srvCfg := cosmosServerCfg.DefaultConfig()
 	// The SDK's default minimum gas price is set to "" (empty value) inside
 	// app.toml. If left empty by validators, the node will halt on startup.
 	// However, the chain developer can set a default app.toml value for their
