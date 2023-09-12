@@ -11,11 +11,11 @@ const (
 
 // ApplicationKey returns the store key to retrieve a Application from the index fields
 func ApplicationKey(
-	index string,
+	address string,
 ) []byte {
 	var key []byte
 
-	indexBytes := []byte(index)
+	indexBytes := []byte(address)
 	key = append(key, indexBytes...)
 	key = append(key, []byte("/")...)
 

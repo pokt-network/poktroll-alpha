@@ -23,8 +23,6 @@ func (k Keeper) UnstakeActor(ctx sdk.Context, msg *types.MsgUnstake) error {
 	switch msg.GetActorType() {
 	case types.ServicerPrefix:
 		return k.unstakeServicer(ctx, actorAddress, coinsToUnstake)
-	case types.ApplicationPrefix:
-		return k.unstakeApplication(ctx, actorAddress, coinsToUnstake)
 	default:
 		return fmt.Errorf("invalid actor type")
 	}
@@ -66,46 +64,6 @@ func (k Keeper) unstakeServicer(ctx sdk.Context, servicerAddress sdk.ValAddress,
 
 	// Save the updated Actor object back to the store
 	servicerStore.Set(byteKey, bz)
-
-	// TODO: Add logic to transfer the unstaked coins from the staking pool to the servicer's addres; usually done through the bank module
-	return nil
-}
-
-func (k Keeper) unstakeApplication(ctx sdk.Context, applicationAddress sdk.ValAddress, coinsToUnstake sdk.Coin) error {
-	logger := ctx.Logger().With(" application", applicationAddress.String())
-
-	store := ctx.KVStore(k.storeKey)
-	applicationStore := prefix.NewStore(store, []byte(types.ApplicationPrefix))
-
-	byteKey := applicationAddress.Bytes()
-	bz := applicationStore.Get(byteKey)
-
-	if bz == nil {
-		logger.Info(" application not found")
-		return fmt.Errorf(" application not found")
-	}
-
-	// Deserialize the byte array into a Validator object
-	var application types.Application
-	k.cdc.Unmarshal(bz, &application)
-
-	coinsStaked, err := parseCoins(application.GetStakeInfo().GetCoinsStaked())
-	if err != nil {
-		return err
-	}
-	// Update staking amount
-	newStakeAmount := coinsStaked.Sub(coinsToUnstake)
-	application.GetStakeInfo().CoinsStaked = newStakeAmount.String()
-	// TODO: Add staked amount checks here when trying to unstake more than currently staked
-
-	// Serialize the servicer object back to bytes
-	bz, err = k.cdc.Marshal(&application)
-	if err != nil {
-		return err
-	}
-
-	// Save the updated Actor object back to the store
-	applicationStore.Set(byteKey, bz)
 
 	// TODO: Add logic to transfer the unstaked coins from the staking pool to the servicer's addres; usually done through the bank module
 	return nil

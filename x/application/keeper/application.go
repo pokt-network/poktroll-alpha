@@ -19,13 +19,13 @@ func (k Keeper) SetApplication(ctx sdk.Context, application types.Application) {
 // GetApplication returns a application from its index
 func (k Keeper) GetApplication(
 	ctx sdk.Context,
-	index string,
+	address string,
 
 ) (val types.Application, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ApplicationKeyPrefix))
 
 	b := store.Get(types.ApplicationKey(
-		index,
+		address,
 	))
 	if b == nil {
 		return val, false
@@ -38,12 +38,12 @@ func (k Keeper) GetApplication(
 // RemoveApplication removes a application from the store
 func (k Keeper) RemoveApplication(
 	ctx sdk.Context,
-	index string,
+	address string,
 
 ) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ApplicationKeyPrefix))
 	store.Delete(types.ApplicationKey(
-		index,
+		address,
 	))
 }
 

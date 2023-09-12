@@ -20,8 +20,8 @@ func TestGenesis(t *testing.T) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	accs := simtypes.RandomAccounts(r, 2)
 
-	coin1 := sdk.NewCoin("upokt", math.NewInt(1))
-	coin2 := sdk.NewCoin("upokt", math.NewInt(12))
+	coin1 := sdk.NewCoin("stake", math.NewInt(1))
+	coin2 := sdk.NewCoin("stake", math.NewInt(12))
 
 	genesisState := types.GenesisState{
 		Params: types.DefaultParams(),

@@ -122,6 +122,7 @@ import (
 	servicermodule "poktroll/x/servicer"
 	servicermodulekeeper "poktroll/x/servicer/keeper"
 	servicermoduletypes "poktroll/x/servicer/types"
+
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "poktroll/app/params"
@@ -199,6 +200,8 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		// DEBUG(olshansky): Follow up with celestia team as to why this doesn't show up in `poktrolld  query auth module-acco`
+		applicationmoduletypes.ModuleName: {authtypes.Burner, authtypes.Staking},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
@@ -561,6 +564,7 @@ func New(
 		keys[applicationmoduletypes.StoreKey],
 		keys[applicationmoduletypes.MemStoreKey],
 		app.GetSubspace(applicationmoduletypes.ModuleName),
+		app.BankKeeper,
 	)
 	applicationModule := applicationmodule.NewAppModule(appCodec, app.ApplicationKeeper, app.AccountKeeper, app.BankKeeper)
 

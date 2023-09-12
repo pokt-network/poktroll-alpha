@@ -22,7 +22,7 @@ func createNApplication(keeper *keeper.Keeper, ctx sdk.Context, n int) []types.A
 
 	applications := make([]types.Application, n)
 	for i := range applications {
-		coins := sdk.NewCoin("upokt", sdk.NewInt(int64(i)))
+		coins := sdk.NewCoin("stake", sdk.NewInt(int64(i)))
 		applications[i].Address = addresses[i].String()
 		applications[i].Stake = &coins
 

@@ -154,15 +154,15 @@ poktroll_servicer_unstake: ## Unstake tokens for the servicer specified
 
 .PHONY: poktroll_app_stake
 poktroll_app_stake: ## Stake tokens for the application specified
-	poktrolld --home=$(POKTROLLD_HOME) tx poktroll stake 1000stake application --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx application stake-application 1000stake --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_apps_get
 poktroll_apps_get: ## Retrieves all applications from the poktroll state
-	poktrolld --home=$(POKTROLLD_HOME) q poktroll application --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) q application list-application --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_app_unstake
 poktroll_app_unstake: ## Unstake tokens for the application specified
-	poktrolld --home=$(POKTROLLD_HOME) tx poktroll unstake 1000stake application --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx application unstake-application --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests

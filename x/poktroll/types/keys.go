@@ -16,9 +16,6 @@ const (
 	// Key to store servicer-related info
 	ServicerPrefix = "servicer"
 
-	// Key to store application-related info
-	ApplicationPrefix = "application"
-
 	// Key to store watcher-related info
 	WatcherPrefix = "watcher"
 
