@@ -6,3 +6,6 @@ bin
 localnet/.poktrolld/*
 !localnet/.poktrolld/keyring-test/
 !localnet/.poktrolld/keyring-test/*
+
+**/*.pb.go
+**/*.pb.gw.go
