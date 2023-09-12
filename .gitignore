@@ -4,9 +4,11 @@ bin
 
 # Why: poktrolld CLI should use the same keys as the node that runs inside the cluster to
 # allow commands such as `poktrolld tx stake` for work.
-localnet/.poktrolld/*
-!localnet/.poktrolld/keyring-test/
-!localnet/.poktrolld/keyring-test/*
+localnet/poktrolld/*
+!localnet/poktrolld/keyring-test/
+!localnet/poktrolld/keyring-test/*
+!localnet/poktrolld/config/
+!localnet/poktrolld/config/*
 
 # Macos
 .DS_Store

@@ -6,7 +6,7 @@ hot_reload_dirs = ['app', 'cmd', 'tools', 'x']
 # Run celestia node
 k8s_yaml('localnet/kubernetes/celestia-rollkit.yaml')
 
-# Import keys into Kubernetes ConfigMap
+# Import files into Kubernetes ConfigMap
 def read_files_from_directory(directory):
     files = listdir(directory)
     config_map_data = {}
@@ -25,13 +25,8 @@ def generate_config_map_yaml(name, data):
     }
     return encode_yaml(config_map_object)
 
-directory = "localnet/.poktrolld/keyring-test/"
-config_map_name = "poktroll-keys"
-
-config_map_data = read_files_from_directory(directory)
-config_map_yaml_blob = generate_config_map_yaml(config_map_name, config_map_data)
-
-k8s_yaml(config_map_yaml_blob)
+k8s_yaml(generate_config_map_yaml("poktrolld-keys", read_files_from_directory("localnet/poktrolld/keyring-test/"))) # poktrolld/keys
+k8s_yaml(generate_config_map_yaml("poktrolld-configs", read_files_from_directory("localnet/poktrolld/keyring-test/"))) # poktrolld/configs
 
 # Build sequencer
 local_resource('hot-reload: generate protobufs', 'ignite generate proto-go -y', deps=['proto'], labels=["hot-reloading"])
