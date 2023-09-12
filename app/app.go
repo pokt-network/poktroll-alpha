@@ -113,6 +113,9 @@ import (
 	poktrollmodule "poktroll/x/poktroll"
 	poktrollmodulekeeper "poktroll/x/poktroll/keeper"
 	poktrollmoduletypes "poktroll/x/poktroll/types"
+	portalmodule "poktroll/x/portal"
+	portalmodulekeeper "poktroll/x/portal/keeper"
+	portalmoduletypes "poktroll/x/portal/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "poktroll/app/params"
@@ -174,6 +177,7 @@ var (
 		vesting.AppModuleBasic{},
 		consensus.AppModuleBasic{},
 		poktrollmodule.AppModuleBasic{},
+		portalmodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
@@ -250,6 +254,8 @@ type App struct {
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
 	PoktrollKeeper poktrollmodulekeeper.Keeper
+
+	PortalKeeper portalmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -297,6 +303,7 @@ func New(
 		feegrant.StoreKey, evidencetypes.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
 		capabilitytypes.StoreKey, group.StoreKey, icacontrollertypes.StoreKey, consensusparamtypes.StoreKey,
 		poktrollmoduletypes.StoreKey,
+		portalmoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -527,6 +534,14 @@ func New(
 	)
 	poktrollModule := poktrollmodule.NewAppModule(appCodec, app.PoktrollKeeper, app.AccountKeeper, app.BankKeeper)
 
+	app.PortalKeeper = *portalmodulekeeper.NewKeeper(
+		appCodec,
+		keys[portalmoduletypes.StoreKey],
+		keys[portalmoduletypes.MemStoreKey],
+		app.GetSubspace(portalmoduletypes.ModuleName),
+	)
+	portalModule := portalmodule.NewAppModule(appCodec, app.PortalKeeper, app.AccountKeeper, app.BankKeeper)
+
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
 	/**** IBC Routing ****/
@@ -589,6 +604,7 @@ func New(
 		transferModule,
 		icaModule,
 		poktrollModule,
+		portalModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
@@ -622,6 +638,7 @@ func New(
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		poktrollmoduletypes.ModuleName,
+		portalmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
@@ -648,6 +665,7 @@ func New(
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		poktrollmoduletypes.ModuleName,
+		portalmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
@@ -679,6 +697,7 @@ func New(
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		poktrollmoduletypes.ModuleName,
+		portalmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	}
 	app.mm.SetOrderInitGenesis(genesisModuleOrder...)
@@ -904,6 +923,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(poktrollmoduletypes.ModuleName)
+	paramsKeeper.Subspace(portalmoduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper

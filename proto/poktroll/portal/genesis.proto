@@ -1,0 +1,12 @@
+syntax = "proto3";
+package poktroll.portal;
+
+import "gogoproto/gogo.proto";
+import "poktroll/portal/params.proto";
+
+option go_package = "poktroll/x/portal/types";
+
+// GenesisState defines the portal module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
