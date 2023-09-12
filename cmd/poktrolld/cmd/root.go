@@ -88,11 +88,14 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 			ctx := context.WithValue(cmd.Context(), PoktrollDepInjectorContextKey, injector)
 			cmd.SetContext(ctx)
 
-			// get key name from clientCtx
 			factory, err := tx.NewFactoryCLI(initClientCtx, cmd.Flags())
 			if err != nil {
 				return err
 			}
+
+			// NB: while we don't need to inject the key itself (just the name),
+			// we should ensure that a key with the given name exists, otherwise
+			// return the error.
 			// QUESTION: does `initClientCtx.GetFromName()` get a default value?
 			key, err := factory.Keybase().Key(initClientCtx.GetFromName())
 			if err != nil {
@@ -112,8 +115,10 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 			di.Provide(modules.KeyNameInjectionToken, key.Name, injector)
 			di.Provide(modules.ServicerToken, servicer.NewServicerModule(), injector)
 
-			servicer := di.HydrateMain(modules.ServicerToken, injector)
-			servicer.Start()
+			srvcr := di.HydrateMain(modules.ServicerToken, injector)
+			if err := srvcr.Start(); err != nil {
+				return err
+			}
 
 			return server.InterceptConfigsPreRunHandler(
 				cmd, customAppTemplate, customAppConfig, customTMConfig,
