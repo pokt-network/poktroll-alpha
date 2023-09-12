@@ -12,12 +12,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO: Replace all `stake` denominations with `upokt` once we get it to start up correctly
+
 func TestGenesisState_Validate(t *testing.T) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	accs := simtypes.RandomAccounts(r, 2)
 
-	coin1 := sdk.NewCoin("upokt", math.NewInt(1))
-	coin2 := sdk.NewCoin("upokt", math.NewInt(12))
+	coin1 := sdk.NewCoin("stake", math.NewInt(1))
+	coin2 := sdk.NewCoin("stake", math.NewInt(12))
 
 	tests := []struct {
 		desc     string

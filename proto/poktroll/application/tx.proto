@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package poktroll.application;
 
+import "cosmos/base/v1beta1/coin.proto";
+
 option go_package = "poktroll/x/application/types";
 
 // Msg defines the Msg service.
@@ -11,6 +13,7 @@ service Msg {
 }
 message MsgStakeApplication {
   string address = 1;
+  cosmos.base.v1beta1.Coin stakeAmount = 2;
 }
 
 message MsgStakeApplicationResponse {}

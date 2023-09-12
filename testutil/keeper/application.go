@@ -3,6 +3,9 @@ package keeper
 import (
 	"testing"
 
+	"poktroll/x/application/keeper"
+	"poktroll/x/application/types"
+
 	tmdb "github.com/cometbft/cometbft-db"
 	"github.com/cometbft/cometbft/libs/log"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -10,14 +13,20 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/store"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+
+	// "github.com/cosmos/cosmos-sdk/x/group/testutil"
+	"github.com/golang/mock/gomock"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	// "github.com/cosmos/cosmos-sdk/x/auth/testutil"
+	distrtestutil "github.com/cosmos/cosmos-sdk/x/distribution/testutil"
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/stretchr/testify/require"
-	"poktroll/x/application/keeper"
-	"poktroll/x/application/types"
 )
 
 func ApplicationKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
+	ctrl := gomock.NewController(t)
+
 	storeKey := sdk.NewKVStoreKey(types.StoreKey)
 	memStoreKey := storetypes.NewMemoryStoreKey(types.MemStoreKey)
 
@@ -30,6 +39,11 @@ func ApplicationKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 	registry := codectypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(registry)
 
+	mockBankKeeper := distrtestutil.NewMockBankKeeper(ctrl)
+	mockBankKeeper.EXPECT().SendCoinsFromModuleToAccount(gomock.Any(), types.ModuleName, gomock.Any(), gomock.Any()).AnyTimes()
+	mockBankKeeper.EXPECT().SendCoinsFromAccountToModule(gomock.Any(), gomock.Any(), types.ModuleName, gomock.Any()).AnyTimes()
+
+	// mockBankKeeper.
 	paramsSubspace := typesparams.NewSubspace(cdc,
 		types.Amino,
 		storeKey,
@@ -41,6 +55,7 @@ func ApplicationKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 		storeKey,
 		memStoreKey,
 		paramsSubspace,
+		mockBankKeeper,
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())

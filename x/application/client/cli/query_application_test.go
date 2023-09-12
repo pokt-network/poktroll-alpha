@@ -36,7 +36,7 @@ func networkWithApplicationObjects(t *testing.T, n int) (*network.Network, []typ
 
 	for i := int64(0); i < int64(n); i++ {
 		account := accounts[i].Address.String()
-		coin := sdk.NewCoin("upokt", math.NewInt(i))
+		coin := sdk.NewCoin("stake", math.NewInt(i))
 		application := types.Application{
 			Address: account,
 			Stake:   &coin,
@@ -59,7 +59,7 @@ func TestShowApplication(t *testing.T) {
 	}
 	tests := []struct {
 		desc    string
-		idIndex string
+		address string
 
 		args []string
 		err  error
@@ -67,14 +67,14 @@ func TestShowApplication(t *testing.T) {
 	}{
 		{
 			desc:    "found",
-			idIndex: objs[0].Address,
+			address: objs[0].Address,
 
 			args: common,
 			obj:  objs[0],
 		},
 		{
 			desc:    "not found",
-			idIndex: strconv.Itoa(100000),
+			address: strconv.Itoa(100000),
 
 			args: common,
 			err:  status.Error(codes.NotFound, "not found"),
@@ -83,7 +83,7 @@ func TestShowApplication(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.desc, func(t *testing.T) {
 			args := []string{
-				tc.idIndex,
+				tc.address,
 			}
 			args = append(args, tc.args...)
 			out, err := clitestutil.ExecTestCLICmd(ctx, cli.CmdShowApplication(), args)

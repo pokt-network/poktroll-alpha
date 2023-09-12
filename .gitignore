@@ -13,4 +13,6 @@ localnet/poktrolld/*
 # Macos
 .DS_Store
 
+# Development
 .vscode
+.env
