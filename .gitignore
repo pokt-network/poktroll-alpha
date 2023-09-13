@@ -12,3 +12,6 @@ localnet/poktrolld/*
 
 # Macos
 .DS_Store
+
+.vscode
+
