@@ -26,9 +26,15 @@ service Query {
 
   }
 
-  // Queries for all stacked Actors
-  rpc Actors (QueryActorsRequest) returns (QueryActorsResponse) {
-    option (google.api.http).get = "/poktroll/poktroll/actors";
+  // Queries for all staked Servicers
+  rpc Servicers (QueryServicersRequest) returns (QueryServicersResponse) {
+    option (google.api.http).get = "/poktroll/poktroll/servicers";
+
+  }
+
+  // Queries for all staked Applications
+  rpc Application (QueryApplicationRequest) returns (QueryApplicationResponse) {
+    option (google.api.http).get = "/poktroll/poktroll/application";
 
   }
 }
@@ -42,20 +48,28 @@ message QueryParamsResponse {
   Params params = 1 [(gogoproto.nullable) = false];
 }
 
-message QueryGetSessionRequest {
-}
+message QueryGetSessionRequest {}
 
 message QueryGetSessionResponse {
   string placeholder_text = 1;
 }
 
-message QueryActorsRequest {
+message QueryServicersRequest {
   cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 
-message QueryActorsResponse {
+message QueryServicersResponse {
   repeated Servicer servicers = 1;
-  // TODO: Return other ators too
+
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryApplicationRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryApplicationResponse {
+  repeated Application applications = 1;
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
