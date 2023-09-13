@@ -1,6 +1,6 @@
 .SILENT:
 
-POKTROLLD_HOME := ./localnet/.poktrolld
+POKTROLLD_HOME := ./localnet/poktrolld
 POKTROLLD_NODE := tcp://127.0.0.1:36657
 
 .PHONY: prompt_user
