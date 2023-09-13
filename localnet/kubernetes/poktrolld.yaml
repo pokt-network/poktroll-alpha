@@ -13,8 +13,8 @@ data:
       CHAIN_ID=poktroll
       KEY_NAME=poktroll-key
       KEY_2_NAME=poktroll-key-2
-      TOKEN_AMOUNT="10000000000000000000000000stake"
-      STAKING_AMOUNT="1000000000stake"
+      TOKEN_AMOUNT="10000000000000000000000000upokt"
+      STAKING_AMOUNT="1000000000upokt"
 
       # create a random Namespace ID for your rollup to post blocks to
       NAMESPACE_ID=$(openssl rand -hex 10)
@@ -65,11 +65,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: read-secrets
-  namespace: default  # Replace with the namespace where the secret resides
+  namespace: default # Replace with the namespace where the secret resides
 subjects:
-- kind: ServiceAccount
-  name: poktrolld
-  namespace: default  # Replace with the namespace where the service account resides
+  - kind: ServiceAccount
+    name: poktrolld
+    namespace: default # Replace with the namespace where the service account resides
 roleRef:
   kind: Role
   name: secret-reader
@@ -79,11 +79,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: secret-reader
-  namespace: default  # Replace with the namespace where the secret resides
+  namespace: default # Replace with the namespace where the secret resides
 rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -106,56 +106,56 @@ spec:
     spec:
       serviceAccountName: poktrolld
       containers:
-      - name: poktrolld
-        image: poktrolld
-        # To allow Delve to do the thing
-        securityContext:
-          allowPrivilegeEscalation: true
-          capabilities:
-            add: ["SYS_PTRACE"]
-        env:
-          - name: AUTH_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: celestia-secret
-                key: auth_token
-        ports:
-        - containerPort: 36657
-        - containerPort: 40004
-        command: ["/bin/sh"]
-        args: ["/scripts/poktroll.sh"]
-        volumeMounts:
-        - name: scripts-volume
-          mountPath: /scripts
-        - name: keys-volume
-          mountPath: /root/.poktroll/keyring-test/
-        - name: configs-volume
-          mountPath: /root/.poktroll/config-src/
-        # - name: configs-volume
-        #   mountPath: /root/.poktroll/config/app.toml
-        #   subPath: app.toml
-        # - name: configs-volume
-        #   mountPath: /root/.poktroll/config/client.toml
-        #   subPath: client.toml
-        # - name: configs-volume
-        #   mountPath: /root/.poktroll/config/config.toml
-        #   subPath: config.toml
-        # - name: configs-volume
-        #   mountPath: /root/.poktroll/config/priv_validator_key.json
-        #   subPath: priv_validator_key.json
-        # - name: configs-volume
-        #   mountPath: /root/.poktroll/config/node_key.json
-        #   subPath: node_key.json
-        # - name: configs-volume
-        #   mountPath: /root/.poktroll/config/genesis.json
-        #   subPath: genesis.json
+        - name: poktrolld
+          image: poktrolld
+          # To allow Delve to do the thing
+          securityContext:
+            allowPrivilegeEscalation: true
+            capabilities:
+              add: ["SYS_PTRACE"]
+          env:
+            - name: AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: celestia-secret
+                  key: auth_token
+          ports:
+            - containerPort: 36657
+            - containerPort: 40004
+          command: ["/bin/sh"]
+          args: ["/scripts/poktroll.sh"]
+          volumeMounts:
+            - name: scripts-volume
+              mountPath: /scripts
+            - name: keys-volume
+              mountPath: /root/.poktroll/keyring-test/
+            - name: configs-volume
+              mountPath: /root/.poktroll/config-src/
+          # - name: configs-volume
+          #   mountPath: /root/.poktroll/config/app.toml
+          #   subPath: app.toml
+          # - name: configs-volume
+          #   mountPath: /root/.poktroll/config/client.toml
+          #   subPath: client.toml
+          # - name: configs-volume
+          #   mountPath: /root/.poktroll/config/config.toml
+          #   subPath: config.toml
+          # - name: configs-volume
+          #   mountPath: /root/.poktroll/config/priv_validator_key.json
+          #   subPath: priv_validator_key.json
+          # - name: configs-volume
+          #   mountPath: /root/.poktroll/config/node_key.json
+          #   subPath: node_key.json
+          # - name: configs-volume
+          #   mountPath: /root/.poktroll/config/genesis.json
+          #   subPath: genesis.json
       volumes:
-      - name: scripts-volume
-        configMap:
-          name: poktroll-scripts
-      - name: keys-volume
-        configMap:
-          name: poktrolld-keys
-      - name: configs-volume
-        configMap:
-          name: poktrolld-configs
+        - name: scripts-volume
+          configMap:
+            name: poktroll-scripts
+        - name: keys-volume
+          configMap:
+            name: poktrolld-keys
+        - name: configs-volume
+          configMap:
+            name: poktrolld-configs

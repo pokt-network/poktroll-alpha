@@ -116,7 +116,7 @@ poktroll_list_keys: ## List the poktroll keys
 poktroll_send: ## Send tokens from one key to another
 	KEY1=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
 	KEY2=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
-	poktrolld --home=$(POKTROLLD_HOME) tx bank send $$KEY1 $$KEY2 42069stake --keyring-backend test --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx bank send $$KEY1 $$KEY2 42069upokt
 
 .PHONY: poktroll_balance
 poktroll_balance: ## Check the balances of both keys
@@ -142,7 +142,7 @@ poktroll_frontend_react: ## Start the poktroll react frontend
 
 .PHONY: poktroll_servicer_stake
 poktroll_servicer_stake: ## Stake tokens for the servicer specified
-	poktrolld --home=$(POKTROLLD_HOME) tx poktroll stake 1000stake servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx poktroll stake 1000upokt servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_servicers_get
 poktroll_servicers_get: ## Retrieves all servicers from the poktroll state
@@ -150,11 +150,11 @@ poktroll_servicers_get: ## Retrieves all servicers from the poktroll state
 
 .PHONY: poktroll_servicer_unstake
 poktroll_servicer_unstake: ## Unstake tokens for the servicer specified
-	poktrolld --home=$(POKTROLLD_HOME) tx poktroll unstake 1000stake servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx poktroll unstake 1000upokt servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_app_stake
 poktroll_app_stake: ## Stake tokens for the application specified
-	poktrolld --home=$(POKTROLLD_HOME) tx poktroll stake 1000stake application --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx poktroll stake 1000upokt application --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_apps_get
 poktroll_apps_get: ## Retrieves all applications from the poktroll state
@@ -162,7 +162,7 @@ poktroll_apps_get: ## Retrieves all applications from the poktroll state
 
 .PHONY: poktroll_app_unstake
 poktroll_app_unstake: ## Unstake tokens for the application specified
-	poktrolld --home=$(POKTROLLD_HOME) tx poktroll unstake 1000stake application --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx poktroll unstake 1000upokt application --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests
