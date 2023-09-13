@@ -130,10 +130,15 @@ poktroll_get_session: ## Queries the poktroll node for session data
 	poktrolld --home=$(POKTROLLD_HOME) query poktroll get-session --node $(POKTROLLD_NODE)
 
 # Ref: https://rollkit.dev/tutorials/gm-world-frontend
-.PHONY: poktroll_cosmology_frontend
-poktroll_cosmology_frontend: ## Start the poktroll cosmology frontend
+.PHONY: poktroll_frontend_cosmology
+poktroll_frontend_cosmology: ## Start the poktroll cosmology frontend
 	echo "Visit http://localhost:3000/"
 	yarn --cwd ./frontend dev
+
+# Tutorial: https://blog.logrocket.com/create-react-native-app-using-ignite-boilerplate/
+.PHONY: poktroll_frontend_react
+poktroll_frontend_react: ## Start the poktroll react frontend
+	cd ./react && npm install && npm run dev
 
 .PHONY: poktroll_servicer_stake
 poktroll_servicer_stake: ## Stake tokens for the servicer specified
