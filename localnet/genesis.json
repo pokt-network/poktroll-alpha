@@ -13,9 +13,7 @@
       "max_bytes": "1048576"
     },
     "validator": {
-      "pub_key_types": [
-        "ed25519"
-      ]
+      "pub_key_types": ["ed25519"]
     },
     "version": {
       "app": "0"
@@ -63,7 +61,7 @@
           "address": "pokt1pt9nzuxfs7jtjc2a8sx57kepxcurshwjusjafe",
           "coins": [
             {
-              "denom": "stake",
+              "denom": "upokt",
               "amount": "10000000000000000000000000"
             }
           ]
@@ -72,7 +70,7 @@
           "address": "pokt1mprzrd3qzqjmkzdpstwzmnrpydacxt2zufxfcd",
           "coins": [
             {
-              "denom": "stake",
+              "denom": "upokt",
               "amount": "10000000000000000000000000"
             }
           ]
@@ -89,7 +87,7 @@
     "consensus": null,
     "crisis": {
       "constant_fee": {
-        "denom": "stake",
+        "denom": "upokt",
         "amount": "1000"
       }
     },
@@ -145,7 +143,7 @@
                   "key": "9RBvIVwsnDXRaXzBcgMlyv2eoPaOJ61OhVN9ZOA9v2A="
                 },
                 "value": {
-                  "denom": "stake",
+                  "denom": "upokt",
                   "amount": "1000000000"
                 }
               }
@@ -195,7 +193,7 @@
       "params": {
         "min_deposit": [
           {
-            "denom": "stake",
+            "denom": "upokt",
             "amount": "10000000"
           }
         ],
@@ -226,11 +224,7 @@
         "clients_consensus": [],
         "clients_metadata": [],
         "params": {
-          "allowed_clients": [
-            "06-solomachine",
-            "07-tendermint",
-            "09-localhost"
-          ]
+          "allowed_clients": ["06-solomachine", "07-tendermint", "09-localhost"]
         },
         "create_localhost": false,
         "next_client_sequence": "0"
@@ -269,9 +263,7 @@
         "port": "icahost",
         "params": {
           "host_enabled": true,
-          "allow_messages": [
-            "*"
-          ]
+          "allow_messages": ["*"]
         }
       }
     },
@@ -281,7 +273,7 @@
         "annual_provisions": "0.000000000000000000"
       },
       "params": {
-        "mint_denom": "stake",
+        "mint_denom": "upokt",
         "inflation_rate_change": "0.130000000000000000",
         "inflation_max": "0.200000000000000000",
         "inflation_min": "0.070000000000000000",
@@ -310,7 +302,7 @@
         "max_validators": 100,
         "max_entries": 7,
         "historical_entries": 10000,
-        "bond_denom": "stake",
+        "bond_denom": "upokt",
         "min_commission_rate": "0.000000000000000000"
       },
       "last_total_power": "0",
