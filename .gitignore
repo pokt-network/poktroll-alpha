@@ -7,8 +7,8 @@ bin
 localnet/poktrolld/*
 !localnet/poktrolld/keyring-test/
 !localnet/poktrolld/keyring-test/*
-!localnet/poktrolld/config/
-!localnet/poktrolld/config/*
+!localnet/*/config/
+!localnet/*/config/*
 
 # Macos
 .DS_Store
