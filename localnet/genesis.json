@@ -61,7 +61,7 @@
           "address": "pokt1pt9nzuxfs7jtjc2a8sx57kepxcurshwjusjafe",
           "coins": [
             {
-              "denom": "upokt",
+              "denom": "stake",
               "amount": "10000000000000000000000000"
             }
           ]
@@ -70,7 +70,7 @@
           "address": "pokt1mprzrd3qzqjmkzdpstwzmnrpydacxt2zufxfcd",
           "coins": [
             {
-              "denom": "upokt",
+              "denom": "stake",
               "amount": "10000000000000000000000000"
             }
           ]
@@ -87,7 +87,7 @@
     "consensus": null,
     "crisis": {
       "constant_fee": {
-        "denom": "upokt",
+        "denom": "stake",
         "amount": "1000"
       }
     },
@@ -143,7 +143,7 @@
                   "key": "9RBvIVwsnDXRaXzBcgMlyv2eoPaOJ61OhVN9ZOA9v2A="
                 },
                 "value": {
-                  "denom": "upokt",
+                  "denom": "stake",
                   "amount": "1000000000"
                 }
               }
@@ -193,7 +193,7 @@
       "params": {
         "min_deposit": [
           {
-            "denom": "upokt",
+            "denom": "stake",
             "amount": "10000000"
           }
         ],
@@ -273,7 +273,7 @@
         "annual_provisions": "0.000000000000000000"
       },
       "params": {
-        "mint_denom": "upokt",
+        "mint_denom": "stake",
         "inflation_rate_change": "0.130000000000000000",
         "inflation_max": "0.200000000000000000",
         "inflation_min": "0.070000000000000000",
@@ -302,7 +302,7 @@
         "max_validators": 100,
         "max_entries": 7,
         "historical_entries": 10000,
-        "bond_denom": "upokt",
+        "bond_denom": "stake",
         "min_commission_rate": "0.000000000000000000"
       },
       "last_total_power": "0",

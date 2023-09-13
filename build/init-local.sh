@@ -6,8 +6,8 @@ CHAIN_ID=poktroll
 KEY_NAME=poktroll-key
 KEY_2_NAME=poktroll-key-2
 CHAINFLAG="--chain-id ${CHAIN_ID}"
-TOKEN_AMOUNT="10000000000000000000000000upokt"
-STAKING_AMOUNT="1000000000upokt"
+TOKEN_AMOUNT="10000000000000000000000000stake"
+STAKING_AMOUNT="1000000000stake"
 AUTH_TOKEN=$AUTH_TOKEN
 
 # create a random Namespace ID for your rollup to post blocks to
