@@ -1,13 +1,13 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: poktroll-config
+  name: poktroll-scripts
 data:
   poktroll.sh: |-
     #!/bin/sh
 
     if [ ! -d "/root/.poktroll/data/" ]; then
-      AUTH_TOKEN=$(curl -sS --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}/api/v1/namespaces/default/secrets/celestia-secret | jq -r '.data.auth_token' | base64 -d)
       echo "AUTH_TOKEN is: $AUTH_TOKEN"
       VALIDATOR_NAME=validator1
       CHAIN_ID=poktroll
@@ -31,22 +31,27 @@ data:
       # reset any existing genesis/chain data
       poktrolld tendermint unsafe-reset-all
 
+      ls -la /root/.poktroll/config-src/
+      mkdir -p /root/.poktroll/config/
+      cp -r -L /root/.poktroll/config-src/* /root/.poktroll/config/
+      ls -la /root/.poktroll/config/
+
       # initialize the validator with the chain ID you set
-      poktrolld init $VALIDATOR_NAME --chain-id $CHAIN_ID
+      # poktrolld init $VALIDATOR_NAME --chain-id $CHAIN_ID
 
       # add keys for key 1 and key 2 to keyring-backend test
       # poktrolld keys add $KEY_NAME --keyring-backend test
       # poktrolld keys add $KEY_2_NAME --keyring-backend test
 
       # add these as genesis accounts
-      poktrolld add-genesis-account $KEY_NAME $TOKEN_AMOUNT --keyring-backend test
-      poktrolld add-genesis-account $KEY_2_NAME $TOKEN_AMOUNT --keyring-backend test
+      # poktrolld add-genesis-account $KEY_NAME $TOKEN_AMOUNT --keyring-backend test
+      # poktrolld add-genesis-account $KEY_2_NAME $TOKEN_AMOUNT --keyring-backend test
 
       # set the staking amounts in the genesis transaction
-      poktrolld gentx $KEY_NAME $STAKING_AMOUNT --chain-id $CHAIN_ID --keyring-backend test
+      # poktrolld gentx $KEY_NAME $STAKING_AMOUNT --chain-id $CHAIN_ID --keyring-backend test
 
       # collect genesis transactions
-      poktrolld collect-gentxs
+      # poktrolld collect-gentxs
     fi
 
     # start the node
@@ -108,20 +113,49 @@ spec:
           allowPrivilegeEscalation: true
           capabilities:
             add: ["SYS_PTRACE"]
+        env:
+          - name: AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: celestia-secret
+                key: auth_token
         ports:
         - containerPort: 36657
         - containerPort: 40004
         command: ["/bin/sh"]
-        args: ["/etc/config/poktroll.sh"]
+        args: ["/scripts/poktroll.sh"]
         volumeMounts:
-        - name: config-volume
-          mountPath: /etc/config
+        - name: scripts-volume
+          mountPath: /scripts
         - name: keys-volume
           mountPath: /root/.poktroll/keyring-test/
+        - name: configs-volume
+          mountPath: /root/.poktroll/config-src/
+        # - name: configs-volume
+        #   mountPath: /root/.poktroll/config/app.toml
+        #   subPath: app.toml
+        # - name: configs-volume
+        #   mountPath: /root/.poktroll/config/client.toml
+        #   subPath: client.toml
+        # - name: configs-volume
+        #   mountPath: /root/.poktroll/config/config.toml
+        #   subPath: config.toml
+        # - name: configs-volume
+        #   mountPath: /root/.poktroll/config/priv_validator_key.json
+        #   subPath: priv_validator_key.json
+        # - name: configs-volume
+        #   mountPath: /root/.poktroll/config/node_key.json
+        #   subPath: node_key.json
+        # - name: configs-volume
+        #   mountPath: /root/.poktroll/config/genesis.json
+        #   subPath: genesis.json
       volumes:
-      - name: config-volume
+      - name: scripts-volume
         configMap:
-          name: poktroll-config
+          name: poktroll-scripts
       - name: keys-volume
         configMap:
-          name: poktroll-keys
+          name: poktrolld-keys
+      - name: configs-volume
+        configMap:
+          name: poktrolld-configs

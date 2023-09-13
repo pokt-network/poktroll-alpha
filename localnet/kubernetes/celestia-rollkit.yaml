@@ -57,11 +57,9 @@ spec:
         # - name: localnet-celestia-tokens
         #   mountPath: "/bridge/keys/NJ3XILLTMVRXEZLUFZVHO5A"
         #   subPath: NJ3XILLTMVRXEZLUFZVHO5A
-        #   readOnly: true
         # - name: localnet-celestia-tokens
         #   mountPath: "/bridge/keys/OAZHALLLMV4Q"
         #   subPath: OAZHALLLMV4Q
-        #   readOnly: true
       - name: secret-update-sidecar
         image: ghcr.io/rollkit/local-celestia-devnet:v0.11.0-rc8
         command: [ "/bin/bash", "-c", "--" ]
@@ -73,11 +71,9 @@ spec:
         # - name: localnet-celestia-tokens
         #   mountPath: "/bridge/keys/NJ3XILLTMVRXEZLUFZVHO5A"
         #   subPath: NJ3XILLTMVRXEZLUFZVHO5A
-        #   readOnly: true
         # - name: localnet-celestia-tokens
         #   mountPath: "/bridge/keys/OAZHALLLMV4Q"
         #   subPath: OAZHALLLMV4Q
-        #   readOnly: true
       volumes:
       - name: bridge-volume
         emptyDir: {}

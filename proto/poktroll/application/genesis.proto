@@ -1,0 +1,12 @@
+syntax = "proto3";
+package poktroll.application;
+
+import "gogoproto/gogo.proto";
+import "poktroll/application/params.proto";
+
+option go_package = "poktroll/x/application/types";
+
+// GenesisState defines the application module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
