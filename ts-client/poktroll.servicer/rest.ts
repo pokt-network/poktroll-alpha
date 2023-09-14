@@ -20,6 +20,8 @@ export interface RpcStatus {
   details?: ProtobufAny[];
 }
 
+export type ServicerMsgStakeServicerResponse = object;
+
 /**
  * Params defines the parameters for the module.
  */
@@ -53,7 +55,26 @@ export interface ServicerQueryParamsResponse {
 }
 
 export interface ServicerServicers {
-  index?: string;
+  address?: string;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  stake?: V1Beta1Coin;
+}
+
+/**
+* Coin defines a token with a denomination and an amount.
+
+NOTE: The amount field is an Int which implements the custom method
+signatures required by gogoproto.
+*/
+export interface V1Beta1Coin {
+  denom?: string;
+  amount?: string;
 }
 
 /**
@@ -300,11 +321,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @tags Query
    * @name QueryServicers
    * @summary Queries a list of Servicers items.
-   * @request GET:/poktroll/servicer/servicers/{index}
+   * @request GET:/poktroll/servicer/servicers/{address}
    */
-  queryServicers = (index: string, params: RequestParams = {}) =>
+  queryServicers = (address: string, params: RequestParams = {}) =>
     this.request<ServicerQueryGetServicersResponse, RpcStatus>({
-      path: `/poktroll/servicer/servicers/${index}`,
+      path: `/poktroll/servicer/servicers/${address}`,
       method: "GET",
       format: "json",
       ...params,
