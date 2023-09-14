@@ -14,10 +14,6 @@
  */
 export type PoktrollParams = object;
 
-export interface PoktrollQueryGetSessionResponse {
-  placeholder_text?: string;
-}
-
 /**
  * QueryParamsResponse is response type for the Query/Params RPC method.
  */
@@ -162,22 +158,6 @@ export class HttpClient<SecurityDataType = unknown> {
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
-  /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryGetSession
-   * @summary Queries a list of GetSession items.
-   * @request GET:/poktroll/poktroll/get_session
-   */
-  queryGetSession = (params: RequestParams = {}) =>
-    this.request<PoktrollQueryGetSessionResponse, RpcStatus>({
-      path: `/poktroll/poktroll/get_session`,
-      method: "GET",
-      format: "json",
-      ...params,
-    });
-
   /**
    * No description
    *

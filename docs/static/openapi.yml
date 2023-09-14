@@ -75968,6 +75968,8 @@ definitions:
 
           NOTE: The amount field is an Int which implements the custom method
           signatures required by gogoproto.
+  poktroll.session.MsgGetSessionResponse:
+    type: object
   poktroll.session.Params:
     type: object
     description: Params defines the parameters for the module.

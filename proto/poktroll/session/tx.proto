@@ -1,7 +1,16 @@
 syntax = "proto3";
+
 package poktroll.session;
 
 option go_package = "poktroll/x/session/types";
 
 // Msg defines the Msg service.
-service Msg {}
+service Msg {
+  rpc GetSession (MsgGetSession) returns (MsgGetSessionResponse);
+}
+message MsgGetSession {
+  string address = 1;
+}
+
+message MsgGetSessionResponse {}
+
