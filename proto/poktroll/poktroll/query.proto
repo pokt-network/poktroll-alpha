@@ -5,8 +5,7 @@ package poktroll.poktroll;
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
-import "poktroll/poktroll/params.proto";
-import "poktroll/poktroll/session.proto";
+import "poktroll/poktroll/params.proto";;
 
 option go_package = "poktroll/x/poktroll/types";
 
@@ -18,12 +17,6 @@ service Query {
     option (google.api.http).get = "/poktroll/poktroll/params";
 
   }
-
-  // Queries a list of GetSession items.
-  rpc GetSession (QueryGetSessionRequest) returns (QueryGetSessionResponse) {
-    option (google.api.http).get = "/poktroll/poktroll/get_session";
-
-  }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
 message QueryParamsRequest {}
@@ -33,10 +26,4 @@ message QueryParamsResponse {
 
   // params holds all the parameters of this module.
   Params params = 1 [(gogoproto.nullable) = false];
-}
-
-message QueryGetSessionRequest {}
-
-message QueryGetSessionResponse {
-  string placeholder_text = 1;
 }
