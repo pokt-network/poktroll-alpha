@@ -2,6 +2,7 @@ package servicer
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,6 +10,7 @@ import (
 	// this line is used by starport scaffolding # 1
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/pokt-network/smt"
 	"github.com/spf13/cobra"
 
 	abci "github.com/cometbft/cometbft/abci/types"
@@ -19,6 +21,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"poktroll/x/servicer/client/cli"
+	"poktroll/x/servicer/components/miner"
 	"poktroll/x/servicer/components/relayer"
 	sessionmanager "poktroll/x/servicer/components/session_manager"
 	"poktroll/x/servicer/keeper"
@@ -102,6 +105,7 @@ type AppModule struct {
 	// Servicer private components
 	relayer        *relayer.Relayer
 	sessionManager *sessionmanager.SessionManager
+	miner          *miner.Miner
 
 	newBlocks chan *types.Block
 }
@@ -116,6 +120,16 @@ func NewAppModule(
 	newBlocks := make(chan *types.Block)
 	sessionManager := sessionmanager.NewSessionManager(newBlocks)
 
+	storePath := "/tmp/smt"
+	kvStore, err := smt.NewKVStore(storePath)
+
+	if err != nil {
+		panic(fmt.Errorf("failed to create KVStore %q: %w", storePath, err))
+	}
+
+	miner := miner.NewMiner(sha256.New(), kvStore)
+	miner.MineRelays(relayer.Relays(), sessionManager.ClosedSessions())
+
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
@@ -124,6 +138,7 @@ func NewAppModule(
 
 		relayer:        relayer,
 		sessionManager: sessionManager,
+		miner:          miner,
 		newBlocks:      newBlocks,
 	}
 }
