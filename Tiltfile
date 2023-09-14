@@ -27,6 +27,8 @@ def generate_config_map_yaml(name, data):
 
 k8s_yaml(generate_config_map_yaml("poktrolld-keys", read_files_from_directory("localnet/poktrolld/keyring-test/"))) # poktrolld/keys
 k8s_yaml(generate_config_map_yaml("poktrolld-configs", read_files_from_directory("localnet/poktrolld/config/"))) # poktrolld/configs
+k8s_yaml(generate_config_map_yaml("poktrolld-servicer-keys", read_files_from_directory("localnet/poktrolld-servicer/keyring-test/"))) # poktrolld-servicer/keys
+k8s_yaml(generate_config_map_yaml("poktrolld-servicer-configs", read_files_from_directory("localnet/poktrolld-servicer/config/"))) # poktrolld-servicer/keys
 
 # Build sequencer
 local_resource('hot-reload: generate protobufs', 'ignite generate proto-go -y', deps=['proto'], labels=["hot-reloading"])
