@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	"strconv"
 
 	"poktroll/x/application/types"
@@ -28,14 +27,10 @@ func CmdStakeApplication() *cobra.Command {
 				return err
 			}
 
-			stakeAmounts, err := sdk.ParseCoinsNormalized(stakeAmountString)
+			stakeAmount, err := sdk.ParseCoinNormalized(stakeAmountString)
 			if err != nil {
 				return err
 			}
-			if len(stakeAmounts) != 1 {
-				return errors.New("stake amount must be a single coin")
-			}
-			stakeAmount := stakeAmounts[0]
 
 			msg := types.NewMsgStakeApplication(
 				clientCtx.GetFromAddress().String(),

@@ -142,15 +142,15 @@ poktroll_frontend_react: ## Start the poktroll react frontend
 
 .PHONY: poktroll_servicer_stake
 poktroll_servicer_stake: ## Stake tokens for the servicer specified
-	poktrolld --home=$(POKTROLLD_HOME) tx poktroll stake 1000stake servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx servicer stake-servicer 1000stake --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_servicers_get
 poktroll_servicers_get: ## Retrieves all servicers from the poktroll state
-	poktrolld --home=$(POKTROLLD_HOME) q poktroll servicers --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) q servicer list-servicers --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_servicer_unstake
 poktroll_servicer_unstake: ## Unstake tokens for the servicer specified
-	poktrolld --home=$(POKTROLLD_HOME) tx poktroll unstake 1000stake servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx servicer unstake-servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
 
 .PHONY: poktroll_app_stake
 poktroll_app_stake: ## Stake tokens for the application specified

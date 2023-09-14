@@ -47,15 +47,12 @@ func (msg *MsgStakeApplication) ValidateBasic() error {
 	if msg.StakeAmount == nil {
 		return ErrNilStakeAmount
 	}
-	stakeAmount, err := sdk.ParseCoinsNormalized(msg.StakeAmount.String())
+	stakeAmount, err := sdk.ParseCoinNormalized(msg.StakeAmount.String())
 	if !stakeAmount.IsValid() {
 		return stakeAmount.Validate()
 	}
 	if err != nil {
 		return err
-	}
-	if stakeAmount.Empty() {
-		return ErrEmptyStakeAmount
 	}
 	return nil
 }

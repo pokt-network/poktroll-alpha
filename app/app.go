@@ -202,6 +202,7 @@ var (
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		// DEBUG(olshansky): Follow up with celestia team as to why this doesn't show up in `poktrolld  query auth module-acco`
 		applicationmoduletypes.ModuleName: {authtypes.Burner, authtypes.Staking},
+		servicermoduletypes.ModuleName:    {authtypes.Minter, authtypes.Burner, authtypes.Staking},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
@@ -573,6 +574,7 @@ func New(
 		keys[servicermoduletypes.StoreKey],
 		keys[servicermoduletypes.MemStoreKey],
 		app.GetSubspace(servicermoduletypes.ModuleName),
+		app.BankKeeper,
 	)
 	servicerModule := servicermodule.NewAppModule(appCodec, app.ServicerKeeper, app.AccountKeeper, app.BankKeeper)
 

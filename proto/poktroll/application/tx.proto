@@ -11,6 +11,7 @@ service Msg {
   rpc StakeApplication   (MsgStakeApplication  ) returns (MsgStakeApplicationResponse  );
   rpc UnstakeApplication (MsgUnstakeApplication) returns (MsgUnstakeApplicationResponse);
 }
+
 message MsgStakeApplication {
   string address = 1;
   cosmos.base.v1beta1.Coin stakeAmount = 2;

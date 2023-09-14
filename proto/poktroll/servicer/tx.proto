@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package poktroll.servicer;
 
+import "cosmos/base/v1beta1/coin.proto";
+
 option go_package = "poktroll/x/servicer/types";
 
 // Msg defines the Msg service.
@@ -9,8 +11,10 @@ service Msg {
   rpc StakeServicer   (MsgStakeServicer  ) returns (MsgStakeServicerResponse  );
   rpc UnstakeServicer (MsgUnstakeServicer) returns (MsgUnstakeServicerResponse);
 }
+
 message MsgStakeServicer {
   string address = 1;
+  cosmos.base.v1beta1.Coin stakeAmount = 2;
 }
 
 message MsgStakeServicerResponse {}

@@ -1,8 +1,6 @@
 syntax = "proto3";
 package poktroll.poktroll;
 
-import "gogoproto/gogo.proto";
-
 option go_package = "poktroll/x/poktroll/types";
 
 message Session {
