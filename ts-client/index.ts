@@ -33,10 +33,11 @@ import { Module as PoktrollApplication, msgTypes as PoktrollApplicationMsgTypes 
 import { Module as PoktrollPoktroll, msgTypes as PoktrollPoktrollMsgTypes } from './poktroll.poktroll'
 import { Module as PoktrollPortal, msgTypes as PoktrollPortalMsgTypes } from './poktroll.portal'
 import { Module as PoktrollServicer, msgTypes as PoktrollServicerMsgTypes } from './poktroll.servicer'
+import { Module as PoktrollSession, msgTypes as PoktrollSessionMsgTypes } from './poktroll.session'
 
 
 const Client = IgniteClient.plugin([
-    CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseNodeV1Beta1, CosmosBaseTendermintV1Beta1, CosmosConsensusV1, CosmosCrisisV1Beta1, CosmosDistributionV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosGovV1, CosmosGovV1Beta1, CosmosGroupV1, CosmosMintV1Beta1, CosmosNftV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosStakingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, IbcApplicationsInterchainAccountsControllerV1, IbcApplicationsInterchainAccountsHostV1, IbcApplicationsTransferV1, IbcCoreChannelV1, IbcCoreClientV1, IbcCoreConnectionV1, PoktrollApplication, PoktrollPoktroll, PoktrollPortal, PoktrollServicer
+    CosmosAuthV1Beta1, CosmosAuthzV1Beta1, CosmosBankV1Beta1, CosmosBaseNodeV1Beta1, CosmosBaseTendermintV1Beta1, CosmosConsensusV1, CosmosCrisisV1Beta1, CosmosDistributionV1Beta1, CosmosEvidenceV1Beta1, CosmosFeegrantV1Beta1, CosmosGovV1, CosmosGovV1Beta1, CosmosGroupV1, CosmosMintV1Beta1, CosmosNftV1Beta1, CosmosParamsV1Beta1, CosmosSlashingV1Beta1, CosmosStakingV1Beta1, CosmosTxV1Beta1, CosmosUpgradeV1Beta1, CosmosVestingV1Beta1, IbcApplicationsInterchainAccountsControllerV1, IbcApplicationsInterchainAccountsHostV1, IbcApplicationsTransferV1, IbcCoreChannelV1, IbcCoreClientV1, IbcCoreConnectionV1, PoktrollApplication, PoktrollPoktroll, PoktrollPortal, PoktrollServicer, PoktrollSession
 ]);
 
 const registry = new Registry([
@@ -71,6 +72,7 @@ const registry = new Registry([
   ...PoktrollPoktrollMsgTypes,
   ...PoktrollPortalMsgTypes,
   ...PoktrollServicerMsgTypes,
+  ...PoktrollSessionMsgTypes,
   
 ])
 

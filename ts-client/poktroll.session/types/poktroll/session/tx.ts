@@ -1,5 +1,5 @@
 /* eslint-disable */
-export const protobufPackage = "poktroll.poktroll";
+export const protobufPackage = "poktroll.session";
 
 /** Msg defines the Msg service. */
 export interface Msg {

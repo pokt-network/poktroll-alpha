@@ -9,23 +9,6 @@
  * ---------------------------------------------------------------
  */
 
-/**
- * Params defines the parameters for the module.
- */
-export type PoktrollParams = object;
-
-export interface PoktrollQueryGetSessionResponse {
-  placeholder_text?: string;
-}
-
-/**
- * QueryParamsResponse is response type for the Query/Params RPC method.
- */
-export interface PoktrollQueryParamsResponse {
-  /** params holds all the parameters of this module. */
-  params?: PoktrollParams;
-}
-
 export interface ProtobufAny {
   "@type"?: string;
 }
@@ -35,6 +18,19 @@ export interface RpcStatus {
   code?: number;
   message?: string;
   details?: ProtobufAny[];
+}
+
+/**
+ * Params defines the parameters for the module.
+ */
+export type SessionParams = object;
+
+/**
+ * QueryParamsResponse is response type for the Query/Params RPC method.
+ */
+export interface SessionQueryParamsResponse {
+  /** params holds all the parameters of this module. */
+  params?: SessionParams;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";
@@ -158,7 +154,7 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title poktroll/poktroll/genesis.proto
+ * @title poktroll/session/genesis.proto
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -166,29 +162,13 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * No description
    *
    * @tags Query
-   * @name QueryGetSession
-   * @summary Queries a list of GetSession items.
-   * @request GET:/poktroll/poktroll/get_session
-   */
-  queryGetSession = (params: RequestParams = {}) =>
-    this.request<PoktrollQueryGetSessionResponse, RpcStatus>({
-      path: `/poktroll/poktroll/get_session`,
-      method: "GET",
-      format: "json",
-      ...params,
-    });
-
-  /**
-   * No description
-   *
-   * @tags Query
    * @name QueryParams
    * @summary Parameters queries the parameters of the module.
-   * @request GET:/poktroll/poktroll/params
+   * @request GET:/poktroll/session/params
    */
   queryParams = (params: RequestParams = {}) =>
-    this.request<PoktrollQueryParamsResponse, RpcStatus>({
-      path: `/poktroll/poktroll/params`,
+    this.request<SessionQueryParamsResponse, RpcStatus>({
+      path: `/poktroll/session/params`,
       method: "GET",
       format: "json",
       ...params,

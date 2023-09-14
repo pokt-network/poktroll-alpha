@@ -1,10 +1,12 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
+import { Coin } from "../../cosmos/base/v1beta1/coin";
 
 export const protobufPackage = "poktroll.servicer";
 
 export interface MsgStakeServicer {
   address: string;
+  stakeAmount: Coin | undefined;
 }
 
 export interface MsgStakeServicerResponse {
@@ -18,13 +20,16 @@ export interface MsgUnstakeServicerResponse {
 }
 
 function createBaseMsgStakeServicer(): MsgStakeServicer {
-  return { address: "" };
+  return { address: "", stakeAmount: undefined };
 }
 
 export const MsgStakeServicer = {
   encode(message: MsgStakeServicer, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.address !== "") {
       writer.uint32(10).string(message.address);
+    }
+    if (message.stakeAmount !== undefined) {
+      Coin.encode(message.stakeAmount, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
@@ -39,6 +44,9 @@ export const MsgStakeServicer = {
         case 1:
           message.address = reader.string();
           break;
+        case 2:
+          message.stakeAmount = Coin.decode(reader, reader.uint32());
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -48,18 +56,26 @@ export const MsgStakeServicer = {
   },
 
   fromJSON(object: any): MsgStakeServicer {
-    return { address: isSet(object.address) ? String(object.address) : "" };
+    return {
+      address: isSet(object.address) ? String(object.address) : "",
+      stakeAmount: isSet(object.stakeAmount) ? Coin.fromJSON(object.stakeAmount) : undefined,
+    };
   },
 
   toJSON(message: MsgStakeServicer): unknown {
     const obj: any = {};
     message.address !== undefined && (obj.address = message.address);
+    message.stakeAmount !== undefined
+      && (obj.stakeAmount = message.stakeAmount ? Coin.toJSON(message.stakeAmount) : undefined);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<MsgStakeServicer>, I>>(object: I): MsgStakeServicer {
     const message = createBaseMsgStakeServicer();
     message.address = object.address ?? "";
+    message.stakeAmount = (object.stakeAmount !== undefined && object.stakeAmount !== null)
+      ? Coin.fromPartial(object.stakeAmount)
+      : undefined;
     return message;
   },
 };
