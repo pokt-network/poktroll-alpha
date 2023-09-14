@@ -1,5 +1,7 @@
 package keeper
 
+//go:generate mockgen -destination ../../../testutil/mocks/application_keeper_mock.go -package mocks . ApplicationKeeper
+
 import (
 	"fmt"
 
@@ -11,6 +13,13 @@ import (
 
 	"poktroll/x/application/types"
 )
+
+type ApplicationKeeper interface {
+	SetApplication(ctx sdk.Context, application types.Application)
+	GetApplication(ctx sdk.Context, address string) (val types.Application, found bool)
+	RemoveApplication(ctx sdk.Context, address string)
+	GetAllApplication(ctx sdk.Context) (list []types.Application)
+}
 
 type (
 	Keeper struct {

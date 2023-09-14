@@ -46803,6 +46803,9 @@ paths:
                         custom method
 
                         signatures required by gogoproto.
+                  title: >-
+                    CLEANUP: Use `Servicer` instead of `Servicers` when
+                    scaffolding the servicer map in the non-alpha repo
               pagination:
                 type: object
                 properties:
@@ -46938,6 +46941,9 @@ paths:
                       custom method
 
                       signatures required by gogoproto.
+                title: >-
+                  CLEANUP: Use `Servicer` instead of `Servicers` when
+                  scaffolding the servicer map in the non-alpha repo
         default:
           description: An unexpected error response.
           schema:
@@ -46972,6 +46978,57 @@ paths:
           description: A successful response.
           schema:
             type: object
+            properties:
+              session:
+                type: object
+                properties:
+                  application:
+                    type: object
+                    properties:
+                      address:
+                        type: string
+                      stake:
+                        type: object
+                        properties:
+                          denom:
+                            type: string
+                          amount:
+                            type: string
+                        description: >-
+                          Coin defines a token with a denomination and an
+                          amount.
+
+
+                          NOTE: The amount field is an Int which implements the
+                          custom method
+
+                          signatures required by gogoproto.
+                  servicers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        address:
+                          type: string
+                        stake:
+                          type: object
+                          properties:
+                            denom:
+                              type: string
+                            amount:
+                              type: string
+                          description: >-
+                            Coin defines a token with a denomination and an
+                            amount.
+
+
+                            NOTE: The amount field is an Int which implements
+                            the custom method
+
+                            signatures required by gogoproto.
+                      title: >-
+                        CLEANUP: Use `Servicer` instead of `Servicers` when
+                        scaffolding the servicer map in the non-alpha repo
         default:
           description: An unexpected error response.
           schema:
@@ -46990,6 +47047,11 @@ paths:
                     '@type':
                       type: string
                   additionalProperties: {}
+      parameters:
+        - name: appAddress
+          in: query
+          required: false
+          type: string
       tags:
         - Query
   /poktroll/session/params:
@@ -75924,6 +75986,9 @@ definitions:
                 method
 
                 signatures required by gogoproto.
+          title: >-
+            CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding the
+            servicer map in the non-alpha repo
       pagination:
         type: object
         properties:
@@ -75973,6 +76038,9 @@ definitions:
               method
 
               signatures required by gogoproto.
+        title: >-
+          CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding the
+          servicer map in the non-alpha repo
   poktroll.servicer.QueryParamsResponse:
     type: object
     properties:
@@ -75997,11 +76065,63 @@ definitions:
 
           NOTE: The amount field is an Int which implements the custom method
           signatures required by gogoproto.
+    title: >-
+      CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding the
+      servicer map in the non-alpha repo
   poktroll.session.Params:
     type: object
     description: Params defines the parameters for the module.
   poktroll.session.QueryGetSessionResponse:
     type: object
+    properties:
+      session:
+        type: object
+        properties:
+          application:
+            type: object
+            properties:
+              address:
+                type: string
+              stake:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+          servicers:
+            type: array
+            items:
+              type: object
+              properties:
+                address:
+                  type: string
+                stake:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+              title: >-
+                CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding
+                the servicer map in the non-alpha repo
   poktroll.session.QueryParamsResponse:
     type: object
     properties:
@@ -76009,3 +76129,51 @@ definitions:
         description: params holds all the parameters of this module.
         type: object
     description: QueryParamsResponse is response type for the Query/Params RPC method.
+  poktroll.session.Session:
+    type: object
+    properties:
+      application:
+        type: object
+        properties:
+          address:
+            type: string
+          stake:
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+            description: >-
+              Coin defines a token with a denomination and an amount.
+
+
+              NOTE: The amount field is an Int which implements the custom
+              method
+
+              signatures required by gogoproto.
+      servicers:
+        type: array
+        items:
+          type: object
+          properties:
+            address:
+              type: string
+            stake:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+          title: >-
+            CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding the
+            servicer map in the non-alpha repo

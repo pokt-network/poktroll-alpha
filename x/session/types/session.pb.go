@@ -9,6 +9,8 @@ import (
 	io "io"
 	math "math"
 	math_bits "math/bits"
+	types "poktroll/x/application/types"
+	types1 "poktroll/x/servicer/types"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -23,6 +25,8 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type Session struct {
+	Application *types.Application  `protobuf:"bytes,1,opt,name=application,proto3" json:"application,omitempty"`
+	Servicers   []*types1.Servicers `protobuf:"bytes,2,rep,name=servicers,proto3" json:"servicers,omitempty"`
 }
 
 func (m *Session) Reset()         { *m = Session{} }
@@ -58,6 +62,20 @@ func (m *Session) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Session proto.InternalMessageInfo
 
+func (m *Session) GetApplication() *types.Application {
+	if m != nil {
+		return m.Application
+	}
+	return nil
+}
+
+func (m *Session) GetServicers() []*types1.Servicers {
+	if m != nil {
+		return m.Servicers
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*Session)(nil), "poktroll.session.Session")
 }
@@ -65,14 +83,20 @@ func init() {
 func init() { proto.RegisterFile("poktroll/session/session.proto", fileDescriptor_6c21b78e7ee4068a) }
 
 var fileDescriptor_6c21b78e7ee4068a = []byte{
-	// 108 bytes of a gzipped FileDescriptorProto
+	// 195 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x2b, 0xc8, 0xcf, 0x2e,
 	0x29, 0xca, 0xcf, 0xc9, 0xd1, 0x2f, 0x4e, 0x2d, 0x2e, 0xce, 0xcc, 0xcf, 0x83, 0xd1, 0x7a, 0x05,
-	0x45, 0xf9, 0x25, 0xf9, 0x42, 0x02, 0x30, 0x79, 0x3d, 0xa8, 0xb8, 0x12, 0x27, 0x17, 0x7b, 0x30,
-	0x84, 0xe9, 0x64, 0x74, 0xe2, 0x91, 0x1c, 0xe3, 0x85, 0x47, 0x72, 0x8c, 0x0f, 0x1e, 0xc9, 0x31,
-	0x4e, 0x78, 0x2c, 0xc7, 0x70, 0xe1, 0xb1, 0x1c, 0xc3, 0x8d, 0xc7, 0x72, 0x0c, 0x51, 0x12, 0x70,
-	0x63, 0x2b, 0xe0, 0x06, 0x97, 0x54, 0x16, 0xa4, 0x16, 0x27, 0xb1, 0x81, 0xcd, 0x35, 0x06, 0x04,
-	0x00, 0x00, 0xff, 0xff, 0x22, 0xaf, 0x43, 0x41, 0x79, 0x00, 0x00, 0x00,
+	0x45, 0xf9, 0x25, 0xf9, 0x42, 0x02, 0x30, 0x79, 0x3d, 0xa8, 0xb8, 0x94, 0x22, 0x92, 0x8e, 0xa2,
+	0xb2, 0xcc, 0xe4, 0xd4, 0x22, 0x38, 0xa3, 0x18, 0xa2, 0x49, 0x4a, 0x0d, 0xae, 0x24, 0xb1, 0xa0,
+	0x20, 0x27, 0x33, 0x39, 0xb1, 0x04, 0x64, 0x30, 0x12, 0x1b, 0xa2, 0x4e, 0xa9, 0x8b, 0x91, 0x8b,
+	0x3d, 0x18, 0x62, 0xac, 0x90, 0x33, 0x17, 0x37, 0x92, 0x02, 0x09, 0x46, 0x05, 0x46, 0x0d, 0x6e,
+	0x23, 0x45, 0x3d, 0xb8, 0xf5, 0xc8, 0xba, 0x1d, 0x11, 0xec, 0x20, 0x64, 0x5d, 0x42, 0x56, 0x5c,
+	0x9c, 0x70, 0xb7, 0x48, 0x30, 0x29, 0x30, 0x6b, 0x70, 0x1b, 0xc9, 0xe8, 0x21, 0xf9, 0x00, 0x22,
+	0xa5, 0x17, 0x0c, 0x53, 0x13, 0x84, 0x50, 0xee, 0x64, 0x74, 0xe2, 0x91, 0x1c, 0xe3, 0x85, 0x47,
+	0x72, 0x8c, 0x0f, 0x1e, 0xc9, 0x31, 0x4e, 0x78, 0x2c, 0xc7, 0x70, 0xe1, 0xb1, 0x1c, 0xc3, 0x8d,
+	0xc7, 0x72, 0x0c, 0x51, 0x12, 0x70, 0xef, 0x54, 0xc0, 0x43, 0xa9, 0xa4, 0xb2, 0x20, 0xb5, 0x38,
+	0x89, 0x0d, 0xec, 0x0f, 0x63, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0x24, 0xad, 0xcf, 0x69, 0x46,
+	0x01, 0x00, 0x00,
 }
 
 func (m *Session) Marshal() (dAtA []byte, err error) {
@@ -95,6 +119,32 @@ func (m *Session) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Servicers) > 0 {
+		for iNdEx := len(m.Servicers) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Servicers[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintSession(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if m.Application != nil {
+		{
+			size, err := m.Application.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintSession(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
 	return len(dAtA) - i, nil
 }
 
@@ -115,6 +165,16 @@ func (m *Session) Size() (n int) {
 	}
 	var l int
 	_ = l
+	if m.Application != nil {
+		l = m.Application.Size()
+		n += 1 + l + sovSession(uint64(l))
+	}
+	if len(m.Servicers) > 0 {
+		for _, e := range m.Servicers {
+			l = e.Size()
+			n += 1 + l + sovSession(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -153,6 +213,76 @@ func (m *Session) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: Session: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Application", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowSession
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthSession
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthSession
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Application == nil {
+				m.Application = &types.Application{}
+			}
+			if err := m.Application.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Servicers", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowSession
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthSession
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthSession
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Servicers = append(m.Servicers, &types1.Servicers{})
+			if err := m.Servicers[len(m.Servicers)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipSession(dAtA[iNdEx:])

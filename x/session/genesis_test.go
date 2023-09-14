@@ -3,11 +3,12 @@ package session_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	keepertest "poktroll/testutil/keeper"
 	"poktroll/testutil/nullify"
 	"poktroll/x/session"
 	"poktroll/x/session/types"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenesis(t *testing.T) {

@@ -2,11 +2,11 @@ package keeper
 
 import (
 	"context"
+	"poktroll/x/session/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"poktroll/x/session/types"
 )
 
 func (k Keeper) GetSession(goCtx context.Context, req *types.QueryGetSessionRequest) (*types.QueryGetSessionResponse, error) {
@@ -16,8 +16,10 @@ func (k Keeper) GetSession(goCtx context.Context, req *types.QueryGetSessionRequ
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// TODO: Process the query
-	_ = ctx
+	session, err := k.GetSessionForApp(ctx, req.AppAddress)
+	if err != nil {
+		return nil, err
+	}
 
-	return &types.QueryGetSessionResponse{}, nil
+	return &types.QueryGetSessionResponse{Session: *session}, nil
 }
