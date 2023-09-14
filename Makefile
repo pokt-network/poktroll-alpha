@@ -235,3 +235,13 @@ todo_count: ## Print a count of all the TODOs in the project
 .PHONY: todo_this_commit
 todo_this_commit: ## List all the TODOs needed to be done in this commit
 	grep --exclude-dir={.git,vendor,prototype,.vscode} --exclude=Makefile -r -e "TODO_IN_THIS_COMMIT" -e "DISCUSS_IN_THIS_COMMIT"
+
+
+.PHONY: ignite_regenerate
+ignite_regenerate: ## Regenerate the ignite boilerplate
+	ignite generate proto-go --yes && ignite generate openapi --yes
+
+# Create new accounts with: `ignite account create {NAME} --keyring-dir ./localnet/poktrolld --keyring-backend test`
+.PHONY: ignite_acc_list
+ignite_acc_list: ## List all the accounts in the ignite boilerplate
+	ignite account list  --keyring-dir $(POKTROLLD_HOME) --keyring-backend test
