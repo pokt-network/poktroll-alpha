@@ -127,7 +127,7 @@ poktroll_balance: ## Check the balances of both keys
 
 .PHONY: poktroll_get_session
 poktroll_get_session: ## Queries the poktroll node for session data
-	poktrolld --home=$(POKTROLLD_HOME) query poktroll get-session --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) query session get-session aaa --node $(POKTROLLD_NODE)
 
 # Ref: https://rollkit.dev/tutorials/gm-world-frontend
 .PHONY: poktroll_frontend_cosmology
@@ -236,6 +236,11 @@ todo_count: ## Print a count of all the TODOs in the project
 todo_this_commit: ## List all the TODOs needed to be done in this commit
 	grep --exclude-dir={.git,vendor,prototype,.vscode} --exclude=Makefile -r -e "TODO_IN_THIS_COMMIT" -e "DISCUSS_IN_THIS_COMMIT"
 
+.PHONY: mockgen
+mockgen: ## Use `mockgen` to generate mocks used for testing purposes of all the modules.
+	go generate ./x/application/keeper
+	go generate ./x/servicer/keeper
+	go generate ./x/session/keeper
 
 .PHONY: ignite_regenerate
 ignite_regenerate: ## Regenerate the ignite boilerplate

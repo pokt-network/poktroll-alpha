@@ -1,5 +1,7 @@
 package keeper
 
+//go:generate mockgen -destination ../../../testutil/mocks/servicer_keeper_mock.go -package mocks . ServicerKeeper
+
 import (
 	"fmt"
 
@@ -11,6 +13,13 @@ import (
 
 	"poktroll/x/servicer/types"
 )
+
+type ServicerKeeper interface {
+	SetServicers(ctx sdk.Context, servicers types.Servicers)
+	GetServicers(ctx sdk.Context, address string)
+	RemoveServicers(ctx sdk.Context, address string)
+	GetAllServicers(ctx sdk.Context) (list []types.Servicers)
+}
 
 type (
 	Keeper struct {

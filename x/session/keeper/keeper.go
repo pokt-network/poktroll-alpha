@@ -1,5 +1,7 @@
 package keeper
 
+//go:generate mockgen -destination ../../../testutil/mocks/session_keeper_mock.go -package mocks . SessionKeeper
+
 import (
 	"fmt"
 
@@ -12,12 +14,19 @@ import (
 	"poktroll/x/session/types"
 )
 
+type SessionKeeper interface {
+	GeSession(ctx sdk.Context, appAddress string) types.Session
+}
+
 type (
 	Keeper struct {
 		cdc        codec.BinaryCodec
 		storeKey   storetypes.StoreKey
 		memKey     storetypes.StoreKey
 		paramstore paramtypes.Subspace
+
+		appKeeper types.ApplicationKeeper
+		svcKeeper types.ServicerKeeper
 	}
 )
 
@@ -26,6 +35,9 @@ func NewKeeper(
 	storeKey,
 	memKey storetypes.StoreKey,
 	ps paramtypes.Subspace,
+
+	appKeeper types.ApplicationKeeper,
+	svcKeeper types.ServicerKeeper,
 
 ) *Keeper {
 	// set KeyTable if it has not already been set
@@ -38,6 +50,9 @@ func NewKeeper(
 		storeKey:   storeKey,
 		memKey:     memKey,
 		paramstore: ps,
+
+		appKeeper: appKeeper,
+		svcKeeper: svcKeeper,
 	}
 }
 

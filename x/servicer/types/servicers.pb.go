@@ -24,6 +24,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding the servicer map in the non-alpha repo
 type Servicers struct {
 	Address string      `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	Stake   *types.Coin `protobuf:"bytes,2,opt,name=stake,proto3" json:"stake,omitempty"`

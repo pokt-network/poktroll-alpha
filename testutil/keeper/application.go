@@ -18,7 +18,6 @@ import (
 	"github.com/golang/mock/gomock"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	// "github.com/cosmos/cosmos-sdk/x/auth/testutil"
 	distrtestutil "github.com/cosmos/cosmos-sdk/x/distribution/testutil"
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/stretchr/testify/require"

@@ -573,6 +573,7 @@ func New(
 		keys[applicationmoduletypes.StoreKey],
 		keys[applicationmoduletypes.MemStoreKey],
 		app.GetSubspace(applicationmoduletypes.ModuleName),
+
 		app.BankKeeper,
 	)
 	applicationModule := applicationmodule.NewAppModule(appCodec, app.ApplicationKeeper, app.AccountKeeper, app.BankKeeper)
@@ -582,6 +583,7 @@ func New(
 		keys[servicermoduletypes.StoreKey],
 		keys[servicermoduletypes.MemStoreKey],
 		app.GetSubspace(servicermoduletypes.ModuleName),
+
 		app.BankKeeper,
 	)
 	servicerModule := servicermodule.NewAppModule(appCodec, app.ServicerKeeper, app.AccountKeeper, app.BankKeeper)
@@ -591,6 +593,9 @@ func New(
 		keys[sessionmoduletypes.StoreKey],
 		keys[sessionmoduletypes.MemStoreKey],
 		app.GetSubspace(sessionmoduletypes.ModuleName),
+
+		app.ApplicationKeeper,
+		app.ServicerKeeper,
 	)
 	sessionModule := sessionmodule.NewAppModule(appCodec, app.SessionKeeper, app.AccountKeeper, app.BankKeeper)
 

@@ -6,6 +6,7 @@ option go_package = "poktroll/x/servicer/types";
 import "cosmos_proto/cosmos.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
+// CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding the servicer map in the non-alpha repo
 message Servicers {
   string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin stake = 2;

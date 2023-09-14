@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	// this line is used by starport scaffolding # 1
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -11,14 +12,15 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 
+	"poktroll/x/session/client/cli"
+	"poktroll/x/session/keeper"
+	"poktroll/x/session/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"poktroll/x/session/client/cli"
-	"poktroll/x/session/keeper"
-	"poktroll/x/session/types"
 )
 
 var (
@@ -91,9 +93,10 @@ func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 
-	keeper        keeper.Keeper
-	accountKeeper types.AccountKeeper
-	bankKeeper    types.BankKeeper
+	keeper            keeper.Keeper
+	accountKeeper     types.AccountKeeper
+	bankKeeper        types.BankKeeper
+	applicationKeeper types.ApplicationKeeper
 }
 
 func NewAppModule(

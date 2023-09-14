@@ -1,8 +1,13 @@
 syntax = "proto3";
 package poktroll.session;
 
+import "poktroll/servicer/servicers.proto";
+import "poktroll/application/application.proto";
+
 option go_package = "poktroll/x/session/types";
 
 message Session {
-  
+    application.Application application = 1;
+    repeated servicer.Servicers servicers = 2;
+
 }
