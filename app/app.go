@@ -113,6 +113,7 @@ import (
 	applicationmodule "poktroll/x/application"
 	applicationmodulekeeper "poktroll/x/application/keeper"
 	applicationmoduletypes "poktroll/x/application/types"
+	"poktroll/x/poktroll"
 	poktrollmodule "poktroll/x/poktroll"
 	poktrollmodulekeeper "poktroll/x/poktroll/keeper"
 	poktrollmoduletypes "poktroll/x/poktroll/types"
@@ -556,7 +557,7 @@ func New(
 		keys[poktrollmoduletypes.StoreKey],
 		keys[poktrollmoduletypes.MemStoreKey],
 		app.GetSubspace(poktrollmoduletypes.ModuleName),
-	)
+	) // TECHDEBT: Do something with the error
 	poktrollModule := poktrollmodule.NewAppModule(appCodec, app.PoktrollKeeper, app.AccountKeeper, app.BankKeeper)
 
 	app.PortalKeeper = *portalmodulekeeper.NewKeeper(
@@ -583,7 +584,23 @@ func New(
 		app.GetSubspace(servicermoduletypes.ModuleName),
 		app.BankKeeper,
 	)
-	servicerModule := servicermodule.NewAppModule(appCodec, app.ServicerKeeper, app.AccountKeeper, app.BankKeeper)
+
+	servicerEnabled := appOpts.Get(poktroll.FlagEnableServicerMode).(bool)
+	applicationEnabled := appOpts.Get(poktroll.FlagEnableApplicationMode).(bool)
+	portalEnabled := appOpts.Get(poktroll.FlagEnablePortalMode).(bool)
+
+	var actorModule module.AppModule
+	if servicerEnabled && !applicationEnabled && !portalEnabled {
+		actorModule = servicermodule.NewAppModule(appCodec, app.ServicerKeeper, app.AccountKeeper, app.BankKeeper)
+	} else if applicationEnabled && !servicerEnabled && !portalEnabled {
+		// actorModule = applicationmodule.NewAppModule(appCodec, app.ApplicationKeeper, app.AccountKeeper, app.BankKeeper)
+	} else if portalEnabled && !applicationEnabled && !servicerEnabled {
+		// actorModule = portalmodule.NewAppModule(appCodec, app.PortalKeeper, app.AccountKeeper, app.BankKeeper)
+	} else if !portalEnabled && !applicationEnabled && !servicerEnabled {
+		// No actor module
+	} else {
+		panic("only one of the following flags can be set: --servicer, --application, --portal")
+	}
 
 	app.SessionKeeper = *sessionmodulekeeper.NewKeeper(
 		appCodec,
@@ -628,7 +645,7 @@ func New(
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
 
-	app.mm = module.NewManager(
+	modules := []module.AppModule{
 		genutil.NewAppModule(
 			app.AccountKeeper,
 			app.StakingKeeper,
@@ -657,12 +674,22 @@ func New(
 		poktrollModule,
 		portalModule,
 		applicationModule,
-		servicerModule,
 		sessionModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 
-		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
+	}
+
+	if servicerEnabled || applicationEnabled || portalEnabled {
+		modules = append(modules, actorModule)
+	}
+
+	// always be last to make sure that it checks for all invariants and not only part of them
+	modules = append(
+		modules,
+		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)),
 	)
+
+	app.mm = module.NewManager(modules...)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the

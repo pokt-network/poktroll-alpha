@@ -4,18 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	// this line is used by starport scaffolding # 1
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
 	abci "github.com/cometbft/cometbft/abci/types"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+
 	"poktroll/x/poktroll/client/cli"
 	"poktroll/x/poktroll/keeper"
 	"poktroll/x/poktroll/types"
@@ -24,6 +25,13 @@ import (
 var (
 	_ module.AppModule      = AppModule{}
 	_ module.AppModuleBasic = AppModuleBasic{}
+)
+
+// Module init related flags
+const (
+	FlagEnableServicerMode    = "servicer"
+	FlagEnableApplicationMode = "application"
+	FlagEnablePortalMode      = "portal"
 )
 
 // ----------------------------------------------------------------------------
@@ -145,4 +153,11 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // EndBlock contains the logic that is automatically triggered at the end of each block
 func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
+}
+
+// AddModuleInitFlags implements servertypes.ModuleInitFlags interface.
+func AddModuleInitFlags(startCmd *cobra.Command) {
+	startCmd.Flags().Bool(FlagEnableServicerMode, false, "Start full node in servicer mode")
+	startCmd.Flags().Bool(FlagEnableApplicationMode, false, "Start full node in application mode")
+	startCmd.Flags().Bool(FlagEnablePortalMode, false, "Start full node in portal mode")
 }

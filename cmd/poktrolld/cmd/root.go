@@ -41,6 +41,7 @@ import (
 
 	"poktroll/app"
 	appparams "poktroll/app/params"
+	"poktroll/x/poktroll"
 )
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
@@ -201,6 +202,8 @@ func txCommand() *cobra.Command {
 }
 
 func addModuleInitFlags(startCmd *cobra.Command) {
+	poktroll.AddModuleInitFlags(startCmd)
+
 	crisis.AddModuleInitFlags(startCmd)
 	// this line is used by starport scaffolding # root/arguments
 }
