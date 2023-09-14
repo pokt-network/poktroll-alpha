@@ -275,3 +275,5 @@ replace github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.2021
 replace github.com/cosmos/cosmos-sdk => github.com/rollkit/cosmos-sdk v0.47.3-rollkit-v0.10.2-no-fraud-proofs
 
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
+
+replace github.com/pokt-network/smt => github.com/pokt-network/smt v0.6.2-0.20230907101623-9d2e4983c5f1
