@@ -18,7 +18,6 @@ func CmdUnstakeServicer() *cobra.Command {
 		Short: "Broadcast message unstake-servicer",
 		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err

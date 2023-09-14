@@ -2,6 +2,7 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
@@ -9,9 +10,10 @@ const TypeMsgStakeServicer = "stake_servicer"
 
 var _ sdk.Msg = &MsgStakeServicer{}
 
-func NewMsgStakeServicer(address string) *MsgStakeServicer {
+func NewMsgStakeServicer(address string, stakeAmount types.Coin) *MsgStakeServicer {
 	return &MsgStakeServicer{
-		Address: address,
+		Address:     address,
+		StakeAmount: &stakeAmount,
 	}
 }
 
@@ -36,10 +38,21 @@ func (msg *MsgStakeServicer) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+// CLEANUP: Use `errors.Join` after upgrading to a newer version of go
 func (msg *MsgStakeServicer) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Address)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid address address (%s)", err)
+		return sdkerrors.ErrInvalidAddress
+	}
+	if msg.StakeAmount == nil {
+		return ErrNilStakeAmount
+	}
+	stakeAmount, err := sdk.ParseCoinNormalized(msg.StakeAmount.String())
+	if !stakeAmount.IsValid() {
+		return stakeAmount.Validate()
+	}
+	if err != nil {
+		return err
 	}
 	return nil
 }
