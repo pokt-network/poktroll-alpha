@@ -23,7 +23,7 @@ func (gs GenesisState) Validate() error {
 	servicersIndexMap := make(map[string]struct{})
 
 	for _, elem := range gs.ServicersList {
-		index := string(ServicersKey(elem.Index))
+		index := string(ServicersKey(elem.Address))
 		if _, ok := servicersIndexMap[index]; ok {
 			return fmt.Errorf("duplicated index for servicers")
 		}

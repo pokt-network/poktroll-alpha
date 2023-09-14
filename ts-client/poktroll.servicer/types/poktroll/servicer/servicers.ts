@@ -4,17 +4,17 @@ import _m0 from "protobufjs/minimal";
 export const protobufPackage = "poktroll.servicer";
 
 export interface Servicers {
-  index: string;
+  address: string;
 }
 
 function createBaseServicers(): Servicers {
-  return { index: "" };
+  return { address: "" };
 }
 
 export const Servicers = {
   encode(message: Servicers, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.index !== "") {
-      writer.uint32(10).string(message.index);
+    if (message.address !== "") {
+      writer.uint32(10).string(message.address);
     }
     return writer;
   },
@@ -27,7 +27,7 @@ export const Servicers = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.index = reader.string();
+          message.address = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -38,18 +38,18 @@ export const Servicers = {
   },
 
   fromJSON(object: any): Servicers {
-    return { index: isSet(object.index) ? String(object.index) : "" };
+    return { address: isSet(object.address) ? String(object.address) : "" };
   },
 
   toJSON(message: Servicers): unknown {
     const obj: any = {};
-    message.index !== undefined && (obj.index = message.index);
+    message.address !== undefined && (obj.address = message.address);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<Servicers>, I>>(object: I): Servicers {
     const message = createBaseServicers();
-    message.index = object.index ?? "";
+    message.address = object.address ?? "";
     return message;
   },
 };

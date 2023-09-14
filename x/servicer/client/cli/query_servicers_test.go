@@ -2,12 +2,17 @@ package cli_test
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 	"testing"
+	"time"
 
+	"cosmossdk.io/math"
 	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -25,13 +30,21 @@ func networkWithServicersObjects(t *testing.T, n int) (*network.Network, []types
 	t.Helper()
 	cfg := network.DefaultConfig()
 	state := types.GenesisState{}
-	for i := 0; i < n; i++ {
-		servicers := types.Servicers{
-			Index: strconv.Itoa(i),
+
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	accounts := simtypes.RandomAccounts(r, n)
+
+	for i := int64(0); i < int64(n); i++ {
+		account := accounts[i].Address.String()
+		coin := sdk.NewCoin("stake", math.NewInt(i))
+		application := types.Servicers{
+			Address: account,
+			Stake:   &coin,
 		}
-		nullify.Fill(&servicers)
-		state.ServicersList = append(state.ServicersList, servicers)
+		nullify.Fill(&application)
+		state.ServicersList = append(state.ServicersList, application)
 	}
+
 	buf, err := cfg.Codec.MarshalJSON(&state)
 	require.NoError(t, err)
 	cfg.GenesisState[types.ModuleName] = buf
@@ -47,7 +60,7 @@ func TestShowServicers(t *testing.T) {
 	}
 	tests := []struct {
 		desc    string
-		idIndex string
+		address string
 
 		args []string
 		err  error
@@ -55,14 +68,14 @@ func TestShowServicers(t *testing.T) {
 	}{
 		{
 			desc:    "found",
-			idIndex: objs[0].Index,
+			address: objs[0].Address,
 
 			args: common,
 			obj:  objs[0],
 		},
 		{
 			desc:    "not found",
-			idIndex: strconv.Itoa(100000),
+			address: strconv.Itoa(100000),
 
 			args: common,
 			err:  status.Error(codes.NotFound, "not found"),
@@ -71,7 +84,7 @@ func TestShowServicers(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.desc, func(t *testing.T) {
 			args := []string{
-				tc.idIndex,
+				tc.address,
 			}
 			args = append(args, tc.args...)
 			out, err := clitestutil.ExecTestCLICmd(ctx, cli.CmdShowServicers(), args)

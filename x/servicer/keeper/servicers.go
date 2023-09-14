@@ -1,9 +1,10 @@
 package keeper
 
 import (
+	"poktroll/x/servicer/types"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"poktroll/x/servicer/types"
 )
 
 // SetServicers set a specific servicers in the store from its index
@@ -11,20 +12,20 @@ func (k Keeper) SetServicers(ctx sdk.Context, servicers types.Servicers) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ServicersKeyPrefix))
 	b := k.cdc.MustMarshal(&servicers)
 	store.Set(types.ServicersKey(
-		servicers.Index,
+		servicers.Address,
 	), b)
 }
 
 // GetServicers returns a servicers from its index
 func (k Keeper) GetServicers(
 	ctx sdk.Context,
-	index string,
+	address string,
 
 ) (val types.Servicers, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ServicersKeyPrefix))
 
 	b := store.Get(types.ServicersKey(
-		index,
+		address,
 	))
 	if b == nil {
 		return val, false
@@ -37,12 +38,12 @@ func (k Keeper) GetServicers(
 // RemoveServicers removes a servicers from the store
 func (k Keeper) RemoveServicers(
 	ctx sdk.Context,
-	index string,
+	address string,
 
 ) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ServicersKeyPrefix))
 	store.Delete(types.ServicersKey(
-		index,
+		address,
 	))
 }
 

@@ -31,21 +31,21 @@ func TestServicersQuerySingle(t *testing.T) {
 		{
 			desc: "First",
 			request: &types.QueryGetServicersRequest{
-				Index: msgs[0].Index,
+				Address: msgs[0].Address,
 			},
 			response: &types.QueryGetServicersResponse{Servicers: msgs[0]},
 		},
 		{
 			desc: "Second",
 			request: &types.QueryGetServicersRequest{
-				Index: msgs[1].Index,
+				Address: msgs[1].Address,
 			},
 			response: &types.QueryGetServicersResponse{Servicers: msgs[1]},
 		},
 		{
 			desc: "KeyNotFound",
 			request: &types.QueryGetServicersRequest{
-				Index: strconv.Itoa(100000),
+				Address: strconv.Itoa(100000),
 			},
 			err: status.Error(codes.NotFound, "not found"),
 		},

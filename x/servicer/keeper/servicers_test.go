@@ -18,7 +18,7 @@ var _ = strconv.IntSize
 func createNServicers(keeper *keeper.Keeper, ctx sdk.Context, n int) []types.Servicers {
 	items := make([]types.Servicers, n)
 	for i := range items {
-		items[i].Index = strconv.Itoa(i)
+		items[i].Address = strconv.Itoa(i)
 
 		keeper.SetServicers(ctx, items[i])
 	}
@@ -30,7 +30,7 @@ func TestServicersGet(t *testing.T) {
 	items := createNServicers(keeper, ctx, 10)
 	for _, item := range items {
 		rst, found := keeper.GetServicers(ctx,
-			item.Index,
+			item.Address,
 		)
 		require.True(t, found)
 		require.Equal(t,
@@ -44,10 +44,10 @@ func TestServicersRemove(t *testing.T) {
 	items := createNServicers(keeper, ctx, 10)
 	for _, item := range items {
 		keeper.RemoveServicers(ctx,
-			item.Index,
+			item.Address,
 		)
 		_, found := keeper.GetServicers(ctx,
-			item.Index,
+			item.Address,
 		)
 		require.False(t, found)
 	}

@@ -1,13 +1,27 @@
 package types_test
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 
-	"github.com/stretchr/testify/require"
 	"poktroll/x/servicer/types"
+
+	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/stretchr/testify/require"
 )
 
+// TODO: Replace all `stake` denominations with `upokt` once we get it to start up correctly
+
 func TestGenesisState_Validate(t *testing.T) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	accs := simtypes.RandomAccounts(r, 2)
+
+	coin1 := sdk.NewCoin("stake", math.NewInt(1))
+	coin2 := sdk.NewCoin("stake", math.NewInt(12))
+
 	tests := []struct {
 		desc     string
 		genState *types.GenesisState
@@ -24,10 +38,12 @@ func TestGenesisState_Validate(t *testing.T) {
 
 				ServicersList: []types.Servicers{
 					{
-						Index: "0",
+						Address: accs[0].Address.String(),
+						Stake:   &coin1,
 					},
 					{
-						Index: "1",
+						Address: accs[1].Address.String(),
+						Stake:   &coin2,
 					},
 				},
 				// this line is used by starport scaffolding # types/genesis/validField
@@ -39,10 +55,12 @@ func TestGenesisState_Validate(t *testing.T) {
 			genState: &types.GenesisState{
 				ServicersList: []types.Servicers{
 					{
-						Index: "0",
+						Address: accs[0].Address.String(),
+						Stake:   &coin1,
 					},
 					{
-						Index: "0",
+						Address: accs[0].Address.String(),
+						Stake:   &coin2,
 					},
 				},
 			},

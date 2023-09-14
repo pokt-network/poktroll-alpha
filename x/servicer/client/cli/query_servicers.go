@@ -57,10 +57,10 @@ func CmdShowServicers() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 
-			argIndex := args[0]
+			argAddress := args[0]
 
 			params := &types.QueryGetServicersRequest{
-				Index: argIndex,
+				Address: argAddress,
 			}
 
 			res, err := queryClient.Servicers(cmd.Context(), params)
