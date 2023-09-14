@@ -46664,38 +46664,6 @@ paths:
                   additionalProperties: {}
       tags:
         - Query
-  /poktroll/poktroll/get_session:
-    get:
-      summary: Queries a list of GetSession items.
-      operationId: PoktrollPoktrollGetSession
-      responses:
-        '200':
-          description: A successful response.
-          schema:
-            type: object
-            properties:
-              placeholder_text:
-                type: string
-        default:
-          description: An unexpected error response.
-          schema:
-            type: object
-            properties:
-              code:
-                type: integer
-                format: int32
-              message:
-                type: string
-              details:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    '@type':
-                      type: string
-                  additionalProperties: {}
-      tags:
-        - Query
   /poktroll/poktroll/params:
     get:
       summary: Parameters queries the parameters of the module.
@@ -75878,11 +75846,6 @@ definitions:
   poktroll.poktroll.Params:
     type: object
     description: Params defines the parameters for the module.
-  poktroll.poktroll.QueryGetSessionResponse:
-    type: object
-    properties:
-      placeholder_text:
-        type: string
   poktroll.poktroll.QueryParamsResponse:
     type: object
     properties:
