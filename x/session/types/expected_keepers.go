@@ -1,6 +1,8 @@
 package types
 
 import (
+	prt "poktroll/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 )
@@ -15,4 +17,12 @@ type AccountKeeper interface {
 type BankKeeper interface {
 	SpendableCoins(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
 	// Methods imported from bank should be defined here
+}
+
+type ApplicationKeeper interface {
+	GetAllApplication(ctx sdk.Context) (list []prt.ApplicationI)
+}
+
+type ServicerKeeper interface {
+	GetAllServicers(ctx sdk.Context) (list []prt.ServicerI)
 }

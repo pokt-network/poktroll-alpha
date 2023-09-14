@@ -126,6 +126,7 @@ import (
 	sessionmodule "poktroll/x/session"
 	sessionmodulekeeper "poktroll/x/session/keeper"
 	sessionmoduletypes "poktroll/x/session/types"
+
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "poktroll/app/params"
@@ -590,6 +591,8 @@ func New(
 		keys[sessionmoduletypes.StoreKey],
 		keys[sessionmoduletypes.MemStoreKey],
 		app.GetSubspace(sessionmoduletypes.ModuleName),
+		app.ApplicationKeeper,
+		app.ServicerKeeper,
 	)
 	sessionModule := sessionmodule.NewAppModule(appCodec, app.SessionKeeper, app.AccountKeeper, app.BankKeeper)
 
