@@ -3,12 +3,15 @@ package types
 import (
 	"testing"
 
+	"poktroll/testutil/sample"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
-	"poktroll/testutil/sample"
 )
 
 func TestMsgStakeServicer_ValidateBasic(t *testing.T) {
+	coins := sdk.NewCoin("stake", sdk.NewInt(int64(1)))
 	tests := []struct {
 		name string
 		msg  MsgStakeServicer
@@ -21,9 +24,17 @@ func TestMsgStakeServicer_ValidateBasic(t *testing.T) {
 			},
 			err: sdkerrors.ErrInvalidAddress,
 		}, {
-			name: "valid address",
+			name: "missing stake amount",
 			msg: MsgStakeServicer{
 				Address: sample.AccAddress(),
+			},
+			err: ErrNilStakeAmount,
+		},
+		{
+			name: "valid address and non nil stake amount",
+			msg: MsgStakeServicer{
+				Address:     sample.AccAddress(),
+				StakeAmount: &coins,
 			},
 		},
 	}
