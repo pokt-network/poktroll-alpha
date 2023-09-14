@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+
 	// this line is used by starport scaffolding # 1
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -17,6 +19,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"poktroll/x/servicer/client/cli"
+	"poktroll/x/servicer/components/relayer"
 	"poktroll/x/servicer/keeper"
 	"poktroll/x/servicer/types"
 )
@@ -94,6 +97,9 @@ type AppModule struct {
 	keeper        keeper.Keeper
 	accountKeeper types.AccountKeeper
 	bankKeeper    types.BankKeeper
+
+	// Servicer private components
+	relayer        *relayer.Relayer
 }
 
 func NewAppModule(
@@ -102,11 +108,15 @@ func NewAppModule(
 	accountKeeper types.AccountKeeper,
 	bankKeeper types.BankKeeper,
 ) AppModule {
+	relayer := relayer.NewRelayer(log.Default())
+
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
 		accountKeeper:  accountKeeper,
 		bankKeeper:     bankKeeper,
+
+		relayer:        relayer,
 	}
 }
 
