@@ -7,11 +7,34 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
+import { MsgUnstakeApplication } from "./types/poktroll/application/tx";
+import { MsgStakeApplication } from "./types/poktroll/application/tx";
 
+import { Application as typeApplication} from "./types"
 import { Params as typeParams} from "./types"
 
-export {  };
+export { MsgUnstakeApplication, MsgStakeApplication };
 
+type sendMsgUnstakeApplicationParams = {
+  value: MsgUnstakeApplication,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgStakeApplicationParams = {
+  value: MsgStakeApplication,
+  fee?: StdFee,
+  memo?: string
+};
+
+
+type msgUnstakeApplicationParams = {
+  value: MsgUnstakeApplication,
+};
+
+type msgStakeApplicationParams = {
+  value: MsgStakeApplication,
+};
 
 
 export const registry = new Registry(msgTypes);
@@ -43,6 +66,50 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
+		async sendMsgUnstakeApplication({ value, fee, memo }: sendMsgUnstakeApplicationParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgUnstakeApplication: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgUnstakeApplication({ value: MsgUnstakeApplication.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgUnstakeApplication: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgStakeApplication({ value, fee, memo }: sendMsgStakeApplicationParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgStakeApplication: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgStakeApplication({ value: MsgStakeApplication.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgStakeApplication: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		
+		msgUnstakeApplication({ value }: msgUnstakeApplicationParams): EncodeObject {
+			try {
+				return { typeUrl: "/poktroll.application.MsgUnstakeApplication", value: MsgUnstakeApplication.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgUnstakeApplication: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgStakeApplication({ value }: msgStakeApplicationParams): EncodeObject {
+			try {
+				return { typeUrl: "/poktroll.application.MsgStakeApplication", value: MsgStakeApplication.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgStakeApplication: Could not create message: ' + e.message)
+			}
+		},
 		
 	}
 };
@@ -66,6 +133,7 @@ class SDKModule {
 		this.query = queryClient({ addr: client.env.apiURL });		
 		this.updateTX(client);
 		this.structure =  {
+						Application: getStructure(typeApplication.fromPartial({})),
 						Params: getStructure(typeParams.fromPartial({})),
 						
 		};

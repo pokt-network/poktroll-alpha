@@ -1,7 +1,7 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
 import { PageRequest, PageResponse } from "../../cosmos/base/query/v1beta1/pagination";
-import { Application, Servicer } from "./actor";
+import { Servicer } from "./actor";
 import { Params } from "./params";
 
 export const protobufPackage = "poktroll.poktroll";
@@ -29,15 +29,6 @@ export interface QueryServicersRequest {
 
 export interface QueryServicersResponse {
   servicers: Servicer[];
-  pagination: PageResponse | undefined;
-}
-
-export interface QueryApplicationRequest {
-  pagination: PageRequest | undefined;
-}
-
-export interface QueryApplicationResponse {
-  applications: Application[];
   pagination: PageResponse | undefined;
 }
 
@@ -330,123 +321,6 @@ export const QueryServicersResponse = {
   },
 };
 
-function createBaseQueryApplicationRequest(): QueryApplicationRequest {
-  return { pagination: undefined };
-}
-
-export const QueryApplicationRequest = {
-  encode(message: QueryApplicationRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.pagination !== undefined) {
-      PageRequest.encode(message.pagination, writer.uint32(10).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): QueryApplicationRequest {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseQueryApplicationRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.pagination = PageRequest.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): QueryApplicationRequest {
-    return { pagination: isSet(object.pagination) ? PageRequest.fromJSON(object.pagination) : undefined };
-  },
-
-  toJSON(message: QueryApplicationRequest): unknown {
-    const obj: any = {};
-    message.pagination !== undefined
-      && (obj.pagination = message.pagination ? PageRequest.toJSON(message.pagination) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<QueryApplicationRequest>, I>>(object: I): QueryApplicationRequest {
-    const message = createBaseQueryApplicationRequest();
-    message.pagination = (object.pagination !== undefined && object.pagination !== null)
-      ? PageRequest.fromPartial(object.pagination)
-      : undefined;
-    return message;
-  },
-};
-
-function createBaseQueryApplicationResponse(): QueryApplicationResponse {
-  return { applications: [], pagination: undefined };
-}
-
-export const QueryApplicationResponse = {
-  encode(message: QueryApplicationResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.applications) {
-      Application.encode(v!, writer.uint32(10).fork()).ldelim();
-    }
-    if (message.pagination !== undefined) {
-      PageResponse.encode(message.pagination, writer.uint32(18).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): QueryApplicationResponse {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseQueryApplicationResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.applications.push(Application.decode(reader, reader.uint32()));
-          break;
-        case 2:
-          message.pagination = PageResponse.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): QueryApplicationResponse {
-    return {
-      applications: Array.isArray(object?.applications)
-        ? object.applications.map((e: any) => Application.fromJSON(e))
-        : [],
-      pagination: isSet(object.pagination) ? PageResponse.fromJSON(object.pagination) : undefined,
-    };
-  },
-
-  toJSON(message: QueryApplicationResponse): unknown {
-    const obj: any = {};
-    if (message.applications) {
-      obj.applications = message.applications.map((e) => e ? Application.toJSON(e) : undefined);
-    } else {
-      obj.applications = [];
-    }
-    message.pagination !== undefined
-      && (obj.pagination = message.pagination ? PageResponse.toJSON(message.pagination) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<QueryApplicationResponse>, I>>(object: I): QueryApplicationResponse {
-    const message = createBaseQueryApplicationResponse();
-    message.applications = object.applications?.map((e) => Application.fromPartial(e)) || [];
-    message.pagination = (object.pagination !== undefined && object.pagination !== null)
-      ? PageResponse.fromPartial(object.pagination)
-      : undefined;
-    return message;
-  },
-};
-
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
@@ -455,8 +329,6 @@ export interface Query {
   GetSession(request: QueryGetSessionRequest): Promise<QueryGetSessionResponse>;
   /** Queries for all staked Servicers */
   Servicers(request: QueryServicersRequest): Promise<QueryServicersResponse>;
-  /** Queries for all staked Applications */
-  Application(request: QueryApplicationRequest): Promise<QueryApplicationResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -466,7 +338,6 @@ export class QueryClientImpl implements Query {
     this.Params = this.Params.bind(this);
     this.GetSession = this.GetSession.bind(this);
     this.Servicers = this.Servicers.bind(this);
-    this.Application = this.Application.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
@@ -484,12 +355,6 @@ export class QueryClientImpl implements Query {
     const data = QueryServicersRequest.encode(request).finish();
     const promise = this.rpc.request("poktroll.poktroll.Query", "Servicers", data);
     return promise.then((data) => QueryServicersResponse.decode(new _m0.Reader(data)));
-  }
-
-  Application(request: QueryApplicationRequest): Promise<QueryApplicationResponse> {
-    const data = QueryApplicationRequest.encode(request).finish();
-    const promise = this.rpc.request("poktroll.poktroll.Query", "Application", data);
-    return promise.then((data) => QueryApplicationResponse.decode(new _m0.Reader(data)));
   }
 }
 

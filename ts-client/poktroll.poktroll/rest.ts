@@ -9,13 +9,6 @@
  * ---------------------------------------------------------------
  */
 
-export interface PoktrollApplication {
-  stake_info?: PoktrollStakeInfo;
-  application_params?: PoktrollApplicationParams;
-}
-
-export type PoktrollApplicationParams = object;
-
 export interface PoktrollMsgStakeResponse {
   /** TODO: Need to return success/error codes */
   success?: boolean;
@@ -30,21 +23,6 @@ export interface PoktrollMsgUnstakeResponse {
  * Params defines the parameters for the module.
  */
 export type PoktrollParams = object;
-
-export interface PoktrollQueryApplicationResponse {
-  applications?: PoktrollApplication[];
-
-  /**
-   * PageResponse is to be embedded in gRPC response messages where the
-   * corresponding request message has used PageRequest.
-   *
-   *  message SomeResponse {
-   *          repeated Bar results = 1;
-   *          PageResponse page = 2;
-   *  }
-   */
-  pagination?: V1Beta1PageResponse;
-}
 
 export interface PoktrollQueryGetSessionResponse {
   placeholder_text?: string;
@@ -294,32 +272,6 @@ export class HttpClient<SecurityDataType = unknown> {
  * @version version not set
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
-  /**
-   * No description
-   *
-   * @tags Query
-   * @name QueryApplication
-   * @summary Queries for all staked Applications
-   * @request GET:/poktroll/poktroll/application
-   */
-  queryApplication = (
-    query?: {
-      "pagination.key"?: string;
-      "pagination.offset"?: string;
-      "pagination.limit"?: string;
-      "pagination.count_total"?: boolean;
-      "pagination.reverse"?: boolean;
-    },
-    params: RequestParams = {},
-  ) =>
-    this.request<PoktrollQueryApplicationResponse, RpcStatus>({
-      path: `/poktroll/poktroll/application`,
-      method: "GET",
-      query: query,
-      format: "json",
-      ...params,
-    });
-
   /**
    * No description
    *
