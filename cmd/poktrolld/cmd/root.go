@@ -74,6 +74,14 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 				return err
 			}
 
+			customAppTemplate, customAppConfig := initAppConfig()
+			customTMConfig := initTendermintConfig()
+			if err := server.InterceptConfigsPreRunHandler(
+				cmd, customAppTemplate, customAppConfig, customTMConfig,
+			); err != nil {
+				return err
+			}
+
 			factory, err := tx.NewFactoryCLI(initClientCtx, cmd.Flags())
 			if err != nil {
 				return err
@@ -84,16 +92,14 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 			serverCtx.Viper.Set("actorMode", "servicer")
 			serverCtx.Viper.Set("clientCtx", initClientCtx)
 			serverCtx.Viper.Set("factory", factory)
+			if err := server.SetCmdServerContext(cmd, serverCtx); err != nil {
+				return err
+			}
 
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
-
-			customAppTemplate, customAppConfig := initAppConfig()
-			customTMConfig := initTendermintConfig()
-			return server.InterceptConfigsPreRunHandler(
-				cmd, customAppTemplate, customAppConfig, customTMConfig,
-			)
+			return nil
 		},
 	}
 

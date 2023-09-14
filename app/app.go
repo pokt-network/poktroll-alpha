@@ -590,8 +590,8 @@ func New(
 	applicationEnabled := appOpts.Get(poktroll.FlagEnableApplicationMode).(bool)
 	portalEnabled := appOpts.Get(poktroll.FlagEnablePortalMode).(bool)
 
-	clientCtx := appOpts.Get("clientCtx").(cosmosClient.Context)
 	factory := appOpts.Get("factory").(tx.Factory)
+	clientCtx := appOpts.Get("clientCtx").(cosmosClient.Context)
 
 	var actorModule module.AppModule
 	if servicerEnabled && !applicationEnabled && !portalEnabled {
