@@ -20,6 +20,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"poktroll/x/servicer/client/cli"
 	"poktroll/x/servicer/components/relayer"
+	sessionmanager "poktroll/x/servicer/components/session_manager"
 	"poktroll/x/servicer/keeper"
 	"poktroll/x/servicer/types"
 )
@@ -100,6 +101,9 @@ type AppModule struct {
 
 	// Servicer private components
 	relayer        *relayer.Relayer
+	sessionManager *sessionmanager.SessionManager
+
+	newBlocks chan *types.Block
 }
 
 func NewAppModule(
@@ -109,6 +113,8 @@ func NewAppModule(
 	bankKeeper types.BankKeeper,
 ) AppModule {
 	relayer := relayer.NewRelayer(log.Default())
+	newBlocks := make(chan *types.Block)
+	sessionManager := sessionmanager.NewSessionManager(newBlocks)
 
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
@@ -117,6 +123,8 @@ func NewAppModule(
 		bankKeeper:     bankKeeper,
 
 		relayer:        relayer,
+		sessionManager: sessionManager,
+		newBlocks:      newBlocks,
 	}
 }
 
@@ -153,6 +161,10 @@ func (AppModule) ConsensusVersion() uint64 { return 1 }
 func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // EndBlock contains the logic that is automatically triggered at the end of each block
-func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(ctx sdk.Context, req abci.RequestEndBlock) []abci.ValidatorUpdate {
+	am.newBlocks <- &types.Block{
+		Height: ctx.BlockHeight(),
+		Hash:   ctx.HeaderHash(),
+	}
 	return []abci.ValidatorUpdate{}
 }
