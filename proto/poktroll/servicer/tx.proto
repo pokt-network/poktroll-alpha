@@ -6,11 +6,18 @@ option go_package = "poktroll/x/servicer/types";
 
 // Msg defines the Msg service.
 service Msg {
-  rpc StakeServicer (MsgStakeServicer) returns (MsgStakeServicerResponse);
+  rpc StakeServicer   (MsgStakeServicer  ) returns (MsgStakeServicerResponse  );
+  rpc UnstakeServicer (MsgUnstakeServicer) returns (MsgUnstakeServicerResponse);
 }
 message MsgStakeServicer {
   string address = 1;
 }
 
 message MsgStakeServicerResponse {}
+
+message MsgUnstakeServicer {
+  string address = 1;
+}
+
+message MsgUnstakeServicerResponse {}
 

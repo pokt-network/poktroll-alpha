@@ -107,27 +107,111 @@ func (m *MsgStakeServicerResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgStakeServicerResponse proto.InternalMessageInfo
 
+type MsgUnstakeServicer struct {
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+}
+
+func (m *MsgUnstakeServicer) Reset()         { *m = MsgUnstakeServicer{} }
+func (m *MsgUnstakeServicer) String() string { return proto.CompactTextString(m) }
+func (*MsgUnstakeServicer) ProtoMessage()    {}
+func (*MsgUnstakeServicer) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5dd68e762f3e7412, []int{2}
+}
+func (m *MsgUnstakeServicer) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUnstakeServicer) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUnstakeServicer.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUnstakeServicer) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUnstakeServicer.Merge(m, src)
+}
+func (m *MsgUnstakeServicer) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUnstakeServicer) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUnstakeServicer.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUnstakeServicer proto.InternalMessageInfo
+
+func (m *MsgUnstakeServicer) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+type MsgUnstakeServicerResponse struct {
+}
+
+func (m *MsgUnstakeServicerResponse) Reset()         { *m = MsgUnstakeServicerResponse{} }
+func (m *MsgUnstakeServicerResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgUnstakeServicerResponse) ProtoMessage()    {}
+func (*MsgUnstakeServicerResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5dd68e762f3e7412, []int{3}
+}
+func (m *MsgUnstakeServicerResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgUnstakeServicerResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgUnstakeServicerResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgUnstakeServicerResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgUnstakeServicerResponse.Merge(m, src)
+}
+func (m *MsgUnstakeServicerResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgUnstakeServicerResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgUnstakeServicerResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgUnstakeServicerResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*MsgStakeServicer)(nil), "poktroll.servicer.MsgStakeServicer")
 	proto.RegisterType((*MsgStakeServicerResponse)(nil), "poktroll.servicer.MsgStakeServicerResponse")
+	proto.RegisterType((*MsgUnstakeServicer)(nil), "poktroll.servicer.MsgUnstakeServicer")
+	proto.RegisterType((*MsgUnstakeServicerResponse)(nil), "poktroll.servicer.MsgUnstakeServicerResponse")
 }
 
 func init() { proto.RegisterFile("poktroll/servicer/tx.proto", fileDescriptor_5dd68e762f3e7412) }
 
 var fileDescriptor_5dd68e762f3e7412 = []byte{
-	// 179 bytes of a gzipped FileDescriptorProto
+	// 219 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x92, 0x2a, 0xc8, 0xcf, 0x2e,
 	0x29, 0xca, 0xcf, 0xc9, 0xd1, 0x2f, 0x4e, 0x2d, 0x2a, 0xcb, 0x4c, 0x4e, 0x2d, 0xd2, 0x2f, 0xa9,
 	0xd0, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x12, 0x84, 0xc9, 0xe9, 0xc1, 0xe4, 0x94, 0x74, 0xb8,
 	0x04, 0x7c, 0x8b, 0xd3, 0x83, 0x4b, 0x12, 0xb3, 0x53, 0x83, 0xa1, 0x62, 0x42, 0x12, 0x5c, 0xec,
 	0x89, 0x29, 0x29, 0x45, 0xa9, 0xc5, 0xc5, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x41, 0x30, 0xae,
-	0x92, 0x14, 0x97, 0x04, 0xba, 0xea, 0xa0, 0xd4, 0xe2, 0x82, 0xfc, 0xbc, 0xe2, 0x54, 0xa3, 0x0c,
-	0x2e, 0x66, 0xdf, 0xe2, 0x74, 0xa1, 0x44, 0x2e, 0x5e, 0x54, 0xd3, 0x94, 0xf5, 0x30, 0x6c, 0xd5,
-	0x43, 0x37, 0x44, 0x4a, 0x9b, 0x08, 0x45, 0x30, 0x9b, 0x9c, 0x8c, 0x4f, 0x3c, 0x92, 0x63, 0xbc,
-	0xf0, 0x48, 0x8e, 0xf1, 0xc1, 0x23, 0x39, 0xc6, 0x09, 0x8f, 0xe5, 0x18, 0x2e, 0x3c, 0x96, 0x63,
-	0xb8, 0xf1, 0x58, 0x8e, 0x21, 0x4a, 0x12, 0xee, 0xf9, 0x0a, 0x24, 0xef, 0x57, 0x16, 0xa4, 0x16,
-	0x27, 0xb1, 0x81, 0x83, 0xc0, 0x18, 0x10, 0x00, 0x00, 0xff, 0xff, 0x21, 0x8b, 0x9e, 0xbb, 0x20,
-	0x01, 0x00, 0x00,
+	0x92, 0x14, 0x97, 0x04, 0xba, 0xea, 0xa0, 0xd4, 0xe2, 0x82, 0xfc, 0xbc, 0xe2, 0x54, 0x25, 0x3d,
+	0x2e, 0x21, 0xdf, 0xe2, 0xf4, 0xd0, 0xbc, 0x62, 0x22, 0xcd, 0x92, 0xe1, 0x92, 0xc2, 0x54, 0x0f,
+	0x33, 0xcd, 0xe8, 0x22, 0x23, 0x17, 0xb3, 0x6f, 0x71, 0xba, 0x50, 0x22, 0x17, 0x2f, 0xaa, 0xe3,
+	0x94, 0xf5, 0x30, 0x3c, 0xa1, 0x87, 0xee, 0x26, 0x29, 0x6d, 0x22, 0x14, 0xc1, 0xac, 0x12, 0x4a,
+	0xe7, 0xe2, 0x47, 0x77, 0xb5, 0x2a, 0x76, 0xfd, 0x68, 0xca, 0xa4, 0x74, 0x89, 0x52, 0x06, 0xb3,
+	0xc8, 0xc9, 0xf8, 0xc4, 0x23, 0x39, 0xc6, 0x0b, 0x8f, 0xe4, 0x18, 0x1f, 0x3c, 0x92, 0x63, 0x9c,
+	0xf0, 0x58, 0x8e, 0xe1, 0xc2, 0x63, 0x39, 0x86, 0x1b, 0x8f, 0xe5, 0x18, 0xa2, 0x24, 0xe1, 0x91,
+	0x56, 0x81, 0x14, 0x6d, 0x95, 0x05, 0xa9, 0xc5, 0x49, 0x6c, 0xe0, 0xa8, 0x33, 0x06, 0x04, 0x00,
+	0x00, 0xff, 0xff, 0x7d, 0x92, 0x22, 0x60, 0xd8, 0x01, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -143,6 +227,7 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
 	StakeServicer(ctx context.Context, in *MsgStakeServicer, opts ...grpc.CallOption) (*MsgStakeServicerResponse, error)
+	UnstakeServicer(ctx context.Context, in *MsgUnstakeServicer, opts ...grpc.CallOption) (*MsgUnstakeServicerResponse, error)
 }
 
 type msgClient struct {
@@ -162,9 +247,19 @@ func (c *msgClient) StakeServicer(ctx context.Context, in *MsgStakeServicer, opt
 	return out, nil
 }
 
+func (c *msgClient) UnstakeServicer(ctx context.Context, in *MsgUnstakeServicer, opts ...grpc.CallOption) (*MsgUnstakeServicerResponse, error) {
+	out := new(MsgUnstakeServicerResponse)
+	err := c.cc.Invoke(ctx, "/poktroll.servicer.Msg/UnstakeServicer", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	StakeServicer(context.Context, *MsgStakeServicer) (*MsgStakeServicerResponse, error)
+	UnstakeServicer(context.Context, *MsgUnstakeServicer) (*MsgUnstakeServicerResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -173,6 +268,9 @@ type UnimplementedMsgServer struct {
 
 func (*UnimplementedMsgServer) StakeServicer(ctx context.Context, req *MsgStakeServicer) (*MsgStakeServicerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StakeServicer not implemented")
+}
+func (*UnimplementedMsgServer) UnstakeServicer(ctx context.Context, req *MsgUnstakeServicer) (*MsgUnstakeServicerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnstakeServicer not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -197,6 +295,24 @@ func _Msg_StakeServicer_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_UnstakeServicer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgUnstakeServicer)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).UnstakeServicer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/poktroll.servicer.Msg/UnstakeServicer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).UnstakeServicer(ctx, req.(*MsgUnstakeServicer))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "poktroll.servicer.Msg",
 	HandlerType: (*MsgServer)(nil),
@@ -204,6 +320,10 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "StakeServicer",
 			Handler:    _Msg_StakeServicer_Handler,
+		},
+		{
+			MethodName: "UnstakeServicer",
+			Handler:    _Msg_UnstakeServicer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -263,6 +383,59 @@ func (m *MsgStakeServicerResponse) MarshalToSizedBuffer(dAtA []byte) (int, error
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgUnstakeServicer) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUnstakeServicer) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUnstakeServicer) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgUnstakeServicerResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgUnstakeServicerResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgUnstakeServicerResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -288,6 +461,28 @@ func (m *MsgStakeServicer) Size() (n int) {
 }
 
 func (m *MsgStakeServicerResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgUnstakeServicer) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	return n
+}
+
+func (m *MsgUnstakeServicerResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -411,6 +606,138 @@ func (m *MsgStakeServicerResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: MsgStakeServicerResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUnstakeServicer) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUnstakeServicer: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUnstakeServicer: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgUnstakeServicerResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgUnstakeServicerResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgUnstakeServicerResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

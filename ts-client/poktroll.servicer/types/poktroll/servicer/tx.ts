@@ -10,6 +10,13 @@ export interface MsgStakeServicer {
 export interface MsgStakeServicerResponse {
 }
 
+export interface MsgUnstakeServicer {
+  address: string;
+}
+
+export interface MsgUnstakeServicerResponse {
+}
+
 function createBaseMsgStakeServicer(): MsgStakeServicer {
   return { address: "" };
 }
@@ -96,9 +103,96 @@ export const MsgStakeServicerResponse = {
   },
 };
 
+function createBaseMsgUnstakeServicer(): MsgUnstakeServicer {
+  return { address: "" };
+}
+
+export const MsgUnstakeServicer = {
+  encode(message: MsgUnstakeServicer, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.address !== "") {
+      writer.uint32(10).string(message.address);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUnstakeServicer {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgUnstakeServicer();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.address = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgUnstakeServicer {
+    return { address: isSet(object.address) ? String(object.address) : "" };
+  },
+
+  toJSON(message: MsgUnstakeServicer): unknown {
+    const obj: any = {};
+    message.address !== undefined && (obj.address = message.address);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgUnstakeServicer>, I>>(object: I): MsgUnstakeServicer {
+    const message = createBaseMsgUnstakeServicer();
+    message.address = object.address ?? "";
+    return message;
+  },
+};
+
+function createBaseMsgUnstakeServicerResponse(): MsgUnstakeServicerResponse {
+  return {};
+}
+
+export const MsgUnstakeServicerResponse = {
+  encode(_: MsgUnstakeServicerResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUnstakeServicerResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgUnstakeServicerResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgUnstakeServicerResponse {
+    return {};
+  },
+
+  toJSON(_: MsgUnstakeServicerResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<MsgUnstakeServicerResponse>, I>>(_: I): MsgUnstakeServicerResponse {
+    const message = createBaseMsgUnstakeServicerResponse();
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   StakeServicer(request: MsgStakeServicer): Promise<MsgStakeServicerResponse>;
+  UnstakeServicer(request: MsgUnstakeServicer): Promise<MsgUnstakeServicerResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -106,11 +200,18 @@ export class MsgClientImpl implements Msg {
   constructor(rpc: Rpc) {
     this.rpc = rpc;
     this.StakeServicer = this.StakeServicer.bind(this);
+    this.UnstakeServicer = this.UnstakeServicer.bind(this);
   }
   StakeServicer(request: MsgStakeServicer): Promise<MsgStakeServicerResponse> {
     const data = MsgStakeServicer.encode(request).finish();
     const promise = this.rpc.request("poktroll.servicer.Msg", "StakeServicer", data);
     return promise.then((data) => MsgStakeServicerResponse.decode(new _m0.Reader(data)));
+  }
+
+  UnstakeServicer(request: MsgUnstakeServicer): Promise<MsgUnstakeServicerResponse> {
+    const data = MsgUnstakeServicer.encode(request).finish();
+    const promise = this.rpc.request("poktroll.servicer.Msg", "UnstakeServicer", data);
+    return promise.then((data) => MsgUnstakeServicerResponse.decode(new _m0.Reader(data)));
   }
 }
 

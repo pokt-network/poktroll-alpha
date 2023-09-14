@@ -22,6 +22,8 @@ export interface RpcStatus {
 
 export type ServicerMsgStakeServicerResponse = object;
 
+export type ServicerMsgUnstakeServicerResponse = object;
+
 /**
  * Params defines the parameters for the module.
  */
