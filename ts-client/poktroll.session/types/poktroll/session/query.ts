@@ -14,6 +14,12 @@ export interface QueryParamsResponse {
   params: Params | undefined;
 }
 
+export interface QueryGetSessionRequest {
+}
+
+export interface QueryGetSessionResponse {
+}
+
 function createBaseQueryParamsRequest(): QueryParamsRequest {
   return {};
 }
@@ -102,10 +108,90 @@ export const QueryParamsResponse = {
   },
 };
 
+function createBaseQueryGetSessionRequest(): QueryGetSessionRequest {
+  return {};
+}
+
+export const QueryGetSessionRequest = {
+  encode(_: QueryGetSessionRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetSessionRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetSessionRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): QueryGetSessionRequest {
+    return {};
+  },
+
+  toJSON(_: QueryGetSessionRequest): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryGetSessionRequest>, I>>(_: I): QueryGetSessionRequest {
+    const message = createBaseQueryGetSessionRequest();
+    return message;
+  },
+};
+
+function createBaseQueryGetSessionResponse(): QueryGetSessionResponse {
+  return {};
+}
+
+export const QueryGetSessionResponse = {
+  encode(_: QueryGetSessionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetSessionResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryGetSessionResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(_: any): QueryGetSessionResponse {
+    return {};
+  },
+
+  toJSON(_: QueryGetSessionResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryGetSessionResponse>, I>>(_: I): QueryGetSessionResponse {
+    const message = createBaseQueryGetSessionResponse();
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
+  /** Queries a list of GetSession items. */
+  GetSession(request: QueryGetSessionRequest): Promise<QueryGetSessionResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -113,11 +199,18 @@ export class QueryClientImpl implements Query {
   constructor(rpc: Rpc) {
     this.rpc = rpc;
     this.Params = this.Params.bind(this);
+    this.GetSession = this.GetSession.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
     const promise = this.rpc.request("poktroll.session.Query", "Params", data);
     return promise.then((data) => QueryParamsResponse.decode(new _m0.Reader(data)));
+  }
+
+  GetSession(request: QueryGetSessionRequest): Promise<QueryGetSessionResponse> {
+    const data = QueryGetSessionRequest.encode(request).finish();
+    const promise = this.rpc.request("poktroll.session.Query", "GetSession", data);
+    return promise.then((data) => QueryGetSessionResponse.decode(new _m0.Reader(data)));
   }
 }
 
