@@ -7,8 +7,8 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgStake } from "./types/poktroll/poktroll/tx";
 import { MsgUnstake } from "./types/poktroll/poktroll/tx";
+import { MsgStake } from "./types/poktroll/poktroll/tx";
 
 import { StakeInfo as typeStakeInfo} from "./types"
 import { WatcherParams as typeWatcherParams} from "./types"
@@ -23,13 +23,7 @@ import { Actor as typeActor} from "./types"
 import { Params as typeParams} from "./types"
 import { Session as typeSession} from "./types"
 
-export { MsgStake, MsgUnstake };
-
-type sendMsgStakeParams = {
-  value: MsgStake,
-  fee?: StdFee,
-  memo?: string
-};
+export { MsgUnstake, MsgStake };
 
 type sendMsgUnstakeParams = {
   value: MsgUnstake,
@@ -37,13 +31,19 @@ type sendMsgUnstakeParams = {
   memo?: string
 };
 
-
-type msgStakeParams = {
+type sendMsgStakeParams = {
   value: MsgStake,
+  fee?: StdFee,
+  memo?: string
 };
+
 
 type msgUnstakeParams = {
   value: MsgUnstake,
+};
+
+type msgStakeParams = {
+  value: MsgStake,
 };
 
 
@@ -76,20 +76,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgStake({ value, fee, memo }: sendMsgStakeParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgStake: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgStake({ value: MsgStake.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgStake: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
 		async sendMsgUnstake({ value, fee, memo }: sendMsgUnstakeParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgUnstake: Unable to sign Tx. Signer is not present.')
@@ -104,20 +90,34 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		
-		msgStake({ value }: msgStakeParams): EncodeObject {
-			try {
-				return { typeUrl: "/poktroll.poktroll.MsgStake", value: MsgStake.fromPartial( value ) }  
+		async sendMsgStake({ value, fee, memo }: sendMsgStakeParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgStake: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgStake({ value: MsgStake.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:MsgStake: Could not create message: ' + e.message)
+				throw new Error('TxClient:sendMsgStake: Could not broadcast Tx: '+ e.message)
 			}
 		},
+		
 		
 		msgUnstake({ value }: msgUnstakeParams): EncodeObject {
 			try {
 				return { typeUrl: "/poktroll.poktroll.MsgUnstake", value: MsgUnstake.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgUnstake: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgStake({ value }: msgStakeParams): EncodeObject {
+			try {
+				return { typeUrl: "/poktroll.poktroll.MsgStake", value: MsgStake.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgStake: Could not create message: ' + e.message)
 			}
 		},
 		
