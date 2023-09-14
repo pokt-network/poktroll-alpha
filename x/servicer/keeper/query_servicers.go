@@ -3,12 +3,13 @@ package keeper
 import (
 	"context"
 
+	"poktroll/x/servicer/types"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"poktroll/x/servicer/types"
 )
 
 func (k Keeper) ServicersAll(goCtx context.Context, req *types.QueryAllServicersRequest) (*types.QueryAllServicersResponse, error) {
@@ -47,7 +48,7 @@ func (k Keeper) Servicers(goCtx context.Context, req *types.QueryGetServicersReq
 
 	val, found := k.GetServicers(
 		ctx,
-		req.Index,
+		req.Address,
 	)
 	if !found {
 		return nil, status.Error(codes.NotFound, "not found")

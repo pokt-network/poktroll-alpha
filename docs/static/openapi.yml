@@ -46949,8 +46949,23 @@ paths:
                 items:
                   type: object
                   properties:
-                    index:
+                    address:
                       type: string
+                    stake:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
               pagination:
                 type: object
                 properties:
@@ -47056,7 +47071,7 @@ paths:
           type: boolean
       tags:
         - Query
-  /poktroll/servicer/servicers/{index}:
+  /poktroll/servicer/servicers/{address}:
     get:
       summary: Queries a list of Servicers items.
       operationId: PoktrollServicerServicers
@@ -47069,8 +47084,23 @@ paths:
               servicers:
                 type: object
                 properties:
-                  index:
+                  address:
                     type: string
+                  stake:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
         default:
           description: An unexpected error response.
           schema:
@@ -47090,7 +47120,7 @@ paths:
                       type: string
                   additionalProperties: {}
       parameters:
-        - name: index
+        - name: address
           in: path
           required: true
           type: string
@@ -76058,8 +76088,23 @@ definitions:
         items:
           type: object
           properties:
-            index:
+            address:
               type: string
+            stake:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
       pagination:
         type: object
         properties:
@@ -76092,8 +76137,23 @@ definitions:
       servicers:
         type: object
         properties:
-          index:
+          address:
             type: string
+          stake:
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+            description: >-
+              Coin defines a token with a denomination and an amount.
+
+
+              NOTE: The amount field is an Int which implements the custom
+              method
+
+              signatures required by gogoproto.
   poktroll.servicer.QueryParamsResponse:
     type: object
     properties:
@@ -76104,5 +76164,17 @@ definitions:
   poktroll.servicer.Servicers:
     type: object
     properties:
-      index:
+      address:
         type: string
+      stake:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
