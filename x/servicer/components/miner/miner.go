@@ -1,11 +1,15 @@
 package miner
 
 import (
+	"context"
 	"hash"
+
+	cosmosClient "github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/pokt-network/smt"
+
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
-
-	"github.com/pokt-network/smt"
 )
 
 type Miner struct {
@@ -13,14 +17,27 @@ type Miner struct {
 	// TECHDEBT: update after switching to logger module (i.e. once
 	// servicer is external to poktrolld)
 	//logger   log.Logger
-	relays   utils.Observable[*types.Relay]
-	sessions utils.Observable[*types.Session]
+	relays      utils.Observable[*types.Relay]
+	sessions    utils.Observable[*types.Session]
+	cometClient cosmosClient.TendermintRPC
+	txConfig    cosmosClient.TxConfig
+	factory     tx.Factory
 
 	hasher hash.Hash
 }
 
-func NewMiner(hasher hash.Hash, store smt.KVStore) *Miner {
-	m := &Miner{}
+func NewMiner(
+	hasher hash.Hash,
+	store smt.KVStore,
+	cometClient cosmosClient.TendermintRPC,
+	txConfig cosmosClient.TxConfig,
+	factory tx.Factory,
+) *Miner { //, client cometrpc.Client) *Miner {
+	m := &Miner{
+		cometClient: cometClient,
+		txConfig:    txConfig,
+		factory:     factory,
+	}
 	m.smst = *smt.NewSparseMerkleSumTree(store, hasher)
 	m.hasher = hasher
 
@@ -31,9 +48,37 @@ func NewMiner(hasher hash.Hash, store smt.KVStore) *Miner {
 }
 
 func (m *Miner) submitClaim() error {
-	//claim := m.smst.Root()
-	//result := <-m.client.SubmitClaim(context.TODO(), claim)
-	//return result.Error()
+	txBuilder := m.txConfig.NewTxBuilder()
+
+	// TODO_THIS_COMMIT:
+	// Construct & set claim msg
+	txBuilder.SetMsgs()
+
+	// Sign tx!!
+	if err := tx.Sign(
+		m.factory,
+		"SOME KEY NAME!!!!",
+		txBuilder,
+		false,
+	); err != nil {
+		return err
+	}
+	// alternatively:
+	// client.SignTx()
+
+	builtTx := txBuilder.GetTx()
+	txBz, err := m.txConfig.TxEncoder()(builtTx)
+	if err != nil {
+		return err
+	}
+
+	txBcastResult, err := m.cometClient.BroadcastTxCommit(context.TODO(), txBz)
+	if err != nil {
+		return err
+	}
+
+	// TODO_THIS_COMMIT: do something with this (?)
+	_ = txBcastResult
 	return nil
 }
 

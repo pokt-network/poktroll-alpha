@@ -1,6 +1,8 @@
 package sessionmanager
 
 import (
+	"fmt"
+
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
 )
@@ -16,8 +18,14 @@ type SessionManager struct {
 }
 
 func NewSessionManager(newBlocks chan *types.Block) *SessionManager {
-	sm := &SessionManager{newBlocks: newBlocks}
+	sm := &SessionManager{
+		session:   &types.Session{},
+		newBlocks: newBlocks,
+	}
 	sm.sessionTicker, sm.newSessions = utils.NewControlledObservable[*types.Session](nil)
+
+	// TODO_THIS_COMMIT: make blocksPerSession a module param.
+	sm.blocksPerSession = 2
 
 	go sm.handleBlocks()
 
@@ -42,6 +50,7 @@ func (sm *SessionManager) handleBlocks() {
 			// set the latest secret for claim and proof use
 			sm.latestSecret = block.Hash
 			go func() {
+				fmt.Println("NEW SESSION")
 				sm.newSessions <- sm.session
 			}()
 		}

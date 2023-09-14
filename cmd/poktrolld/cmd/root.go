@@ -19,6 +19,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
@@ -72,6 +73,17 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 			if err != nil {
 				return err
 			}
+
+			factory, err := tx.NewFactoryCLI(initClientCtx, cmd.Flags())
+			if err != nil {
+				return err
+			}
+
+			serverCtx := server.GetServerContextFromCmd(cmd)
+			// TODO_THIS_COMMIT: factor out keys to constants.
+			serverCtx.Viper.Set("actorMode", "servicer")
+			serverCtx.Viper.Set("clientCtx", initClientCtx)
+			serverCtx.Viper.Set("factory", factory)
 
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err

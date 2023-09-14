@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	"log"
 
 	// this line is used by starport scaffolding # 1
@@ -15,7 +16,7 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 
-	"github.com/cosmos/cosmos-sdk/client"
+	cosmosClient "github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -67,7 +68,7 @@ func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 }
 
 // ValidateGenesis used to validate the GenesisState, given in its json.RawMessage form
-func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncodingConfig, bz json.RawMessage) error {
+func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config cosmosClient.TxEncodingConfig, bz json.RawMessage) error {
 	var genState types.GenesisState
 	if err := cdc.UnmarshalJSON(bz, &genState); err != nil {
 		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
@@ -76,7 +77,7 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncod
 }
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the module
-func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
+func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx cosmosClient.Context, mux *runtime.ServeMux) {
 	types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx))
 }
 
@@ -115,6 +116,9 @@ func NewAppModule(
 	keeper keeper.Keeper,
 	accountKeeper types.AccountKeeper,
 	bankKeeper types.BankKeeper,
+	// TODO_THIS_COMMIT: use an enum or something
+	clientCtx cosmosClient.Context,
+	factory tx.Factory,
 ) AppModule {
 	relayer := relayer.NewRelayer(log.Default())
 	newBlocks := make(chan *types.Block)
@@ -127,7 +131,10 @@ func NewAppModule(
 		panic(fmt.Errorf("failed to create KVStore %q: %w", storePath, err))
 	}
 
-	miner := miner.NewMiner(sha256.New(), kvStore)
+	cometClient := clientCtx.Client
+	txConfig := clientCtx.TxConfig
+
+	miner := miner.NewMiner(sha256.New(), kvStore, cometClient, txConfig, factory)
 	miner.MineRelays(relayer.Relays(), sessionManager.ClosedSessions())
 
 	return AppModule{

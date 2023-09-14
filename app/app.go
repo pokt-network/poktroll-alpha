@@ -14,9 +14,10 @@ import (
 	"github.com/cometbft/cometbft/libs/log"
 	tmos "github.com/cometbft/cometbft/libs/os"
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/client"
+	cosmosClient "github.com/cosmos/cosmos-sdk/client"
 	nodeservice "github.com/cosmos/cosmos-sdk/client/grpc/node"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/runtime"
@@ -235,7 +236,7 @@ type App struct {
 	cdc               *codec.LegacyAmino
 	appCodec          codec.Codec
 	interfaceRegistry types.InterfaceRegistry
-	txConfig          client.TxConfig
+	txConfig          cosmosClient.TxConfig
 
 	invCheckPeriod uint
 
@@ -589,9 +590,20 @@ func New(
 	applicationEnabled := appOpts.Get(poktroll.FlagEnableApplicationMode).(bool)
 	portalEnabled := appOpts.Get(poktroll.FlagEnablePortalMode).(bool)
 
+	clientCtx := appOpts.Get("clientCtx").(cosmosClient.Context)
+	factory := appOpts.Get("factory").(tx.Factory)
+
 	var actorModule module.AppModule
 	if servicerEnabled && !applicationEnabled && !portalEnabled {
-		actorModule = servicermodule.NewAppModule(appCodec, app.ServicerKeeper, app.AccountKeeper, app.BankKeeper)
+		actorModule = servicermodule.NewAppModule(
+			appCodec,
+			app.ServicerKeeper,
+			app.AccountKeeper,
+			app.BankKeeper,
+			// TODO_THIS_COMMIT: refactor & de-dup key to a constant
+			clientCtx,
+			factory,
+		)
 	} else if applicationEnabled && !servicerEnabled && !portalEnabled {
 		// actorModule = applicationmodule.NewAppModule(appCodec, app.ApplicationKeeper, app.AccountKeeper, app.BankKeeper)
 	} else if portalEnabled && !applicationEnabled && !servicerEnabled {
@@ -925,7 +937,7 @@ func (app *App) InterfaceRegistry() types.InterfaceRegistry {
 }
 
 // TxConfig returns SimApp's TxConfig
-func (app *App) TxConfig() client.TxConfig {
+func (app *App) TxConfig() cosmosClient.TxConfig {
 	return app.txConfig
 }
 
@@ -977,12 +989,12 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 }
 
 // RegisterTxService implements the Application.RegisterTxService method.
-func (app *App) RegisterTxService(clientCtx client.Context) {
+func (app *App) RegisterTxService(clientCtx cosmosClient.Context) {
 	authtx.RegisterTxService(app.BaseApp.GRPCQueryRouter(), clientCtx, app.BaseApp.Simulate, app.interfaceRegistry)
 }
 
 // RegisterTendermintService implements the Application.RegisterTendermintService method.
-func (app *App) RegisterTendermintService(clientCtx client.Context) {
+func (app *App) RegisterTendermintService(clientCtx cosmosClient.Context) {
 	tmservice.RegisterTendermintService(
 		clientCtx,
 		app.BaseApp.GRPCQueryRouter(),
@@ -992,7 +1004,7 @@ func (app *App) RegisterTendermintService(clientCtx client.Context) {
 }
 
 // RegisterNodeService implements the Application.RegisterNodeService method.
-func (app *App) RegisterNodeService(clientCtx client.Context) {
+func (app *App) RegisterNodeService(clientCtx cosmosClient.Context) {
 	nodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter())
 }
 
