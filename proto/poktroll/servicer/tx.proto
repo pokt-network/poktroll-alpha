@@ -10,10 +10,11 @@ option go_package = "poktroll/x/servicer/types";
 service Msg {
   rpc StakeServicer   (MsgStakeServicer  ) returns (MsgStakeServicerResponse  );
   rpc UnstakeServicer (MsgUnstakeServicer) returns (MsgUnstakeServicerResponse);
+  rpc Claim           (MsgClaim          ) returns (MsgClaimResponse          );
+  rpc Proof           (MsgProof          ) returns (MsgProofResponse          );
 }
-
 message MsgStakeServicer {
-  string address = 1;
+  string                   address     = 1;
   cosmos.base.v1beta1.Coin stakeAmount = 2;
 }
 
@@ -24,4 +25,22 @@ message MsgUnstakeServicer {
 }
 
 message MsgUnstakeServicerResponse {}
+
+message MsgClaim {
+  string creator     = 1;
+  bytes  smtRootHash = 2;
+}
+
+message MsgClaimResponse {}
+
+message MsgProof {
+  string creator   = 1;
+  string root      = 2;
+  string path      = 3;
+  string valueHash = 4;
+  int32  sum       = 5;
+  string proofBz   = 6;
+}
+
+message MsgProofResponse {}
 

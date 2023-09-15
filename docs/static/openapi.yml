@@ -75954,6 +75954,10 @@ definitions:
         description: params holds all the parameters of this module.
         type: object
     description: QueryParamsResponse is response type for the Query/Params RPC method.
+  poktroll.servicer.MsgClaimResponse:
+    type: object
+  poktroll.servicer.MsgProofResponse:
+    type: object
   poktroll.servicer.MsgStakeServicerResponse:
     type: object
   poktroll.servicer.MsgUnstakeServicerResponse:

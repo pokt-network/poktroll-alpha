@@ -1,6 +1,7 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
 import { Params } from "./params";
+import { Session } from "./session";
 
 export const protobufPackage = "poktroll.session";
 
@@ -15,9 +16,11 @@ export interface QueryParamsResponse {
 }
 
 export interface QueryGetSessionRequest {
+  appAddress: string;
 }
 
 export interface QueryGetSessionResponse {
+  session: Session | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -109,11 +112,14 @@ export const QueryParamsResponse = {
 };
 
 function createBaseQueryGetSessionRequest(): QueryGetSessionRequest {
-  return {};
+  return { appAddress: "" };
 }
 
 export const QueryGetSessionRequest = {
-  encode(_: QueryGetSessionRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(message: QueryGetSessionRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.appAddress !== "") {
+      writer.uint32(10).string(message.appAddress);
+    }
     return writer;
   },
 
@@ -124,6 +130,9 @@ export const QueryGetSessionRequest = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
+        case 1:
+          message.appAddress = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -132,27 +141,32 @@ export const QueryGetSessionRequest = {
     return message;
   },
 
-  fromJSON(_: any): QueryGetSessionRequest {
-    return {};
+  fromJSON(object: any): QueryGetSessionRequest {
+    return { appAddress: isSet(object.appAddress) ? String(object.appAddress) : "" };
   },
 
-  toJSON(_: QueryGetSessionRequest): unknown {
+  toJSON(message: QueryGetSessionRequest): unknown {
     const obj: any = {};
+    message.appAddress !== undefined && (obj.appAddress = message.appAddress);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<QueryGetSessionRequest>, I>>(_: I): QueryGetSessionRequest {
+  fromPartial<I extends Exact<DeepPartial<QueryGetSessionRequest>, I>>(object: I): QueryGetSessionRequest {
     const message = createBaseQueryGetSessionRequest();
+    message.appAddress = object.appAddress ?? "";
     return message;
   },
 };
 
 function createBaseQueryGetSessionResponse(): QueryGetSessionResponse {
-  return {};
+  return { session: undefined };
 }
 
 export const QueryGetSessionResponse = {
-  encode(_: QueryGetSessionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+  encode(message: QueryGetSessionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.session !== undefined) {
+      Session.encode(message.session, writer.uint32(10).fork()).ldelim();
+    }
     return writer;
   },
 
@@ -163,6 +177,9 @@ export const QueryGetSessionResponse = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
+        case 1:
+          message.session = Session.decode(reader, reader.uint32());
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -171,17 +188,21 @@ export const QueryGetSessionResponse = {
     return message;
   },
 
-  fromJSON(_: any): QueryGetSessionResponse {
-    return {};
+  fromJSON(object: any): QueryGetSessionResponse {
+    return { session: isSet(object.session) ? Session.fromJSON(object.session) : undefined };
   },
 
-  toJSON(_: QueryGetSessionResponse): unknown {
+  toJSON(message: QueryGetSessionResponse): unknown {
     const obj: any = {};
+    message.session !== undefined && (obj.session = message.session ? Session.toJSON(message.session) : undefined);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<QueryGetSessionResponse>, I>>(_: I): QueryGetSessionResponse {
+  fromPartial<I extends Exact<DeepPartial<QueryGetSessionResponse>, I>>(object: I): QueryGetSessionResponse {
     const message = createBaseQueryGetSessionResponse();
+    message.session = (object.session !== undefined && object.session !== null)
+      ? Session.fromPartial(object.session)
+      : undefined;
     return message;
   },
 };

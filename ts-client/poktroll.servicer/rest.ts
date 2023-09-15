@@ -20,6 +20,10 @@ export interface RpcStatus {
   details?: ProtobufAny[];
 }
 
+export type ServicerMsgClaimResponse = object;
+
+export type ServicerMsgProofResponse = object;
+
 export type ServicerMsgStakeServicerResponse = object;
 
 export type ServicerMsgUnstakeServicerResponse = object;

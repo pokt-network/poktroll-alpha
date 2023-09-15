@@ -1,10 +1,14 @@
 import { GeneratedType } from "@cosmjs/proto-signing";
-import { MsgUnstakeServicer } from "./types/poktroll/servicer/tx";
 import { MsgStakeServicer } from "./types/poktroll/servicer/tx";
+import { MsgClaim } from "./types/poktroll/servicer/tx";
+import { MsgProof } from "./types/poktroll/servicer/tx";
+import { MsgUnstakeServicer } from "./types/poktroll/servicer/tx";
 
 const msgTypes: Array<[string, GeneratedType]>  = [
-    ["/poktroll.servicer.MsgUnstakeServicer", MsgUnstakeServicer],
     ["/poktroll.servicer.MsgStakeServicer", MsgStakeServicer],
+    ["/poktroll.servicer.MsgClaim", MsgClaim],
+    ["/poktroll.servicer.MsgProof", MsgProof],
+    ["/poktroll.servicer.MsgUnstakeServicer", MsgUnstakeServicer],
     
 ];
 

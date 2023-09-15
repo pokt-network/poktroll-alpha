@@ -7,19 +7,15 @@ import { msgTypes } from './registry';
 import { IgniteClient } from "../client"
 import { MissingWalletError } from "../helpers"
 import { Api } from "./rest";
-import { MsgUnstakeServicer } from "./types/poktroll/servicer/tx";
 import { MsgStakeServicer } from "./types/poktroll/servicer/tx";
+import { MsgClaim } from "./types/poktroll/servicer/tx";
+import { MsgProof } from "./types/poktroll/servicer/tx";
+import { MsgUnstakeServicer } from "./types/poktroll/servicer/tx";
 
 import { Params as typeParams} from "./types"
 import { Servicers as typeServicers} from "./types"
 
-export { MsgUnstakeServicer, MsgStakeServicer };
-
-type sendMsgUnstakeServicerParams = {
-  value: MsgUnstakeServicer,
-  fee?: StdFee,
-  memo?: string
-};
+export { MsgStakeServicer, MsgClaim, MsgProof, MsgUnstakeServicer };
 
 type sendMsgStakeServicerParams = {
   value: MsgStakeServicer,
@@ -27,13 +23,39 @@ type sendMsgStakeServicerParams = {
   memo?: string
 };
 
-
-type msgUnstakeServicerParams = {
-  value: MsgUnstakeServicer,
+type sendMsgClaimParams = {
+  value: MsgClaim,
+  fee?: StdFee,
+  memo?: string
 };
+
+type sendMsgProofParams = {
+  value: MsgProof,
+  fee?: StdFee,
+  memo?: string
+};
+
+type sendMsgUnstakeServicerParams = {
+  value: MsgUnstakeServicer,
+  fee?: StdFee,
+  memo?: string
+};
+
 
 type msgStakeServicerParams = {
   value: MsgStakeServicer,
+};
+
+type msgClaimParams = {
+  value: MsgClaim,
+};
+
+type msgProofParams = {
+  value: MsgProof,
+};
+
+type msgUnstakeServicerParams = {
+  value: MsgUnstakeServicer,
 };
 
 
@@ -66,20 +88,6 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 
   return {
 		
-		async sendMsgUnstakeServicer({ value, fee, memo }: sendMsgUnstakeServicerParams): Promise<DeliverTxResponse> {
-			if (!signer) {
-					throw new Error('TxClient:sendMsgUnstakeServicer: Unable to sign Tx. Signer is not present.')
-			}
-			try {			
-				const { address } = (await signer.getAccounts())[0]; 
-				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
-				let msg = this.msgUnstakeServicer({ value: MsgUnstakeServicer.fromPartial(value) })
-				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
-			} catch (e: any) {
-				throw new Error('TxClient:sendMsgUnstakeServicer: Could not broadcast Tx: '+ e.message)
-			}
-		},
-		
 		async sendMsgStakeServicer({ value, fee, memo }: sendMsgStakeServicerParams): Promise<DeliverTxResponse> {
 			if (!signer) {
 					throw new Error('TxClient:sendMsgStakeServicer: Unable to sign Tx. Signer is not present.')
@@ -94,20 +102,78 @@ export const txClient = ({ signer, prefix, addr }: TxClientOptions = { addr: "ht
 			}
 		},
 		
-		
-		msgUnstakeServicer({ value }: msgUnstakeServicerParams): EncodeObject {
-			try {
-				return { typeUrl: "/poktroll.servicer.MsgUnstakeServicer", value: MsgUnstakeServicer.fromPartial( value ) }  
+		async sendMsgClaim({ value, fee, memo }: sendMsgClaimParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgClaim: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgClaim({ value: MsgClaim.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
 			} catch (e: any) {
-				throw new Error('TxClient:MsgUnstakeServicer: Could not create message: ' + e.message)
+				throw new Error('TxClient:sendMsgClaim: Could not broadcast Tx: '+ e.message)
 			}
 		},
+		
+		async sendMsgProof({ value, fee, memo }: sendMsgProofParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgProof: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgProof({ value: MsgProof.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgProof: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
+		async sendMsgUnstakeServicer({ value, fee, memo }: sendMsgUnstakeServicerParams): Promise<DeliverTxResponse> {
+			if (!signer) {
+					throw new Error('TxClient:sendMsgUnstakeServicer: Unable to sign Tx. Signer is not present.')
+			}
+			try {			
+				const { address } = (await signer.getAccounts())[0]; 
+				const signingClient = await SigningStargateClient.connectWithSigner(addr,signer,{registry, prefix});
+				let msg = this.msgUnstakeServicer({ value: MsgUnstakeServicer.fromPartial(value) })
+				return await signingClient.signAndBroadcast(address, [msg], fee ? fee : defaultFee, memo)
+			} catch (e: any) {
+				throw new Error('TxClient:sendMsgUnstakeServicer: Could not broadcast Tx: '+ e.message)
+			}
+		},
+		
 		
 		msgStakeServicer({ value }: msgStakeServicerParams): EncodeObject {
 			try {
 				return { typeUrl: "/poktroll.servicer.MsgStakeServicer", value: MsgStakeServicer.fromPartial( value ) }  
 			} catch (e: any) {
 				throw new Error('TxClient:MsgStakeServicer: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgClaim({ value }: msgClaimParams): EncodeObject {
+			try {
+				return { typeUrl: "/poktroll.servicer.MsgClaim", value: MsgClaim.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgClaim: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgProof({ value }: msgProofParams): EncodeObject {
+			try {
+				return { typeUrl: "/poktroll.servicer.MsgProof", value: MsgProof.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgProof: Could not create message: ' + e.message)
+			}
+		},
+		
+		msgUnstakeServicer({ value }: msgUnstakeServicerParams): EncodeObject {
+			try {
+				return { typeUrl: "/poktroll.servicer.MsgUnstakeServicer", value: MsgUnstakeServicer.fromPartial( value ) }  
+			} catch (e: any) {
+				throw new Error('TxClient:MsgUnstakeServicer: Could not create message: ' + e.message)
 			}
 		},
 		
