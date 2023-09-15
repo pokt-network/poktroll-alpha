@@ -134,7 +134,7 @@ import (
 )
 
 const (
-	AccountAddressPrefix = "stake"
+	AccountAddressPrefix = "pokt"
 	Name                 = "poktroll"
 )
 
