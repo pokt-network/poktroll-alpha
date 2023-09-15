@@ -241,7 +241,9 @@ todo_this_commit: ## List all the TODOs needed to be done in this commit
 ignite_regenerate: ## Regenerate the ignite boilerplate
 	ignite generate proto-go --yes && ignite generate openapi --yes
 
-# Create new accounts with: `ignite account create {NAME} --keyring-dir ./localnet/poktrolld --keyring-backend test`
+# Create new accounts with:
+#  - ignite account create {KEY_NAME} --keyring-dir ./localnet/poktrolld --keyring-backend test
+#  - poktrolld --home=${POKTROLLD_HOME} --node ${POKTROLLD_NODE} --keyring-backend test add-genesis-account {KEY_NAME} 1000000000000000pokt
 .PHONY: ignite_acc_list
 ignite_acc_list: ## List all the accounts in the ignite boilerplate
 	ignite account list  --keyring-dir $(POKTROLLD_HOME) --keyring-backend test

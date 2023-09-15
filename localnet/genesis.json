@@ -13,7 +13,9 @@
       "max_bytes": "1048576"
     },
     "validator": {
-      "pub_key_types": ["ed25519"]
+      "pub_key_types": [
+        "ed25519"
+      ]
     },
     "version": {
       "app": "0"
@@ -45,6 +47,48 @@
           "pub_key": null,
           "account_number": "1",
           "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "pokt1aj5m44gpvdmqcr3q0fm24vtff8g8j78004wn43",
+          "pub_key": null,
+          "account_number": "2",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "pokt1c0aal6vmfh094v7xuk3ynkfexep3txdpjk6xhz",
+          "pub_key": null,
+          "account_number": "3",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "pokt14srytst0alvqp3t8v6j76uhkq4667036xenn8k",
+          "pub_key": null,
+          "account_number": "4",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "pokt1mf07l4cl9usssf54ncu46l8a4tkly36yxy3qx7",
+          "pub_key": null,
+          "account_number": "5",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "pokt1krv39cxnwjhqy669d4lll3zegns8wrr9cplw5e",
+          "pub_key": null,
+          "account_number": "6",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "pokt1ekqerw60gxjze2u5t0nvgjmalmnj7xrt8462et",
+          "pub_key": null,
+          "account_number": "7",
+          "sequence": "0"
         }
       ]
     },
@@ -67,11 +111,65 @@
           ]
         },
         {
+          "address": "pokt14srytst0alvqp3t8v6j76uhkq4667036xenn8k",
+          "coins": [
+            {
+              "denom": "pokt",
+              "amount": "1000000000000000"
+            }
+          ]
+        },
+        {
+          "address": "pokt1krv39cxnwjhqy669d4lll3zegns8wrr9cplw5e",
+          "coins": [
+            {
+              "denom": "pokt",
+              "amount": "1000000000000000"
+            }
+          ]
+        },
+        {
+          "address": "pokt1c0aal6vmfh094v7xuk3ynkfexep3txdpjk6xhz",
+          "coins": [
+            {
+              "denom": "pokt",
+              "amount": "1000000000000000"
+            }
+          ]
+        },
+        {
+          "address": "pokt1ekqerw60gxjze2u5t0nvgjmalmnj7xrt8462et",
+          "coins": [
+            {
+              "denom": "pokt",
+              "amount": "1000000000000000"
+            }
+          ]
+        },
+        {
           "address": "pokt1mprzrd3qzqjmkzdpstwzmnrpydacxt2zufxfcd",
           "coins": [
             {
               "denom": "stake",
               "amount": "10000000000000000000000000"
+            }
+          ]
+        },
+        {
+          "address": "pokt1mf07l4cl9usssf54ncu46l8a4tkly36yxy3qx7",
+          "coins": [
+            {
+              "denom": "pokt",
+              "amount": "1000000000000000"
+            }
+          ]
+        },
+        {
+          "address": "pokt1aj5m44gpvdmqcr3q0fm24vtff8g8j78004wn43",
+          "coins": [
+            {
+              "denom": "pokt",
+              "amount": "1000000000000000"
             }
           ]
         }
@@ -224,7 +322,11 @@
         "clients_consensus": [],
         "clients_metadata": [],
         "params": {
-          "allowed_clients": ["06-solomachine", "07-tendermint", "09-localhost"]
+          "allowed_clients": [
+            "06-solomachine",
+            "07-tendermint",
+            "09-localhost"
+          ]
         },
         "create_localhost": false,
         "next_client_sequence": "0"
@@ -263,7 +365,9 @@
         "port": "icahost",
         "params": {
           "host_enabled": true,
-          "allow_messages": ["*"]
+          "allow_messages": [
+            "*"
+          ]
         }
       }
     },
