@@ -101,7 +101,8 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		servicersimulation.SimulateMsgClaim(am.accountKeeper, am.bankKeeper, am.keeper),
 	))
 
-	var weightMsgClaim int
+	// Commented out by Dima to avoid compilation errors
+	// var weightMsgClaim int
 	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgClaim, &weightMsgClaim, nil,
 		func(_ *rand.Rand) {
 			weightMsgClaim = defaultWeightMsgClaim
@@ -112,7 +113,8 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		servicersimulation.SimulateMsgClaim(am.accountKeeper, am.bankKeeper, am.keeper),
 	))
 
-	var weightMsgClaim int
+	// Commented out by Dima to avoid compilation errors
+	// var weightMsgClaim int
 	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgClaim, &weightMsgClaim, nil,
 		func(_ *rand.Rand) {
 			weightMsgClaim = defaultWeightMsgClaim

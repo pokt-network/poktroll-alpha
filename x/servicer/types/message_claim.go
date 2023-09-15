@@ -11,8 +11,9 @@ var _ sdk.Msg = &MsgClaim{}
 
 func NewMsgClaim(creator string, smtRootHash string) *MsgClaim {
 	return &MsgClaim{
-		Creator:     creator,
-		SmtRootHash: smtRootHash,
+		Creator: creator,
+		// Changed type by Dima to avoid compilation errors
+		SmtRootHash: []byte(smtRootHash),
 	}
 }
 

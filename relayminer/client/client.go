@@ -57,7 +57,9 @@ func (client *servicerClient) SubmitProof(
 	proof *smt.SparseMerkleProof,
 ) error {
 	//
-	client.broadcastMessageTx(ctx, msg)
+	// client.broadcastMessageTx(ctx, msg)
+	// Commented out by Dima to avoid compilation errors
+	return nil
 }
 
 func (client *servicerClient) broadcastMessageTx(
