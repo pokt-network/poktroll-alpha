@@ -126,6 +126,7 @@ import (
 	sessionmodule "poktroll/x/session"
 	sessionmodulekeeper "poktroll/x/session/keeper"
 	sessionmoduletypes "poktroll/x/session/types"
+
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "poktroll/app/params"
@@ -133,7 +134,7 @@ import (
 )
 
 const (
-	AccountAddressPrefix = "pokt"
+	AccountAddressPrefix = "stake"
 	Name                 = "poktroll"
 )
 
