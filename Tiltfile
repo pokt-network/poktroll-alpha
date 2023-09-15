@@ -25,9 +25,10 @@ def generate_config_map_yaml(name, data):
     }
     return encode_yaml(config_map_object)
 
+# The keys are shared between all poktrolld instances
 k8s_yaml(generate_config_map_yaml("poktrolld-keys", read_files_from_directory("localnet/poktrolld/keyring-test/"))) # poktrolld/keys
+
 k8s_yaml(generate_config_map_yaml("poktrolld-configs", read_files_from_directory("localnet/poktrolld/config/"))) # poktrolld/configs
-k8s_yaml(generate_config_map_yaml("poktrolld-servicer-keys", read_files_from_directory("localnet/poktrolld-servicer/keyring-test/"))) # poktrolld-servicer/keys
 k8s_yaml(generate_config_map_yaml("poktrolld-servicer-configs", read_files_from_directory("localnet/poktrolld-servicer/config/"))) # poktrolld-servicer/keys
 
 # Build sequencer
@@ -53,7 +54,7 @@ WORKDIR /
 )
 
 # Run poktrolld
-k8s_yaml('localnet/kubernetes/poktrolld.yaml')
+k8s_yaml(['localnet/kubernetes/poktrolld.yaml', 'localnet/kubernetes/poktrolld-common.yaml'])
 
 # Configure tilt resources for nodes
 # TODO(@okdas): add port forwarding to be able to query the endpoints on localhost
