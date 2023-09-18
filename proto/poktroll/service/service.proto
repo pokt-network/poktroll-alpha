@@ -1,0 +1,8 @@
+syntax = "proto3";
+package poktroll.service;
+
+option go_package = "poktroll/x/service/types";
+
+message Service {
+  
+}
