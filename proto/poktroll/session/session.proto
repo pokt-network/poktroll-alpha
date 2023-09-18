@@ -11,19 +11,3 @@ message Session {
     repeated servicer.Servicers servicers = 2;
 
 }
-
-// TODO on monday
-// - Allow staking for this as an app
-//      - Allow to create a bid for this (max price)
-// - Allow staking for this as a servicer
-//      - Allow to create a bid for this (min price)
-// - Look at v0 params, v1 params, other RPCs and determine what we need (i.e. ask chatgpt)
-// ALso investigate:
-//      - Rev share
-//      - Lava QoS
-message Service {
-    string service_name = 1;
-    string service_url = 3;
-    map<string, string> service_params = 2;
-
-}

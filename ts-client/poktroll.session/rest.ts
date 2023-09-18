@@ -9,6 +9,18 @@
  * ---------------------------------------------------------------
  */
 
+export interface ApplicationApplication {
+  address?: string;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  stake?: V1Beta1Coin;
+}
+
 export interface ProtobufAny {
   "@type"?: string;
 }
@@ -20,12 +32,26 @@ export interface RpcStatus {
   details?: ProtobufAny[];
 }
 
+export interface ServicerServicers {
+  address?: string;
+
+  /**
+   * Coin defines a token with a denomination and an amount.
+   *
+   * NOTE: The amount field is an Int which implements the custom method
+   * signatures required by gogoproto.
+   */
+  stake?: V1Beta1Coin;
+}
+
 /**
  * Params defines the parameters for the module.
  */
 export type SessionParams = object;
 
-export type SessionQueryGetSessionResponse = object;
+export interface SessionQueryGetSessionResponse {
+  session?: SessionSession;
+}
 
 /**
  * QueryParamsResponse is response type for the Query/Params RPC method.
@@ -33,6 +59,22 @@ export type SessionQueryGetSessionResponse = object;
 export interface SessionQueryParamsResponse {
   /** params holds all the parameters of this module. */
   params?: SessionParams;
+}
+
+export interface SessionSession {
+  application?: ApplicationApplication;
+  servicers?: ServicerServicers[];
+}
+
+/**
+* Coin defines a token with a denomination and an amount.
+
+NOTE: The amount field is an Int which implements the custom method
+signatures required by gogoproto.
+*/
+export interface V1Beta1Coin {
+  denom?: string;
+  amount?: string;
 }
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, ResponseType } from "axios";
@@ -168,10 +210,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
    * @summary Queries a list of GetSession items.
    * @request GET:/poktroll/session/get_session
    */
-  queryGetSession = (params: RequestParams = {}) =>
+  queryGetSession = (query?: { appAddress?: string }, params: RequestParams = {}) =>
     this.request<SessionQueryGetSessionResponse, RpcStatus>({
       path: `/poktroll/session/get_session`,
       method: "GET",
+      query: query,
       format: "json",
       ...params,
     });
