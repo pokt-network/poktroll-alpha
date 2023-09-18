@@ -3,11 +3,22 @@ package poktroll.session;
 
 import "poktroll/servicer/servicers.proto";
 import "poktroll/application/application.proto";
+import "poktroll/service/service.proto";
 
 option go_package = "poktroll/x/session/types";
 
 message Session {
-    application.Application application = 1;
-    repeated servicer.Servicers servicers = 2;
+    // TODO_CONSIDERATION: Reconsider the following set of fields in term of their type, need, naming, etc...
+    string session_id = 1;
+    uint64 session_number = 2; // The session number
+    uint64 session_block_start_height = 3; // The height at which the session started
+    uint64 num_blocks_per_session = 4; // The number of blocks the session will last (starting at block_height)
 
+
+    service.ServiceId service = 5;
+    application.Application application = 6;
+    repeated servicer.Servicers servicers = 7;
+
+    // TODO_ADD:
+    // - GeoZone
 }

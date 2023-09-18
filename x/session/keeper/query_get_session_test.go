@@ -45,6 +45,7 @@ func TestGetSessionQuery(t *testing.T) {
 
 	req := &types.QueryGetSessionRequest{
 		AppAddress: application.Address,
+		// TODO_TEST: Need to improve the tests by adding ServiceId and BlockHeight
 	}
 
 	response, err := sessionKeeper.GetSession(wctx, req)

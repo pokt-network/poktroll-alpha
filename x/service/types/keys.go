@@ -2,7 +2,7 @@ package types
 
 const (
 	// ModuleName defines the module name
-	ModuleName = "service"
+	ModuleName = "services" // TODO_REFACTOR: Use `services` when scaffolding this module BECAUSE otherwise `assertNoCommonPrefix`  throws a panic
 
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName
