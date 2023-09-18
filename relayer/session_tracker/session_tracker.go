@@ -2,7 +2,6 @@ package sessiontracker
 
 import (
 	"context"
-	"fmt"
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
 )
@@ -10,13 +9,13 @@ import (
 var _ types.Session = &session{}
 
 type SessionTracker struct {
-	blocksPerSession int64
+	blocksPerSession uint32
 	session          types.Session
 	sessionTicker    utils.Observable[types.Session]
 	latestSecret     []byte
 
 	newSessions chan types.Session
-	newBlocks   utils.Observable[types.Block]
+	blockTicker utils.Observable[types.Block]
 }
 
 type session struct {
@@ -25,8 +24,8 @@ type session struct {
 	blockHash     []byte
 }
 
-func NewSessionTracker(ctx context.Context, newBlocks utils.Observable[types.Block]) *SessionTracker {
-	sm := &SessionTracker{newBlocks: newBlocks}
+func NewSessionTracker(ctx context.Context, blocksPerSession uint32, blockTicker utils.Observable[types.Block]) *SessionTracker {
+	sm := &SessionTracker{blockTicker: blockTicker, blocksPerSession: blocksPerSession}
 	sm.sessionTicker, sm.newSessions = utils.NewControlledObservable[types.Session](nil)
 
 	go sm.handleBlocks(ctx)
@@ -40,24 +39,24 @@ func (sm *SessionTracker) ClosedSessions() utils.Observable[types.Session] {
 
 func (sm *SessionTracker) handleBlocks(ctx context.Context) {
 	// tick sessions along as new blocks are received
-	for block := range sm.newBlocks.Subscribe().Ch() {
+	ch := sm.blockTicker.Subscribe().Ch()
+	for block := range ch {
 		select {
 		case <-ctx.Done():
 			return
 		default:
 		}
 		// discover a new session every `blocksPerSession` blocks
-		if int64(block.Height())%sm.blocksPerSession == 0 {
-			sessionNumber := int64(block.Height()) / sm.blocksPerSession
+		if block.Height()%uint64(sm.blocksPerSession) == 0 {
+			sessionNumber := block.Height() / uint64(sm.blocksPerSession)
 
 			sm.session = &session{
-				sessionNumber: uint64(sessionNumber),
-				sessionHeight: uint64(sessionNumber * sm.blocksPerSession),
+				sessionNumber: sessionNumber,
+				sessionHeight: sessionNumber * uint64(sm.blocksPerSession),
 				blockHash:     block.Hash(),
 			}
 
 			// set the latest secret for claim and proof use
-			fmt.Printf("block hash: %s\n", block.Hash())
 			sm.latestSecret = block.Hash()
 			go func() {
 				select {

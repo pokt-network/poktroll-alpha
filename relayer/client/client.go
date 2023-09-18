@@ -135,15 +135,24 @@ func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.B
 		default:
 		}
 
-		_, _, err := client.wsClient.ReadMessage()
+		_, msg, err := client.wsClient.ReadMessage()
 		if err != nil {
+			// TODO: handle error
 			continue
 		}
 
-		newBlocks <- Block{
-			height: 1,
-			hash:   []byte(""),
+		block, err := NewTendermintBlockEvent(msg)
+		if err != nil {
+			// TODO: handle error
+			continue
 		}
+
+		// If msg does not contain data then block is nil, we can ignore it
+		if block == nil {
+			continue
+		}
+
+		newBlocks <- block
 	}
 }
 
