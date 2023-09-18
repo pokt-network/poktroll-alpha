@@ -24,9 +24,9 @@ func NewControlledObservable[V any](emitter chan V) (Observable[V], chan V) {
 	o := &ObservableImpl[V]{sync.RWMutex{}, e, []chan V{}, false}
 
 	// Start listening to the emitter and emit values to subscribers
-	go o.listen(emitter)
+	go o.listen(e)
 
-	return o, emitter
+	return o, e
 }
 
 // Get a subscription to the observable
