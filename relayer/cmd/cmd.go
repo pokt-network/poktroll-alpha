@@ -11,6 +11,8 @@ import (
 
 var signingKeyName string
 var wsURL string
+var blocksPerSession uint32
+var smtStorePath string
 
 func RelayerCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -22,6 +24,8 @@ func RelayerCmd() *cobra.Command {
 
 	cmd.Flags().StringVar(&signingKeyName, "signing-key", "", "Name of the key to sign transactions")
 	cmd.Flags().StringVar(&wsURL, "ws-url", "ws://localhost:26657/websocket", "Websocket URL to poktrolld node")
+	cmd.Flags().Uint32VarP(&blocksPerSession, "blocks-per-session", "b", 2, "Websocket URL to poktrolld node")
+	cmd.Flags().StringVar(&smtStorePath, "smt-store", "", "Path to the SMT KV store")
 
 	return cmd
 }
@@ -42,7 +46,10 @@ func runRelayer(cmd *cobra.Command, args []string) error {
 		WithClientCtx(clientCtx).
 		WithWsURL(ctx, wsURL)
 
-	relayer := relayer.NewRelayer(ctx, c)
+	relayer := relayer.NewRelayer().
+		WithServicerClient(c).
+		WithBlocksPerSession(ctx, blocksPerSession).
+		WithKVStorePath(smtStorePath)
 
 	return relayer.Start()
 }
