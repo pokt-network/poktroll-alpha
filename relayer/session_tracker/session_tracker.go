@@ -16,7 +16,7 @@ type SessionTracker struct {
 	latestSecret     []byte
 
 	newSessions chan types.Session
-	newBlocks   chan types.Block
+	newBlocks   utils.Observable[types.Block]
 }
 
 type session struct {
@@ -25,7 +25,7 @@ type session struct {
 	blockHash     []byte
 }
 
-func NewSessionTracker(ctx context.Context, newBlocks chan types.Block) *SessionTracker {
+func NewSessionTracker(ctx context.Context, newBlocks utils.Observable[types.Block]) *SessionTracker {
 	sm := &SessionTracker{newBlocks: newBlocks}
 	sm.sessionTicker, sm.newSessions = utils.NewControlledObservable[types.Session](nil)
 
@@ -40,7 +40,7 @@ func (sm *SessionTracker) ClosedSessions() utils.Observable[types.Session] {
 
 func (sm *SessionTracker) handleBlocks(ctx context.Context) {
 	// tick sessions along as new blocks are received
-	for block := range sm.newBlocks {
+	for block := range sm.newBlocks.Subscribe().Ch() {
 		select {
 		case <-ctx.Done():
 			return

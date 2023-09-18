@@ -20,14 +20,12 @@ type Relayer struct {
 	relayer        *proxy.Proxy
 	miner          *miner.Miner
 	sessionTracker *sessiontracker.SessionTracker
-	newBlocks      chan types.Block
 }
 
 func NewRelayer(ctx context.Context, client types.ServicerClient) *Relayer {
 	relayer := proxy.NewProxy(log.Default())
 	// should be sourced somehow form a subscription to the blockchain
-	newBlocks := make(chan types.Block)
-	sessionTracker := sessiontracker.NewSessionTracker(ctx, newBlocks)
+	sessionTracker := sessiontracker.NewSessionTracker(ctx, client.NewBlocks())
 
 	storePath := "/tmp/smt"
 	kvStore, err := smt.NewKVStore(storePath)
@@ -43,7 +41,6 @@ func NewRelayer(ctx context.Context, client types.ServicerClient) *Relayer {
 		relayer:        relayer,
 		miner:          miner,
 		sessionTracker: sessionTracker,
-		newBlocks:      newBlocks,
 	}
 }
 
