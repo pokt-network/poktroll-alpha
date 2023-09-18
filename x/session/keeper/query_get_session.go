@@ -16,7 +16,7 @@ func (k Keeper) GetSession(goCtx context.Context, req *types.QueryGetSessionRequ
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	session, err := k.GetSessionForApp(ctx, req.AppAddress)
+	session, err := k.GetSessionForApp(ctx, req.AppAddress, req.ServiceId, req.BlockHeight)
 	if err != nil {
 		return nil, err
 	}

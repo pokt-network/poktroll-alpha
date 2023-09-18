@@ -3,6 +3,7 @@ syntax = "proto3";
 package poktroll.application;
 
 import "cosmos/base/v1beta1/coin.proto";
+import "poktroll/service/service.proto";
 
 option go_package = "poktroll/x/application/types";
 
@@ -15,6 +16,7 @@ service Msg {
 message MsgStakeApplication {
   string address = 1;
   cosmos.base.v1beta1.Coin stakeAmount = 2;
+  repeated string serviceIds = 3;
 }
 
 message MsgStakeApplicationResponse {}

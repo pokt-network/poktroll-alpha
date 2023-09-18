@@ -16,9 +16,14 @@ func CmdGetSession() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-session",
 		Short: "Query get-session",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			appAddress := args[0]
+			serviceId := args[1]
+			blockHeight, err := strconv.ParseUint(args[2], 10, 64)
+			if err != nil {
+				return err
+			}
 
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -28,7 +33,9 @@ func CmdGetSession() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			params := &types.QueryGetSessionRequest{
-				AppAddress: appAddress,
+				BlockHeight: blockHeight,
+				AppAddress:  appAddress,
+				ServiceId:   serviceId,
 			}
 
 			res, err := queryClient.GetSession(cmd.Context(), params)

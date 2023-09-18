@@ -15,7 +15,7 @@ import (
 )
 
 type SessionKeeper interface {
-	GeSession(ctx sdk.Context, appAddress string) types.Session
+	GetSessionForApp(ctx sdk.Context, appAddress string, serviceId string, blockHeight uint64) (*types.Session, error)
 }
 
 type (

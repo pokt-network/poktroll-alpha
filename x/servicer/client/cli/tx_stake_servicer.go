@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"encoding/json"
+	"os"
 	"strconv"
 
 	"poktroll/x/servicer/types"
@@ -8,7 +10,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 )
 
@@ -20,26 +21,27 @@ func CmdStakeServicer() *cobra.Command {
 		Short: "Broadcast message stake-servicer",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			stakeAmountString := args[0]
-
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			stakeAmount, err := sdk.ParseCoinNormalized(stakeAmountString)
+			pathToAppConfig := args[0]
+			contents, err := os.ReadFile(pathToAppConfig)
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgStakeServicer(
-				clientCtx.GetFromAddress().String(),
-				stakeAmount,
-			)
-			if err := msg.ValidateBasic(); err != nil {
+			var stakeMsg types.MsgStakeServicer
+			if err := json.Unmarshal(contents, &stakeMsg); err != nil {
 				return err
 			}
-			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+			stakeMsg.Address = clientCtx.GetFromAddress().String()
+			if err := stakeMsg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &stakeMsg)
 		},
 	}
 

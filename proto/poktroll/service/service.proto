@@ -1,8 +1,55 @@
 syntax = "proto3";
 package poktroll.service;
 
+
+import "gogoproto/gogo.proto";
+option (gogoproto.equal_all) = true;
+import "google/protobuf/any.proto";
 option go_package = "poktroll/x/service/types";
 
-message Service {
-  
+// Enum to define various RPC types
+// DISCUSS: Enums are nice but in the `.json` files (e.g. see servicer1.json), we have to represent it as an int, which defeats half the purpose of using enums.
+enum RPCType {
+    UNKNOWN_RPC = 0;
+    GRPC = 1;
+    WEBSOCKET = 2;
+    JSON_RPC = 3;
+    // Add new RPC types here as needed
+}
+
+// Enum to define configuration options for the endpoint
+// DISCUSS: Enums are nice but in the `.json` files (e.g. see servicer1.json), we have to represent it as an int, which defeats half the purpose of using enums.
+enum ConfigOptions {
+    UNKNOWN_CONFIG = 0;
+    TIMEOUT = 1;
+    // Add new config options here as needed
+}
+
+// NB: proto maps cannot be keyed be enums, so we create a key-value wrapper instead
+message ConfigOption {
+    ConfigOptions key = 1;
+    string value = 2;
+}
+
+message ServiceId {
+    string id = 1; // unique identifier for the service
+    string name = 2; // human-readable name for the service
+}
+
+message ServiceConfig {
+    ServiceId id = 1;
+    repeated Endpoint endpoints = 2 [(gogoproto.nullable) = false, (gogoproto.jsontag) = "endpoints"];
+    Metadata metadata = 3; // metadata to allow for future extensibility
+}
+
+message Endpoint {
+    string url = 1 [(gogoproto.jsontag) = "url"]; // The URL of the endpoint
+    RPCType rpc_type = 2 [(gogoproto.jsontag) = "rpc_type"]; // The type of the RPC
+    Metadata metadata = 3; // Additional metadata about the endpoint
+    repeated ConfigOption configs = 4; // Configuration options for the endpoint
+}
+
+message Metadata {
+    // map<string, google.protobuf.Any> metadata = 3; // metadata to allow for future extensibility
+    map<string, string> entries = 1;
 }

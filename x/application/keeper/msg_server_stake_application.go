@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"poktroll/x/application/types"
+	svcTypes "poktroll/x/service/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -33,22 +34,31 @@ func (k msgServer) StakeApplication(goCtx context.Context, msg *types.MsgStakeAp
 	var coinsToSend sdk.Coin
 	application, found := k.GetApplication(ctx, msg.Address)
 	if !found {
+		logger.Info(fmt.Sprintf("application not found, creating new application for address %s with stake amount %v", appAddress, newApplicationStake))
+
 		// If the application is not found, create a new one
 		application = types.Application{
-			Address: msg.Address,
-			Stake:   msg.StakeAmount,
+			Address:  msg.Address,
+			Stake:    msg.StakeAmount,
+			Services: serviceIdsToService(msg.ServiceIds),
 		}
+
+		// Determine the number of coins to send from the application address to the application module account
 		coinsToSend = newApplicationStake
-		logger.Info(fmt.Sprintf("application not found, creating new application for address %s with stake amount %v", appAddress, newApplicationStake))
 	} else {
+		logger.Info(fmt.Sprintf("application found, updating application stake from %v to %v", application.Stake, newApplicationStake))
 		// If the application is found, make sure the stake amount has increased
 		if application.Stake.IsGTE(newApplicationStake) {
 			logger.Error(fmt.Sprintf("stake amount must %v be higher than previous stake amount %v", newApplicationStake, application.Stake))
 			return nil, types.ErrStakeAmountMustBeHigher
 		}
-		logger.Info(fmt.Sprintf("application found, updating application stake from %v to %v", application.Stake, newApplicationStake))
+
+		// Determine the number of coins to send from the application address to the application module account
 		coinsToSend = newApplicationStake.Sub(*application.Stake)
 		application.Stake = &newApplicationStake
+
+		// Update the services (just an override operation)
+		application.Services = serviceIdsToService(msg.ServiceIds)
 	}
 
 	// Send coins to the application module account
@@ -65,4 +75,15 @@ func (k msgServer) StakeApplication(goCtx context.Context, msg *types.MsgStakeAp
 
 	// QED
 	return &types.MsgStakeApplicationResponse{}, nil
+}
+
+func serviceIdsToService(serviceIds []string) []*svcTypes.ServiceId {
+	services := make([]*svcTypes.ServiceId, len(serviceIds))
+	for i, serviceId := range serviceIds {
+		services[i] = &svcTypes.ServiceId{
+			Id:   serviceId,
+			Name: "TODO_HYDRATE_ME",
+		}
+	}
+	return services
 }
