@@ -46736,6 +46736,42 @@ paths:
                   additionalProperties: {}
       tags:
         - Query
+  /poktroll/service/params:
+    get:
+      summary: Parameters queries the parameters of the module.
+      operationId: PoktrollServiceParams
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              params:
+                description: params holds all the parameters of this module.
+                type: object
+            description: >-
+              QueryParamsResponse is response type for the Query/Params RPC
+              method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      tags:
+        - Query
   /poktroll/servicer/params:
     get:
       summary: Parameters queries the parameters of the module.
@@ -75948,6 +75984,16 @@ definitions:
     type: object
     description: Params defines the parameters for the module.
   poktroll.portal.QueryParamsResponse:
+    type: object
+    properties:
+      params:
+        description: params holds all the parameters of this module.
+        type: object
+    description: QueryParamsResponse is response type for the Query/Params RPC method.
+  poktroll.service.Params:
+    type: object
+    description: Params defines the parameters for the module.
+  poktroll.service.QueryParamsResponse:
     type: object
     properties:
       params:

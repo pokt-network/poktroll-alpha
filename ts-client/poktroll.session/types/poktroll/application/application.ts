@@ -2,20 +2,19 @@
 import _m0 from "protobufjs/minimal";
 import { Coin } from "../../cosmos/base/v1beta1/coin";
 
-export const protobufPackage = "poktroll.servicer";
+export const protobufPackage = "poktroll.application";
 
-/** CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding the servicer map in the non-alpha repo */
-export interface Servicers {
+export interface Application {
   address: string;
   stake: Coin | undefined;
 }
 
-function createBaseServicers(): Servicers {
+function createBaseApplication(): Application {
   return { address: "", stake: undefined };
 }
 
-export const Servicers = {
-  encode(message: Servicers, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const Application = {
+  encode(message: Application, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.address !== "") {
       writer.uint32(10).string(message.address);
     }
@@ -25,10 +24,10 @@ export const Servicers = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): Servicers {
+  decode(input: _m0.Reader | Uint8Array, length?: number): Application {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseServicers();
+    const message = createBaseApplication();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -46,22 +45,22 @@ export const Servicers = {
     return message;
   },
 
-  fromJSON(object: any): Servicers {
+  fromJSON(object: any): Application {
     return {
       address: isSet(object.address) ? String(object.address) : "",
       stake: isSet(object.stake) ? Coin.fromJSON(object.stake) : undefined,
     };
   },
 
-  toJSON(message: Servicers): unknown {
+  toJSON(message: Application): unknown {
     const obj: any = {};
     message.address !== undefined && (obj.address = message.address);
     message.stake !== undefined && (obj.stake = message.stake ? Coin.toJSON(message.stake) : undefined);
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<Servicers>, I>>(object: I): Servicers {
-    const message = createBaseServicers();
+  fromPartial<I extends Exact<DeepPartial<Application>, I>>(object: I): Application {
+    const message = createBaseApplication();
     message.address = object.address ?? "";
     message.stake = (object.stake !== undefined && object.stake !== null) ? Coin.fromPartial(object.stake) : undefined;
     return message;

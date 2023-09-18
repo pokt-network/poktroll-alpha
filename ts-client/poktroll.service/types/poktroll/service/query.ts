@@ -1,9 +1,8 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
 import { Params } from "./params";
-import { Session } from "./session";
 
-export const protobufPackage = "poktroll.session";
+export const protobufPackage = "poktroll.service";
 
 /** QueryParamsRequest is request type for the Query/Params RPC method. */
 export interface QueryParamsRequest {
@@ -13,14 +12,6 @@ export interface QueryParamsRequest {
 export interface QueryParamsResponse {
   /** params holds all the parameters of this module. */
   params: Params | undefined;
-}
-
-export interface QueryGetSessionRequest {
-  appAddress: string;
-}
-
-export interface QueryGetSessionResponse {
-  session: Session | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -111,108 +102,10 @@ export const QueryParamsResponse = {
   },
 };
 
-function createBaseQueryGetSessionRequest(): QueryGetSessionRequest {
-  return { appAddress: "" };
-}
-
-export const QueryGetSessionRequest = {
-  encode(message: QueryGetSessionRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.appAddress !== "") {
-      writer.uint32(10).string(message.appAddress);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetSessionRequest {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseQueryGetSessionRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.appAddress = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): QueryGetSessionRequest {
-    return { appAddress: isSet(object.appAddress) ? String(object.appAddress) : "" };
-  },
-
-  toJSON(message: QueryGetSessionRequest): unknown {
-    const obj: any = {};
-    message.appAddress !== undefined && (obj.appAddress = message.appAddress);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<QueryGetSessionRequest>, I>>(object: I): QueryGetSessionRequest {
-    const message = createBaseQueryGetSessionRequest();
-    message.appAddress = object.appAddress ?? "";
-    return message;
-  },
-};
-
-function createBaseQueryGetSessionResponse(): QueryGetSessionResponse {
-  return { session: undefined };
-}
-
-export const QueryGetSessionResponse = {
-  encode(message: QueryGetSessionResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.session !== undefined) {
-      Session.encode(message.session, writer.uint32(10).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): QueryGetSessionResponse {
-    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseQueryGetSessionResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.session = Session.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): QueryGetSessionResponse {
-    return { session: isSet(object.session) ? Session.fromJSON(object.session) : undefined };
-  },
-
-  toJSON(message: QueryGetSessionResponse): unknown {
-    const obj: any = {};
-    message.session !== undefined && (obj.session = message.session ? Session.toJSON(message.session) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<QueryGetSessionResponse>, I>>(object: I): QueryGetSessionResponse {
-    const message = createBaseQueryGetSessionResponse();
-    message.session = (object.session !== undefined && object.session !== null)
-      ? Session.fromPartial(object.session)
-      : undefined;
-    return message;
-  },
-};
-
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
-  /** Queries a list of GetSession items. */
-  GetSession(request: QueryGetSessionRequest): Promise<QueryGetSessionResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -220,18 +113,11 @@ export class QueryClientImpl implements Query {
   constructor(rpc: Rpc) {
     this.rpc = rpc;
     this.Params = this.Params.bind(this);
-    this.GetSession = this.GetSession.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
-    const promise = this.rpc.request("poktroll.session.Query", "Params", data);
+    const promise = this.rpc.request("poktroll.service.Query", "Params", data);
     return promise.then((data) => QueryParamsResponse.decode(new _m0.Reader(data)));
-  }
-
-  GetSession(request: QueryGetSessionRequest): Promise<QueryGetSessionResponse> {
-    const data = QueryGetSessionRequest.encode(request).finish();
-    const promise = this.rpc.request("poktroll.session.Query", "GetSession", data);
-    return promise.then((data) => QueryGetSessionResponse.decode(new _m0.Reader(data)));
   }
 }
 
