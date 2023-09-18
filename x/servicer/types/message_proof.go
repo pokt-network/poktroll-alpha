@@ -9,7 +9,14 @@ const TypeMsgProof = "proof"
 
 var _ sdk.Msg = &MsgProof{}
 
-func NewMsgProof(creator string, root string, path string, valueHash string, sum int32, proofBz string) *MsgProof {
+func NewMsgProof(
+	creator string,
+	root,
+	path,
+	valueHash []byte,
+	sum int32,
+	proofBz []byte,
+) *MsgProof {
 	return &MsgProof{
 		Creator:   creator,
 		Root:      root,

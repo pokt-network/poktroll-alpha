@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"encoding/hex"
+	"fmt"
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -14,11 +16,14 @@ var _ = strconv.Itoa(0)
 
 func CmdClaim() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "claim [smt-root-hash]",
+		Use:   "claim [root-hash hex]",
 		Short: "Broadcast message claim",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			argSmtRootHash := args[0]
+			argSmtRootHash, err := hex.DecodeString(args[0])
+			if err != nil {
+				return fmt.Errorf("unable to hex decode root hash argument: %w", err)
+			}
 
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {

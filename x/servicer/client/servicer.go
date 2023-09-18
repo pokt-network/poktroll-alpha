@@ -13,6 +13,7 @@ type ServicerClient interface {
 	SubmitClaim(context.Context, []byte) error
 	SubmitProof(
 		ctx context.Context,
+		smtRootHash []byte,
 		closestKey []byte,
 		closestValueHash []byte,
 		closestSum uint64,

@@ -9,7 +9,7 @@ const TypeMsgClaim = "claim"
 
 var _ sdk.Msg = &MsgClaim{}
 
-func NewMsgClaim(creator string, smtRootHash string) *MsgClaim {
+func NewMsgClaim(creator string, smtRootHash []byte) *MsgClaim {
 	return &MsgClaim{
 		Creator:     creator,
 		SmtRootHash: smtRootHash,
