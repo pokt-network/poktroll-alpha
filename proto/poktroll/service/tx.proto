@@ -1,0 +1,7 @@
+syntax = "proto3";
+package poktroll.service;
+
+option go_package = "poktroll/x/service/types";
+
+// Msg defines the Msg service.
+service Msg {}

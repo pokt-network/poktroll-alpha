@@ -127,6 +127,9 @@ import (
 	sessionmodulekeeper "poktroll/x/session/keeper"
 	sessionmoduletypes "poktroll/x/session/types"
 
+	servicemodule "poktroll/x/service"
+	servicemodulekeeper "poktroll/x/service/keeper"
+	servicemoduletypes "poktroll/x/service/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "poktroll/app/params"
@@ -192,6 +195,7 @@ var (
 		applicationmodule.AppModuleBasic{},
 		servicermodule.AppModuleBasic{},
 		sessionmodule.AppModuleBasic{},
+		servicemodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
@@ -279,6 +283,8 @@ type App struct {
 	ServicerKeeper servicermodulekeeper.Keeper
 
 	SessionKeeper sessionmodulekeeper.Keeper
+
+	ServiceKeeper servicemodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -330,6 +336,7 @@ func New(
 		applicationmoduletypes.StoreKey,
 		servicermoduletypes.StoreKey,
 		sessionmoduletypes.StoreKey,
+		servicemoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -599,6 +606,14 @@ func New(
 	)
 	sessionModule := sessionmodule.NewAppModule(appCodec, app.SessionKeeper, app.AccountKeeper, app.BankKeeper)
 
+	app.ServiceKeeper = *servicemodulekeeper.NewKeeper(
+		appCodec,
+		keys[servicemoduletypes.StoreKey],
+		keys[servicemoduletypes.MemStoreKey],
+		app.GetSubspace(servicemoduletypes.ModuleName),
+	)
+	serviceModule := servicemodule.NewAppModule(appCodec, app.ServiceKeeper, app.AccountKeeper, app.BankKeeper)
+
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
 	/**** IBC Routing ****/
@@ -665,6 +680,7 @@ func New(
 		applicationModule,
 		servicerModule,
 		sessionModule,
+		serviceModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
@@ -702,6 +718,7 @@ func New(
 		applicationmoduletypes.ModuleName,
 		servicermoduletypes.ModuleName,
 		sessionmoduletypes.ModuleName,
+		servicemoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
@@ -732,6 +749,7 @@ func New(
 		applicationmoduletypes.ModuleName,
 		servicermoduletypes.ModuleName,
 		sessionmoduletypes.ModuleName,
+		servicemoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
@@ -767,6 +785,7 @@ func New(
 		applicationmoduletypes.ModuleName,
 		servicermoduletypes.ModuleName,
 		sessionmoduletypes.ModuleName,
+		servicemoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	}
 	app.mm.SetOrderInitGenesis(genesisModuleOrder...)
@@ -996,6 +1015,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(applicationmoduletypes.ModuleName)
 	paramsKeeper.Subspace(servicermoduletypes.ModuleName)
 	paramsKeeper.Subspace(sessionmoduletypes.ModuleName)
+	paramsKeeper.Subspace(servicemoduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper
