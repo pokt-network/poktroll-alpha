@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package poktroll.servicer;
+
+option go_package = "poktroll/x/servicer/types";
+
+message Proof {
+	repeated bytes sideNodes = 1;
+	bytes nonMembershipLeafData = 2;
+	bytes siblingData = 3;
+}

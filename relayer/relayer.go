@@ -1,31 +1,33 @@
-package relayminer
+package relayer
 
 import (
+	"context"
 	"crypto/sha256"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 
 	"github.com/pokt-network/smt"
 
-	"poktroll/relayminer/miner"
-	"poktroll/relayminer/relayer"
-	sessiontracker "poktroll/relayminer/session_tracker"
-	"poktroll/relayminer/types"
-	"poktroll/x/servicer/client"
+	"poktroll/relayer/miner"
+	"poktroll/relayer/proxy"
+	sessiontracker "poktroll/relayer/session_tracker"
+	"poktroll/x/servicer/types"
 )
 
-type RelayMiner struct {
-	relayer        *relayer.Relayer
+type Relayer struct {
+	relayer        *proxy.Proxy
 	miner          *miner.Miner
 	sessionTracker *sessiontracker.SessionTracker
 	newBlocks      chan types.Block
 }
 
-func NewRelayMiner(client client.ServicerClient) *RelayMiner {
-	relayer := relayer.NewRelayer(log.Default())
+func NewRelayer(ctx context.Context, client types.ServicerClient) *Relayer {
+	relayer := proxy.NewProxy(log.Default())
 	// should be sourced somehow form a subscription to the blockchain
 	newBlocks := make(chan types.Block)
-	sessionTracker := sessiontracker.NewSessionTracker(newBlocks)
+	sessionTracker := sessiontracker.NewSessionTracker(ctx, newBlocks)
 
 	storePath := "/tmp/smt"
 	kvStore, err := smt.NewKVStore(storePath)
@@ -37,7 +39,7 @@ func NewRelayMiner(client client.ServicerClient) *RelayMiner {
 	miner := miner.NewMiner(sha256.New(), kvStore, client)
 	miner.MineRelays(relayer.Relays(), sessionTracker.ClosedSessions())
 
-	return &RelayMiner{
+	return &Relayer{
 		relayer:        relayer,
 		miner:          miner,
 		sessionTracker: sessionTracker,
@@ -45,6 +47,10 @@ func NewRelayMiner(client client.ServicerClient) *RelayMiner {
 	}
 }
 
-func (relayMiner *RelayMiner) Start() error {
+func (relayer *Relayer) Start() error {
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt)
+	<-sigCh
+
 	return nil
 }

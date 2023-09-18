@@ -2,43 +2,50 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	cosmosClient "github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/tx"
 	txClient "github.com/cosmos/cosmos-sdk/client/tx"
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
 	authClient "github.com/cosmos/cosmos-sdk/x/auth/client"
+	"github.com/gorilla/websocket"
 	"github.com/pokt-network/smt"
 
-	relayminer "poktroll/relayminer/types"
-	"poktroll/x/servicer/client"
+	"poktroll/utils"
 	"poktroll/x/servicer/types"
 )
 
 var (
-	_ client.ServicerClient = &servicerClient{}
+	_ types.ServicerClient = &servicerClient{}
 )
+
+type Block struct {
+	height uint64
+	hash   []byte
+}
+
+func (b Block) Height() uint64 {
+	return b.height
+}
+
+func (b Block) Hash() []byte {
+	return b.hash
+}
 
 type servicerClient struct {
 	keyName   string
 	txFactory txClient.Factory
 	clientCtx cosmosClient.Context
+	wsClient  *websocket.Conn
+	newBlocks utils.Observable[types.Block]
 }
 
-func NewServicerClient(
-	keyName string,
-	txFactory tx.Factory,
-	clientCtx cosmosClient.Context,
-) client.ServicerClient {
-	return &servicerClient{
-		keyName:   keyName,
-		txFactory: txFactory,
-		clientCtx: clientCtx,
-	}
+func NewServicerClient() *servicerClient {
+	return &servicerClient{}
 }
 
-func (client *servicerClient) NewBlocks() <-chan relayminer.Block {
-	panic("implement me")
+func (client *servicerClient) NewBlocks() utils.Observable[types.Block] {
+	return client.newBlocks
 }
 
 func (client *servicerClient) SubmitClaim(
@@ -118,4 +125,64 @@ func (client *servicerClient) broadcastMessageTx(
 	}
 
 	return nil
+}
+
+func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.Block) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
+		_, _, err := client.wsClient.ReadMessage()
+		if err != nil {
+			continue
+		}
+
+		newBlocks <- Block{
+			height: 1,
+			hash:   []byte(""),
+		}
+	}
+}
+
+func (client *servicerClient) WithSigningKeyUID(uid string) *servicerClient {
+	client.keyName = uid
+	return client
+}
+
+func (client *servicerClient) WithWsURL(ctx context.Context, wsURL string) *servicerClient {
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		panic(fmt.Errorf("failed to connect to websocket: %w", err))
+	}
+
+	conn.WriteJSON(map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method":  "subscribe",
+		"id":      0,
+		"params": map[string]interface{}{
+			"query": "tm.event='NewBlock'",
+		},
+	})
+
+	newBlocks, controller := utils.NewControlledObservable[types.Block](nil)
+
+	client.wsClient = conn
+	client.newBlocks = newBlocks
+
+	go client.listen(ctx, controller)
+
+	return client
+}
+
+func (client *servicerClient) WithTxFactory(txFactory txClient.Factory) *servicerClient {
+	client.txFactory = txFactory
+	return client
+}
+
+func (client *servicerClient) WithClientCtx(clientCtx cosmosClient.Context) *servicerClient {
+	client.clientCtx = clientCtx
+	return client
 }

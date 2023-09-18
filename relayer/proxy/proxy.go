@@ -1,4 +1,4 @@
-package relayer
+package proxy
 
 import (
 	"bufio"
@@ -12,7 +12,7 @@ import (
 	"poktroll/x/servicer/types"
 )
 
-type Relayer struct {
+type Proxy struct {
 	localAddr        string
 	serviceAddr      string
 	logger           *log.Logger
@@ -20,29 +20,29 @@ type Relayer struct {
 	outputObservable utils.Observable[*types.Relay]
 }
 
-func NewRelayer(logger *log.Logger) *Relayer {
-	r := &Relayer{output: make(chan *types.Relay), logger: logger}
-	r.outputObservable, _ = utils.NewControlledObservable[*types.Relay](r.output)
+func NewProxy(logger *log.Logger) *Proxy {
+	proxy := &Proxy{output: make(chan *types.Relay), logger: logger}
+	proxy.outputObservable, _ = utils.NewControlledObservable[*types.Relay](proxy.output)
 
-	r.localAddr = "localhost:8545"
-	r.serviceAddr = "localhost:8546"
+	proxy.localAddr = "localhost:8545"
+	proxy.serviceAddr = "localhost:8546"
 
-	go r.listen()
+	go proxy.listen()
 
-	return r
+	return proxy
 }
 
-func (r *Relayer) Relays() utils.Observable[*types.Relay] {
-	return r.outputObservable
+func (proxy *Proxy) Relays() utils.Observable[*types.Relay] {
+	return proxy.outputObservable
 }
 
-func (r *Relayer) listen() {
-	if err := http.ListenAndServe(r.localAddr, r); err != nil {
-		r.logger.Fatal(err)
+func (proxy *Proxy) listen() {
+	if err := http.ListenAndServe(proxy.localAddr, proxy); err != nil {
+		proxy.logger.Fatal(err)
 	}
 }
 
-func (r *Relayer) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
+func (proxy *Proxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	requestHeaders := make(map[string]string)
 	for k, v := range req.Header {
 		requestHeaders[k] = v[0]
@@ -58,21 +58,21 @@ func (r *Relayer) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 		// Read the request body
 		requestBody, err := io.ReadAll(req.Body)
 		if err != nil {
-			r.replyWithError(500, err, wr)
+			proxy.replyWithError(500, err, wr)
 			return
 		}
 		relayRequest.Payload = requestBody
 	}
 
 	// Change the request host to the service address
-	req.Host = r.serviceAddr
-	req.URL.Host = r.serviceAddr
+	req.Host = proxy.serviceAddr
+	req.URL.Host = proxy.serviceAddr
 	req.Body = io.NopCloser(bytes.NewBuffer(relayRequest.Payload))
 
 	// Connect to the service
-	remoteConnection, err := net.Dial("tcp", r.serviceAddr)
+	remoteConnection, err := net.Dial("tcp", proxy.serviceAddr)
 	if err != nil {
-		r.replyWithError(500, err, wr)
+		proxy.replyWithError(500, err, wr)
 		return
 	}
 	defer remoteConnection.Close()
@@ -80,14 +80,14 @@ func (r *Relayer) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	// Send the request to the service
 	err = req.Write(remoteConnection)
 	if err != nil {
-		r.replyWithError(500, err, wr)
+		proxy.replyWithError(500, err, wr)
 		return
 	}
 
 	// Read the response from the service
 	response, err := http.ReadResponse(bufio.NewReader(remoteConnection), req)
 	if err != nil {
-		r.replyWithError(500, err, wr)
+		proxy.replyWithError(500, err, wr)
 		return
 	}
 
@@ -96,7 +96,7 @@ func (r *Relayer) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 		// Read the request body
 		responseBody, err = io.ReadAll(response.Body)
 		if err != nil {
-			r.replyWithError(500, err, wr)
+			proxy.replyWithError(500, err, wr)
 			return
 		}
 	}
@@ -124,16 +124,16 @@ func (r *Relayer) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 		},
 	}
 
-	relay.Res.Signature = r.signResponse(relay)
+	relay.Res.Signature = proxy.signResponse(relay)
 
-	r.output <- relay
+	proxy.output <- relay
 }
 
-func (r *Relayer) signResponse(relay *types.Relay) []byte {
+func (r *Proxy) signResponse(relay *types.Relay) []byte {
 	return nil
 }
 
-func (r *Relayer) replyWithError(statusCode int, err error, wr http.ResponseWriter) {
+func (proxy *Proxy) replyWithError(statusCode int, err error, wr http.ResponseWriter) {
 	wr.WriteHeader(statusCode)
 	wr.Write([]byte(err.Error()))
 }

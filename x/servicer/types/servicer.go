@@ -1,15 +1,15 @@
-package client
+package types
 
 import (
 	"context"
 
 	"github.com/pokt-network/smt"
 
-	"poktroll/relayminer/types"
+	"poktroll/utils"
 )
 
 type ServicerClient interface {
-	NewBlocks() <-chan types.Block
+	NewBlocks() utils.Observable[Block]
 	SubmitClaim(context.Context, []byte) error
 	SubmitProof(
 		ctx context.Context,
