@@ -13,7 +13,7 @@ import (
 type Miner struct {
 	smst     smt.SMST
 	relays   utils.Observable[*types.Relay]
-	sessions utils.Observable[*types.Session]
+	sessions utils.Observable[types.Session]
 	client   types.ServicerClient
 	hasher   hash.Hash
 }
@@ -40,7 +40,7 @@ func (m *Miner) submitProof(hash []byte, root []byte) error {
 	return m.client.SubmitProof(context.TODO(), root, path, valueHash, sum, proof)
 }
 
-func (m *Miner) MineRelays(relays utils.Observable[*types.Relay], sessions utils.Observable[*types.Session]) {
+func (m *Miner) MineRelays(relays utils.Observable[*types.Relay], sessions utils.Observable[types.Session]) {
 	m.relays = relays
 	m.sessions = sessions
 }
@@ -50,11 +50,14 @@ func (m *Miner) handleSessionEnd() {
 	for session := range ch {
 		claim := m.smst.Root()
 		if err := m.client.SubmitClaim(context.TODO(), claim); err != nil {
+			// TODO_THIS_COMMIT: log error
 			continue
 		}
 
 		// Wait for some time
-		m.submitProof(session.BlockHash, claim)
+		if err := m.submitProof(session.BlockHash(), claim); err != nil {
+			// TODO_THIS_COMMIT: log error
+		}
 	}
 }
 
@@ -71,6 +74,8 @@ func (m *Miner) handleRelays() {
 		// Is it correct that we need to hash the key while smst.Update() could do it
 		// since smst has a reference to the hasher
 		hash := m.hasher.Sum([]byte(relayBz))
-		m.smst.Update(hash, relayBz, 1)
+		if err := m.smst.Update(hash, relayBz, 1); err != nil {
+			// TODO_THIS_COMMIT: log error
+		}
 	}
 }
