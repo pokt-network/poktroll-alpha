@@ -10,8 +10,9 @@ import (
 	authClient "github.com/cosmos/cosmos-sdk/x/auth/client"
 	"github.com/pokt-network/smt"
 
-	"poktroll/relayminer/types"
+	relayminer "poktroll/relayminer/types"
 	"poktroll/x/servicer/client"
+	"poktroll/x/servicer/types"
 )
 
 var (
@@ -36,28 +37,51 @@ func NewServicerClient(
 	}
 }
 
-func (client *servicerClient) NewBlocks() <-chan types.Block {
+func (client *servicerClient) NewBlocks() <-chan relayminer.Block {
 	panic("implement me")
 }
 
 func (client *servicerClient) SubmitClaim(
 	ctx context.Context,
-	// TODO: what type should `claim` be?
-	claim []byte,
+	smtRootHash []byte,
 ) error {
-	panic("implement me")
+	msg := &types.MsgClaim{
+		Creator:     client.clientCtx.FromAddress.String(),
+		SmtRootHash: smtRootHash,
+	}
+	if err := client.broadcastMessageTx(ctx, msg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (client *servicerClient) SubmitProof(
 	ctx context.Context,
+	smtRootHash []byte,
 	closestKey []byte,
 	closestValueHash []byte,
 	closestSum uint64,
 	// TODO: what type should `claim` be?
 	proof *smt.SparseMerkleProof,
 ) error {
-	//
-	client.broadcastMessageTx(ctx, msg)
+	proofBz, err := proof.Marshal()
+	if err != nil {
+		return err
+	}
+
+	msg := &types.MsgProof{
+		Creator:   client.clientCtx.FromAddress.String(),
+		Root:      smtRootHash,
+		Path:      closestKey,
+		ValueHash: closestValueHash,
+		// CONSIDERATION: should we change this type in the protobuf?
+		Sum:     int32(closestSum),
+		ProofBz: proofBz,
+	}
+	if err := client.broadcastMessageTx(ctx, msg); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (client *servicerClient) broadcastMessageTx(
