@@ -3,8 +3,11 @@ package client
 import (
 	"encoding/hex"
 	"encoding/json"
+
 	"poktroll/x/servicer/types"
 )
+
+var _ types.Block = &tendermintBlockEvent{}
 
 type tendermintBlockEvent struct {
 	Block  tendermintBlock `json:"block"`
