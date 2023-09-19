@@ -252,3 +252,9 @@ ignite_regenerate: ## Regenerate the ignite boilerplate
 .PHONY: ignite_acc_list
 ignite_acc_list: ## List all the accounts in the ignite boilerplate
 	ignite account list  --keyring-dir $(POKTROLLD_HOME) --keyring-backend test
+
+.PHONY: regenesis
+regenesis:
+	# NOTE: intentionally not using --home <dir> flag to avoid overwriting the test keyring
+	ignite chain init --skip-proto
+	cp ${HOME}/.poktroll/config/*.json ./localnet/poktrolld/config/
