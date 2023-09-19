@@ -203,6 +203,7 @@ func (client *servicerClient) WithSigningKeyUID(uid string) *servicerClient {
 }
 
 func (client *servicerClient) WithWsURL(ctx context.Context, wsURL string) *servicerClient {
+	// IMPROVE: separate configuration from subcomponent construction & setup.
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		panic(fmt.Errorf("failed to connect to websocket: %w", err))

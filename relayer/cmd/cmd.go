@@ -28,6 +28,9 @@ func RelayerCmd() *cobra.Command {
 		RunE:  runRelayer,
 	}
 
+	// TECHDEBT: integrate these flags with the client context (i.e. flags, config, viper, etc.)
+	// This is simpler to do with server-side configs (see rootCmd#PersistentPreRunE).
+	// Will require more effort than currently justifiable.
 	cmd.Flags().StringVar(&signingKeyName, "signing-key", "", "Name of the key to sign transactions")
 	cmd.Flags().StringVar(&wsURL, "ws-url", "ws://localhost:36657/websocket", "Websocket URL to poktrolld node; formatted as ws://<host>:<port>[/path]")
 	cmd.Flags().Uint32VarP(&blocksPerSession, "blocks-per-session", "b", 2, "Websocket URL to poktrolld node")
@@ -46,6 +49,10 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
+	// CONSIDERATION: there may be a more conventional, idomatic, and/or convenient
+	// way to track and cleanup goroutines. In the wait group solution, goroutines get a
+	// reference to it via the context value and are expected to call `wg.Add(n)` and 
+	// `wg.Done()` appropriately.
 	wg := new(sync.WaitGroup)
 	ctx, cancelCtx := context.WithCancel(
 		context.WithValue(
@@ -55,8 +62,14 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		),
 	)
 
-	// The order of the WithXXX methods matters for now.
-	// TODO: Refactor this to a builder pattern.
+	// IMPROVE: we tried this pattern because it seemed to be conventional across
+	// some cosmos-sdk code. In our use case, it turned out to be problematic. In
+	// the presence of shared and/or nested dependencies, call order starts to
+	// matter.
+	// CONSIDERATION: perhaps the `depinject` cosmos-sdk system or a builder
+	// pattern would be more appropriate.
+	// see: https://github.com/cosmos/cosmos-sdk/tree/main/depinject#depinject
+	func (relayer *Relayer) WithKVStorePath(storePath string) *Relayer {
 	c := client.NewServicerClient().
 		WithTxFactory(clientFactory).
 		WithSigningKeyUID(signingKeyName).
@@ -78,7 +91,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, os.Kill)
-	// Block until we receive an interrupt or signal signals (OS-agnostic)
+	// Block until we receive an interrupt or kill signal (OS-agnostic)
 	<-sigCh
 
 	// Signal goroutines to stop

@@ -59,6 +59,7 @@ func (relayer *Relayer) WithKVStorePath(storePath string) *Relayer {
 }
 
 func (relayer *Relayer) WithKey(keyring keyring.Keyring, keyName string) *Relayer {
+	// IMPROVE: separate configuration from subcomponent construction
 	relayer.proxy = proxy.NewProxy(log.Default(), keyring, keyName)
 
 	return relayer

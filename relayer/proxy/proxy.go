@@ -34,7 +34,8 @@ func NewProxy(logger *log.Logger, keyring keyring.Keyring, keyName string) *Prox
 
 	proxy.outputObservable, _ = utils.NewControlledObservable[*types.Relay](proxy.output)
 
-	proxy.localAddr = "localhost:8545"
+        // TECHDEBT: move these into config/flags/etc.
+        proxy.localAddr = "localhost:8545"
 	proxy.serviceAddr = "localhost:8546"
 
 	go proxy.listen()
