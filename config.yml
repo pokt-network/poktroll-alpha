@@ -1,10 +1,12 @@
 version: 1
 accounts:
   - name: alice
+    mnemonic: "cable surround lemon legend river dizzy seek you camera concert orient nest sponsor process junk hub melt bar puzzle invite portion machine when strategy"
     coins:
       - 20000token
       - 200000000stake
   - name: bob
+    mnemonic: "visa test air predict head shoot mad syrup own craft mail spare better remember leg produce noodle humble glad social neck prize breeze fat"
     coins:
       - 10000token
       - 100000000stake
