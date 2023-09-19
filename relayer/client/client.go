@@ -133,6 +133,8 @@ func (client *servicerClient) broadcastMessageTx(
 	return nil
 }
 
+// listen blocks on reading messages from a websocket connection, it is intended
+// to be called from within a go routine.
 func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.Block) {
 	wg, haveWaitGroup := ctx.Value(relayer.WaitGroupContextKey).(*sync.WaitGroup)
 	if haveWaitGroup {
