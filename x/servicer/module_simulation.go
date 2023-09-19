@@ -145,22 +145,6 @@ func (am AppModule) ProposalMsgs(simState module.SimulationState) []simtypes.Wei
 			},
 		),
 		simulation.NewWeightedProposalMsg(
-			opWeightMsgClaim,
-			defaultWeightMsgClaim,
-			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
-				servicersimulation.SimulateMsgClaim(am.accountKeeper, am.bankKeeper, am.keeper)
-				return nil
-			},
-		),
-		simulation.NewWeightedProposalMsg(
-			opWeightMsgClaim,
-			defaultWeightMsgClaim,
-			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
-				servicersimulation.SimulateMsgClaim(am.accountKeeper, am.bankKeeper, am.keeper)
-				return nil
-			},
-		),
-		simulation.NewWeightedProposalMsg(
 			opWeightMsgProof,
 			defaultWeightMsgProof,
 			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {

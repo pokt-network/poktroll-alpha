@@ -112,7 +112,6 @@ func (proxy *Proxy) executeRelay(req *http.Request, requestPayload []byte) (*typ
 	req.Body = io.NopCloser(bytes.NewBuffer(requestPayload))
 
 	serviceResponse, err := proxyServiceRequest(req)
-	//http.ReadResponse(bufio.NewReader(remoteConnection), req)
 	if err != nil {
 		return nil, err
 	}
