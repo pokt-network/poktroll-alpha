@@ -34,6 +34,7 @@ func RelayerCmd() *cobra.Command {
 	cmd.Flags().StringVar(&smtStorePath, "smt-store", "", "Path to the SMT KV store")
 
 	cmd.Flags().String(flags.FlagKeyringBackend, "", "Select keyring's backend (os|file|kwallet|pass|test)")
+	cmd.Flags().String(flags.FlagNode, "tcp://localhost:36657", "tcp://<host>:<port> to tendermint rpc interface for this chain")
 
 	return cmd
 }
