@@ -77,16 +77,10 @@ func (client *servicerClient) SubmitProof(
 	closestKey []byte,
 	closestValueHash []byte,
 	closestSum uint64,
-	// TODO: what type should `claim` be?
-	proof *smt.SparseMerkleProof,
+	smtProof *smt.SparseMerkleProof,
 ) error {
 	if client.address == "" {
 		return errEmptyAddress
-	}
-
-	proofBz, err := proof.Marshal()
-	if err != nil {
-		return err
 	}
 
 	msg := &types.MsgProof{
@@ -94,9 +88,8 @@ func (client *servicerClient) SubmitProof(
 		Root:      smtRootHash,
 		Path:      closestKey,
 		ValueHash: closestValueHash,
-		// CONSIDERATION: should we change this type in the protobuf?
-		Sum:     int32(closestSum),
-		ProofBz: proofBz,
+		Sum:       int32(closestSum),
+		Proof:     newProof(smtProof),
 	}
 	if err := client.broadcastMessageTx(ctx, msg); err != nil {
 		return err
@@ -240,4 +233,13 @@ func (client *servicerClient) WithTxFactory(txFactory txClient.Factory) *service
 func (client *servicerClient) WithClientCtx(clientCtx cosmosClient.Context) *servicerClient {
 	client.clientCtx = clientCtx
 	return client
+}
+
+func newProof(smtProof *smt.SparseMerkleProof) *types.Proof {
+	return &types.Proof{
+		SideNodes:             smtProof.SideNodes,
+		NonMembershipLeafData: smtProof.NonMembershipLeafData,
+		SiblingData:           smtProof.SiblingData,
+	}
+
 }
