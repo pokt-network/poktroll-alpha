@@ -51,7 +51,7 @@ func CmdProof() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgProof(
+			msg, err := types.NewMsgProof(
 				clientCtx.GetFromAddress().String(),
 				argRoot,
 				argPath,
@@ -59,6 +59,10 @@ func CmdProof() *cobra.Command {
 				argSum,
 				argProofBz,
 			)
+			if err != nil {
+				return err
+			}
+
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
