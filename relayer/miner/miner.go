@@ -83,7 +83,9 @@ func (m *Miner) handleRelays() {
 
 		// Is it correct that we need to hash the key while smst.Update() could do it
 		// since smst has a reference to the hasher
-		hash := m.hasher.Sum([]byte(relayBz))
+		m.hasher.Write(relayBz)
+		hash := m.hasher.Sum(nil)
+		m.hasher.Reset()
 		if err := m.smst.Update(hash, relayBz, 1); err != nil {
 			// TODO_THIS_COMMIT: log error
 		}
