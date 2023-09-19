@@ -19,6 +19,8 @@ type Miner struct {
 	hasher   hash.Hash
 }
 
+// IMPROVE: be consistent with component configuration & setup.
+// (We got burned by the `WithXXX` pattern and just did this for now).
 func NewMiner(hasher hash.Hash, store smt.KVStore, client types.ServicerClient) *Miner {
 	m := &Miner{
 		smst:   *smt.NewSparseMerkleSumTree(store, hasher),

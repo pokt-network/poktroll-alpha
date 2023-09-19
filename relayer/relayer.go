@@ -46,6 +46,7 @@ func (relayer *Relayer) WithBlocksPerSession(ctx context.Context, blocksPerSessi
 }
 
 func (relayer *Relayer) WithKVStorePath(storePath string) *Relayer {
+	// IMPROVE: separate configuration from subcomponent construction
 	kvStore, err := smt.NewKVStore(storePath)
 
 	if err != nil {

@@ -24,6 +24,8 @@ type Proxy struct {
 	outputObservable utils.Observable[*types.Relay]
 }
 
+// IMPROVE: be consistent with component configuration & setup.
+// (We got burned by the `WithXXX` pattern and just did this for now).
 func NewProxy(logger *log.Logger, keyring keyring.Keyring, keyName string) *Proxy {
 	proxy := &Proxy{
 		output:  make(chan *types.Relay),
