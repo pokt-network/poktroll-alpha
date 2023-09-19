@@ -137,7 +137,11 @@ func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.B
 
 		_, msg, err := client.wsClient.ReadMessage()
 		if err != nil {
-			// TODO: handle error
+			if websocket.IsUnexpectedCloseError(err) {
+				// NB: stop this goroutine if the websocket connection is closed
+				return
+			}
+			// TODO: handle other errors (?)
 			continue
 		}
 
