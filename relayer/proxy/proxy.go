@@ -65,12 +65,7 @@ func (proxy *Proxy) ServeHTTP(httpResponseWriter http.ResponseWriter, req *http.
 		return
 	}
 
-	// Change the request host to the service address
-	req.Host = proxy.serviceAddr
-	req.URL.Host = proxy.serviceAddr
-	req.Body = io.NopCloser(bytes.NewBuffer(relayRequest.Payload))
-
-	relayResponse, err := proxy.executeRelay(req)
+	relayResponse, err := proxy.executeRelay(req, relayRequest.Payload)
 	if err != nil {
 		if err := proxy.replyWithError(500, err, httpResponseWriter); err != nil {
 			// TECHDEBT: log error
@@ -109,7 +104,12 @@ func (proxy *Proxy) replyWithError(statusCode int, err error, wr http.ResponseWr
 	return nil
 }
 
-func (proxy *Proxy) executeRelay(req *http.Request) (*types.RelayResponse, error) {
+func (proxy *Proxy) executeRelay(req *http.Request, requestPayload []byte) (*types.RelayResponse, error) {
+	// Change the request host to the service address
+	req.Host = proxy.serviceAddr
+	req.URL.Host = proxy.serviceAddr
+	req.Body = io.NopCloser(bytes.NewBuffer(requestPayload))
+
 	serviceResponse, err := proxyServiceRequest(req)
 	//http.ReadResponse(bufio.NewReader(remoteConnection), req)
 	if err != nil {
