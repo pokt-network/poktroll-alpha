@@ -23,7 +23,7 @@ func RelayerCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&signingKeyName, "signing-key", "", "Name of the key to sign transactions")
-	cmd.Flags().StringVar(&wsURL, "ws-url", "ws://localhost:26657/websocket", "Websocket URL to poktrolld node")
+	cmd.Flags().StringVar(&wsURL, "ws-url", "ws://localhost:36657/websocket", "Websocket URL to poktrolld node; formatted as ws://<host>:<port>[/path]")
 	cmd.Flags().Uint32VarP(&blocksPerSession, "blocks-per-session", "b", 2, "Websocket URL to poktrolld node")
 	cmd.Flags().StringVar(&smtStorePath, "smt-store", "", "Path to the SMT KV store")
 
