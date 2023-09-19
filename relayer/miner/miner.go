@@ -67,10 +67,9 @@ func (m *Miner) handleSessionEnd() {
 func (m *Miner) handleRelays() {
 	ch := m.relays.Subscribe().Ch()
 	for relay := range ch {
-		// TODO get the serialized byte representation of the relay
 		relayBz, err := relay.Marshal()
 		if err != nil {
-			//m.logger.Error("failed to marshal relay: %s", err)
+			log.Printf("failed to marshal relay: %s\n", err)
 			continue
 		}
 
