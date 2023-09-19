@@ -2,6 +2,8 @@ package sessiontracker
 
 import (
 	"context"
+	"log"
+
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
 )
@@ -63,6 +65,7 @@ func (sm *SessionTracker) handleBlocks(ctx context.Context) {
 				case <-ctx.Done():
 					return
 				default:
+					log.Println("new session")
 					sm.newSessions <- sm.session
 				}
 			}()

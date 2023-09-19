@@ -3,6 +3,7 @@ package miner
 import (
 	"context"
 	"hash"
+	"log"
 
 	"github.com/pokt-network/smt"
 
@@ -50,13 +51,13 @@ func (m *Miner) handleSessionEnd() {
 	for session := range ch {
 		claim := m.smst.Root()
 		if err := m.client.SubmitClaim(context.TODO(), claim); err != nil {
-			// TODO_THIS_COMMIT: log error
+			log.Printf("failed to submit claim: %s", err)
 			continue
 		}
 
 		// Wait for some time
 		if err := m.submitProof(session.BlockHash(), claim); err != nil {
-			// TODO_THIS_COMMIT: log error
+			log.Printf("failed to submit proof: %s", err)
 		}
 	}
 }

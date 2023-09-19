@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"log"
 	"sync"
 
 	cosmosClient "github.com/cosmos/cosmos-sdk/client"
@@ -149,6 +150,7 @@ func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.B
 	for {
 		select {
 		case <-ctx.Done():
+			log.Println("closing websocket")
 			_ = client.wsClient.Close()
 			if haveWaitGroup {
 				// Decrement the wait group as this goroutine stops
@@ -164,21 +166,25 @@ func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.B
 				// NB: stop this goroutine if the websocket connection is closed
 				return
 			}
+			log.Printf("skipping due to websocket error: %s\n", err)
 			// TODO: handle other errors (?)
 			continue
 		}
 
 		block, err := NewTendermintBlockEvent(msg)
 		if err != nil {
+			log.Printf("skipping due to new block event error: %s\n", err)
 			// TODO: handle error
 			continue
 		}
 
 		// If msg does not contain data then block is nil, we can ignore it
 		if block == nil {
+			log.Println("skipping because block is nil")
 			continue
 		}
 
+		log.Printf("new block; height: %d, hash: %x\n", block.Height(), block.Hash())
 		newBlocks <- block
 	}
 }
