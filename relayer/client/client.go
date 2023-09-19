@@ -18,7 +18,8 @@ import (
 )
 
 var (
-	_ types.ServicerClient = &servicerClient{}
+	_               types.ServicerClient = &servicerClient{}
+	errEmptyAddress                      = fmt.Errorf("client address is empty")
 )
 
 type Block struct {
@@ -36,6 +37,7 @@ func (b Block) Hash() []byte {
 
 type servicerClient struct {
 	keyName   string
+	address   string
 	txFactory txClient.Factory
 	clientCtx cosmosClient.Context
 	wsClient  *websocket.Conn
@@ -54,8 +56,12 @@ func (client *servicerClient) SubmitClaim(
 	ctx context.Context,
 	smtRootHash []byte,
 ) error {
+	if client.address == "" {
+		return errEmptyAddress
+	}
+
 	msg := &types.MsgClaim{
-		Creator:     client.clientCtx.FromAddress.String(),
+		Creator:     client.address,
 		SmtRootHash: smtRootHash,
 	}
 	if err := client.broadcastMessageTx(ctx, msg); err != nil {
@@ -73,13 +79,17 @@ func (client *servicerClient) SubmitProof(
 	// TODO: what type should `claim` be?
 	proof *smt.SparseMerkleProof,
 ) error {
+	if client.address == "" {
+		return errEmptyAddress
+	}
+
 	proofBz, err := proof.Marshal()
 	if err != nil {
 		return err
 	}
 
 	msg := &types.MsgProof{
-		Creator:   client.clientCtx.FromAddress.String(),
+		Creator:   client.address,
 		Root:      smtRootHash,
 		Path:      closestKey,
 		ValueHash: closestValueHash,
@@ -174,7 +184,20 @@ func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.B
 }
 
 func (client *servicerClient) WithSigningKeyUID(uid string) *servicerClient {
+	key, err := client.txFactory.Keybase().Key(uid)
+
+	if err != nil {
+		panic(fmt.Errorf("failed to get key with UID %q: %w", uid, err))
+	}
+
+	address, err := key.GetAddress()
+	if err != nil {
+		panic(fmt.Errorf("failed to get address for key with UID %q: %w", uid, err))
+	}
+
 	client.keyName = uid
+	client.address = address.String()
+
 	return client
 }
 

@@ -4,8 +4,10 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"github.com/pokt-network/smt"
 	"log"
+
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/pokt-network/smt"
 
 	"poktroll/relayer/miner"
 	"poktroll/relayer/proxy"
@@ -23,7 +25,7 @@ type Relayer struct {
 }
 
 func NewRelayer() *Relayer {
-	return &Relayer{proxy: proxy.NewProxy(log.Default())}
+	return &Relayer{}
 }
 
 func (relayer *Relayer) Start() error {
@@ -52,6 +54,12 @@ func (relayer *Relayer) WithKVStorePath(storePath string) *Relayer {
 
 	miner := miner.NewMiner(sha256.New(), kvStore, relayer.servicerClient)
 	miner.MineRelays(relayer.proxy.Relays(), relayer.sessionTracker.ClosedSessions())
+
+	return relayer
+}
+
+func (relayer *Relayer) WithKey(keyring keyring.Keyring, keyName string) *Relayer {
+	relayer.proxy = proxy.NewProxy(log.Default(), keyring, keyName)
 
 	return relayer
 }

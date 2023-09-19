@@ -10,18 +10,28 @@ import (
 
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
+
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 )
 
 type Proxy struct {
 	localAddr        string
 	serviceAddr      string
+	keyring          keyring.Keyring
+	keyName          string
 	logger           *log.Logger
 	output           chan *types.Relay
 	outputObservable utils.Observable[*types.Relay]
 }
 
-func NewProxy(logger *log.Logger) *Proxy {
-	proxy := &Proxy{output: make(chan *types.Relay), logger: logger}
+func NewProxy(logger *log.Logger, keyring keyring.Keyring, keyName string) *Proxy {
+	proxy := &Proxy{
+		output:  make(chan *types.Relay),
+		logger:  logger,
+		keyring: keyring,
+		keyName: keyName,
+	}
+
 	proxy.outputObservable, _ = utils.NewControlledObservable[*types.Relay](proxy.output)
 
 	proxy.localAddr = "localhost:8545"
@@ -101,6 +111,12 @@ func (proxy *Proxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	sig, err = proxy.signResponse(relay)
+	if err != nil {
+		proxy.replyWithError(500, err, wr)
+		return
+	}
+
 	wr.WriteHeader(response.StatusCode)
 
 	responseHeaders := make(map[string]string)
@@ -124,13 +140,17 @@ func (proxy *Proxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 		},
 	}
 
-	relay.Res.Signature = proxy.signResponse(relay)
-
 	proxy.output <- relay
 }
 
-func (r *Proxy) signResponse(relay *types.Relay) []byte {
-	return nil
+func (r *Proxy) signResponse(relayResponse *types.RelayResponse) ([]byte, error) {
+	relayBz, err := relay.Marshal()
+	if err != nil {
+		return nil, err
+	}
+
+	signature, _, err := r.keyring.Sign(r.keyName, relayBz)
+	return signature, err
 }
 
 func (proxy *Proxy) replyWithError(statusCode int, err error, wr http.ResponseWriter) {
