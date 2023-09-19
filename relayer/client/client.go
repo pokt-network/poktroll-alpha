@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	cosmosClient "github.com/cosmos/cosmos-sdk/client"
 	txClient "github.com/cosmos/cosmos-sdk/client/tx"
@@ -11,6 +12,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/pokt-network/smt"
 
+	"poktroll/relayer"
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
 )
@@ -128,10 +130,20 @@ func (client *servicerClient) broadcastMessageTx(
 }
 
 func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.Block) {
+	wg, haveWaitGroup := ctx.Value(relayer.WaitGroupContextKey).(*sync.WaitGroup)
+	if haveWaitGroup {
+		// Increment the relayer wait group to track this goroutine
+		wg.Add(1)
+	}
+
 	for {
 		select {
 		case <-ctx.Done():
 			_ = client.wsClient.Close()
+			if haveWaitGroup {
+				// Decrement the wait group as this goroutine stops
+				wg.Done()
+			}
 			return
 		default:
 		}

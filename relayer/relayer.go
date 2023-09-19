@@ -4,17 +4,16 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"log"
-	"os"
-	"os/signal"
-
 	"github.com/pokt-network/smt"
+	"log"
 
 	"poktroll/relayer/miner"
 	"poktroll/relayer/proxy"
 	sessiontracker "poktroll/relayer/session_tracker"
 	"poktroll/x/servicer/types"
 )
+
+const WaitGroupContextKey = "relayer_cmd_wait_group"
 
 type Relayer struct {
 	proxy          *proxy.Proxy
@@ -28,10 +27,6 @@ func NewRelayer() *Relayer {
 }
 
 func (relayer *Relayer) Start() error {
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt)
-	<-sigCh
-
 	return nil
 }
 

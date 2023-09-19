@@ -1,6 +1,11 @@
 package cmd
 
 import (
+	"context"
+	"os"
+	"os/signal"
+	"sync"
+
 	cosmosclient "github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
@@ -30,15 +35,21 @@ func RelayerCmd() *cobra.Command {
 	return cmd
 }
 
-func runRelayer(cmd *cobra.Command, args []string) error {
-	// construct client
+func runRelayer(cmd *cobra.Command, _ []string) error {
 	clientCtx := cosmosclient.GetClientContextFromCmd(cmd)
 	clientFactory, err := tx.NewFactoryCLI(clientCtx, cmd.Flags())
 	if err != nil {
 		return err
 	}
 
-	ctx := cmd.Context()
+	wg := new(sync.WaitGroup)
+	ctx, cancelCtx := context.WithCancel(
+		context.WithValue(
+			cmd.Context(),
+			relayer.WaitGroupContextKey,
+			wg,
+		),
+	)
 
 	c := client.NewServicerClient().
 		WithSigningKeyUID(signingKeyName).
@@ -51,5 +62,20 @@ func runRelayer(cmd *cobra.Command, args []string) error {
 		WithBlocksPerSession(ctx, blocksPerSession).
 		WithKVStorePath(smtStorePath)
 
-	return relayer.Start()
+	if err := relayer.Start(); err != nil {
+		cancelCtx()
+		return err
+	}
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, os.Kill)
+	// Block until we receive an interrupt or signal signals (OS-agnostic)
+	<-sigCh
+
+	// Signal goroutines to stop
+	cancelCtx()
+	// Wait for all goroutines to finish
+	wg.Wait()
+
+	return nil
 }
