@@ -40,13 +40,18 @@ func runRelayer(cmd *cobra.Command, args []string) error {
 
 	ctx := cmd.Context()
 
+	// The order of the WithXXX methods matters for now.
+	// TODO: Refactor this to a builder pattern.
 	c := client.NewServicerClient().
-		WithSigningKeyUID(signingKeyName).
 		WithTxFactory(clientFactory).
+		WithSigningKeyUID(signingKeyName).
 		WithClientCtx(clientCtx).
 		WithWsURL(ctx, wsURL)
 
+	// The order of the WithXXX methods matters for now.
+	// TODO: Refactor this to a builder pattern.
 	relayer := relayer.NewRelayer().
+		WithKey(clientFactory.Keybase(), signingKeyName).
 		WithServicerClient(c).
 		WithBlocksPerSession(ctx, blocksPerSession).
 		WithKVStorePath(smtStorePath)
