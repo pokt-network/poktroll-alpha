@@ -131,6 +131,7 @@ func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.B
 	for {
 		select {
 		case <-ctx.Done():
+			_ = client.wsClient.Close()
 			return
 		default:
 		}
