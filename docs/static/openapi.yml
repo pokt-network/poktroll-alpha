@@ -46468,6 +46468,17 @@ paths:
                         custom method
 
                         signatures required by gogoproto.
+                    services:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            title: unique identifier for the service
+                          name:
+                            type: string
+                            title: human-readable name for the service
               pagination:
                 type: object
                 properties:
@@ -46513,7 +46524,174 @@ paths:
                   properties:
                     '@type':
                       type: string
+                      description: >-
+                        A URL/resource name that uniquely identifies the type of
+                        the serialized
+
+                        protocol buffer message. This string must contain at
+                        least
+
+                        one "/" character. The last segment of the URL's path
+                        must represent
+
+                        the fully qualified name of the type (as in
+
+                        `path/google.protobuf.Duration`). The name should be in
+                        a canonical form
+
+                        (e.g., leading "." is not accepted).
+
+
+                        In practice, teams usually precompile into the binary
+                        all types that they
+
+                        expect it to use in the context of Any. However, for
+                        URLs which use the
+
+                        scheme `http`, `https`, or no scheme, one can optionally
+                        set up a type
+
+                        server that maps type URLs to message definitions as
+                        follows:
+
+
+                        * If no scheme is provided, `https` is assumed.
+
+                        * An HTTP GET on the URL must yield a
+                        [google.protobuf.Type][]
+                          value in binary format, or produce an error.
+                        * Applications are allowed to cache lookup results based
+                        on the
+                          URL, or have them precompiled into a binary to avoid any
+                          lookup. Therefore, binary compatibility needs to be preserved
+                          on changes to types. (Use versioned type names to manage
+                          breaking changes.)
+
+                        Note: this functionality is not currently available in
+                        the official
+
+                        protobuf release, and it is not used for type URLs
+                        beginning with
+
+                        type.googleapis.com.
+
+
+                        Schemes other than `http`, `https` (or the empty scheme)
+                        might be
+
+                        used with implementation specific semantics.
                   additionalProperties: {}
+                  description: >-
+                    `Any` contains an arbitrary serialized protocol buffer
+                    message along with a
+
+                    URL that describes the type of the serialized message.
+
+
+                    Protobuf library provides support to pack/unpack Any values
+                    in the form
+
+                    of utility functions or additional generated methods of the
+                    Any type.
+
+
+                    Example 1: Pack and unpack a message in C++.
+
+                        Foo foo = ...;
+                        Any any;
+                        any.PackFrom(foo);
+                        ...
+                        if (any.UnpackTo(&foo)) {
+                          ...
+                        }
+
+                    Example 2: Pack and unpack a message in Java.
+
+                        Foo foo = ...;
+                        Any any = Any.pack(foo);
+                        ...
+                        if (any.is(Foo.class)) {
+                          foo = any.unpack(Foo.class);
+                        }
+
+                     Example 3: Pack and unpack a message in Python.
+
+                        foo = Foo(...)
+                        any = Any()
+                        any.Pack(foo)
+                        ...
+                        if any.Is(Foo.DESCRIPTOR):
+                          any.Unpack(foo)
+                          ...
+
+                     Example 4: Pack and unpack a message in Go
+
+                         foo := &pb.Foo{...}
+                         any, err := anypb.New(foo)
+                         if err != nil {
+                           ...
+                         }
+                         ...
+                         foo := &pb.Foo{}
+                         if err := any.UnmarshalTo(foo); err != nil {
+                           ...
+                         }
+
+                    The pack methods provided by protobuf library will by
+                    default use
+
+                    'type.googleapis.com/full.type.name' as the type URL and the
+                    unpack
+
+                    methods only use the fully qualified type name after the
+                    last '/'
+
+                    in the type URL, for example "foo.bar.com/x/y.z" will yield
+                    type
+
+                    name "y.z".
+
+
+
+                    JSON
+
+                    ====
+
+                    The JSON representation of an `Any` value uses the regular
+
+                    representation of the deserialized, embedded message, with
+                    an
+
+                    additional field `@type` which contains the type URL.
+                    Example:
+
+                        package google.profile;
+                        message Person {
+                          string first_name = 1;
+                          string last_name = 2;
+                        }
+
+                        {
+                          "@type": "type.googleapis.com/google.profile.Person",
+                          "firstName": <string>,
+                          "lastName": <string>
+                        }
+
+                    If the embedded message type is well-known and has a custom
+                    JSON
+
+                    representation, that representation will be embedded adding
+                    a field
+
+                    `value` which holds the custom JSON in addition to the
+                    `@type`
+
+                    field. Example (for message [google.protobuf.Duration][]):
+
+                        {
+                          "@type": "type.googleapis.com/google.protobuf.Duration",
+                          "value": "1.212s"
+                        }
       parameters:
         - name: pagination.key
           description: |-
@@ -46603,6 +46781,17 @@ paths:
                       custom method
 
                       signatures required by gogoproto.
+                  services:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          title: unique identifier for the service
+                        name:
+                          type: string
+                          title: human-readable name for the service
         default:
           description: An unexpected error response.
           schema:
@@ -46620,7 +46809,174 @@ paths:
                   properties:
                     '@type':
                       type: string
+                      description: >-
+                        A URL/resource name that uniquely identifies the type of
+                        the serialized
+
+                        protocol buffer message. This string must contain at
+                        least
+
+                        one "/" character. The last segment of the URL's path
+                        must represent
+
+                        the fully qualified name of the type (as in
+
+                        `path/google.protobuf.Duration`). The name should be in
+                        a canonical form
+
+                        (e.g., leading "." is not accepted).
+
+
+                        In practice, teams usually precompile into the binary
+                        all types that they
+
+                        expect it to use in the context of Any. However, for
+                        URLs which use the
+
+                        scheme `http`, `https`, or no scheme, one can optionally
+                        set up a type
+
+                        server that maps type URLs to message definitions as
+                        follows:
+
+
+                        * If no scheme is provided, `https` is assumed.
+
+                        * An HTTP GET on the URL must yield a
+                        [google.protobuf.Type][]
+                          value in binary format, or produce an error.
+                        * Applications are allowed to cache lookup results based
+                        on the
+                          URL, or have them precompiled into a binary to avoid any
+                          lookup. Therefore, binary compatibility needs to be preserved
+                          on changes to types. (Use versioned type names to manage
+                          breaking changes.)
+
+                        Note: this functionality is not currently available in
+                        the official
+
+                        protobuf release, and it is not used for type URLs
+                        beginning with
+
+                        type.googleapis.com.
+
+
+                        Schemes other than `http`, `https` (or the empty scheme)
+                        might be
+
+                        used with implementation specific semantics.
                   additionalProperties: {}
+                  description: >-
+                    `Any` contains an arbitrary serialized protocol buffer
+                    message along with a
+
+                    URL that describes the type of the serialized message.
+
+
+                    Protobuf library provides support to pack/unpack Any values
+                    in the form
+
+                    of utility functions or additional generated methods of the
+                    Any type.
+
+
+                    Example 1: Pack and unpack a message in C++.
+
+                        Foo foo = ...;
+                        Any any;
+                        any.PackFrom(foo);
+                        ...
+                        if (any.UnpackTo(&foo)) {
+                          ...
+                        }
+
+                    Example 2: Pack and unpack a message in Java.
+
+                        Foo foo = ...;
+                        Any any = Any.pack(foo);
+                        ...
+                        if (any.is(Foo.class)) {
+                          foo = any.unpack(Foo.class);
+                        }
+
+                     Example 3: Pack and unpack a message in Python.
+
+                        foo = Foo(...)
+                        any = Any()
+                        any.Pack(foo)
+                        ...
+                        if any.Is(Foo.DESCRIPTOR):
+                          any.Unpack(foo)
+                          ...
+
+                     Example 4: Pack and unpack a message in Go
+
+                         foo := &pb.Foo{...}
+                         any, err := anypb.New(foo)
+                         if err != nil {
+                           ...
+                         }
+                         ...
+                         foo := &pb.Foo{}
+                         if err := any.UnmarshalTo(foo); err != nil {
+                           ...
+                         }
+
+                    The pack methods provided by protobuf library will by
+                    default use
+
+                    'type.googleapis.com/full.type.name' as the type URL and the
+                    unpack
+
+                    methods only use the fully qualified type name after the
+                    last '/'
+
+                    in the type URL, for example "foo.bar.com/x/y.z" will yield
+                    type
+
+                    name "y.z".
+
+
+
+                    JSON
+
+                    ====
+
+                    The JSON representation of an `Any` value uses the regular
+
+                    representation of the deserialized, embedded message, with
+                    an
+
+                    additional field `@type` which contains the type URL.
+                    Example:
+
+                        package google.profile;
+                        message Person {
+                          string first_name = 1;
+                          string last_name = 2;
+                        }
+
+                        {
+                          "@type": "type.googleapis.com/google.profile.Person",
+                          "firstName": <string>,
+                          "lastName": <string>
+                        }
+
+                    If the embedded message type is well-known and has a custom
+                    JSON
+
+                    representation, that representation will be embedded adding
+                    a field
+
+                    `value` which holds the custom JSON in addition to the
+                    `@type`
+
+                    field. Example (for message [google.protobuf.Duration][]):
+
+                        {
+                          "@type": "type.googleapis.com/google.protobuf.Duration",
+                          "value": "1.212s"
+                        }
       parameters:
         - name: address
           in: path
@@ -46661,7 +47017,174 @@ paths:
                   properties:
                     '@type':
                       type: string
+                      description: >-
+                        A URL/resource name that uniquely identifies the type of
+                        the serialized
+
+                        protocol buffer message. This string must contain at
+                        least
+
+                        one "/" character. The last segment of the URL's path
+                        must represent
+
+                        the fully qualified name of the type (as in
+
+                        `path/google.protobuf.Duration`). The name should be in
+                        a canonical form
+
+                        (e.g., leading "." is not accepted).
+
+
+                        In practice, teams usually precompile into the binary
+                        all types that they
+
+                        expect it to use in the context of Any. However, for
+                        URLs which use the
+
+                        scheme `http`, `https`, or no scheme, one can optionally
+                        set up a type
+
+                        server that maps type URLs to message definitions as
+                        follows:
+
+
+                        * If no scheme is provided, `https` is assumed.
+
+                        * An HTTP GET on the URL must yield a
+                        [google.protobuf.Type][]
+                          value in binary format, or produce an error.
+                        * Applications are allowed to cache lookup results based
+                        on the
+                          URL, or have them precompiled into a binary to avoid any
+                          lookup. Therefore, binary compatibility needs to be preserved
+                          on changes to types. (Use versioned type names to manage
+                          breaking changes.)
+
+                        Note: this functionality is not currently available in
+                        the official
+
+                        protobuf release, and it is not used for type URLs
+                        beginning with
+
+                        type.googleapis.com.
+
+
+                        Schemes other than `http`, `https` (or the empty scheme)
+                        might be
+
+                        used with implementation specific semantics.
                   additionalProperties: {}
+                  description: >-
+                    `Any` contains an arbitrary serialized protocol buffer
+                    message along with a
+
+                    URL that describes the type of the serialized message.
+
+
+                    Protobuf library provides support to pack/unpack Any values
+                    in the form
+
+                    of utility functions or additional generated methods of the
+                    Any type.
+
+
+                    Example 1: Pack and unpack a message in C++.
+
+                        Foo foo = ...;
+                        Any any;
+                        any.PackFrom(foo);
+                        ...
+                        if (any.UnpackTo(&foo)) {
+                          ...
+                        }
+
+                    Example 2: Pack and unpack a message in Java.
+
+                        Foo foo = ...;
+                        Any any = Any.pack(foo);
+                        ...
+                        if (any.is(Foo.class)) {
+                          foo = any.unpack(Foo.class);
+                        }
+
+                     Example 3: Pack and unpack a message in Python.
+
+                        foo = Foo(...)
+                        any = Any()
+                        any.Pack(foo)
+                        ...
+                        if any.Is(Foo.DESCRIPTOR):
+                          any.Unpack(foo)
+                          ...
+
+                     Example 4: Pack and unpack a message in Go
+
+                         foo := &pb.Foo{...}
+                         any, err := anypb.New(foo)
+                         if err != nil {
+                           ...
+                         }
+                         ...
+                         foo := &pb.Foo{}
+                         if err := any.UnmarshalTo(foo); err != nil {
+                           ...
+                         }
+
+                    The pack methods provided by protobuf library will by
+                    default use
+
+                    'type.googleapis.com/full.type.name' as the type URL and the
+                    unpack
+
+                    methods only use the fully qualified type name after the
+                    last '/'
+
+                    in the type URL, for example "foo.bar.com/x/y.z" will yield
+                    type
+
+                    name "y.z".
+
+
+
+                    JSON
+
+                    ====
+
+                    The JSON representation of an `Any` value uses the regular
+
+                    representation of the deserialized, embedded message, with
+                    an
+
+                    additional field `@type` which contains the type URL.
+                    Example:
+
+                        package google.profile;
+                        message Person {
+                          string first_name = 1;
+                          string last_name = 2;
+                        }
+
+                        {
+                          "@type": "type.googleapis.com/google.profile.Person",
+                          "firstName": <string>,
+                          "lastName": <string>
+                        }
+
+                    If the embedded message type is well-known and has a custom
+                    JSON
+
+                    representation, that representation will be embedded adding
+                    a field
+
+                    `value` which holds the custom JSON in addition to the
+                    `@type`
+
+                    field. Example (for message [google.protobuf.Duration][]):
+
+                        {
+                          "@type": "type.googleapis.com/google.protobuf.Duration",
+                          "value": "1.212s"
+                        }
       tags:
         - Query
   /poktroll/poktroll/params:
@@ -46736,6 +47259,209 @@ paths:
                   additionalProperties: {}
       tags:
         - Query
+  /poktroll/service/params:
+    get:
+      summary: Parameters queries the parameters of the module.
+      operationId: PoktrollServiceParams
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              params:
+                description: params holds all the parameters of this module.
+                type: object
+            description: >-
+              QueryParamsResponse is response type for the Query/Params RPC
+              method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                      description: >-
+                        A URL/resource name that uniquely identifies the type of
+                        the serialized
+
+                        protocol buffer message. This string must contain at
+                        least
+
+                        one "/" character. The last segment of the URL's path
+                        must represent
+
+                        the fully qualified name of the type (as in
+
+                        `path/google.protobuf.Duration`). The name should be in
+                        a canonical form
+
+                        (e.g., leading "." is not accepted).
+
+
+                        In practice, teams usually precompile into the binary
+                        all types that they
+
+                        expect it to use in the context of Any. However, for
+                        URLs which use the
+
+                        scheme `http`, `https`, or no scheme, one can optionally
+                        set up a type
+
+                        server that maps type URLs to message definitions as
+                        follows:
+
+
+                        * If no scheme is provided, `https` is assumed.
+
+                        * An HTTP GET on the URL must yield a
+                        [google.protobuf.Type][]
+                          value in binary format, or produce an error.
+                        * Applications are allowed to cache lookup results based
+                        on the
+                          URL, or have them precompiled into a binary to avoid any
+                          lookup. Therefore, binary compatibility needs to be preserved
+                          on changes to types. (Use versioned type names to manage
+                          breaking changes.)
+
+                        Note: this functionality is not currently available in
+                        the official
+
+                        protobuf release, and it is not used for type URLs
+                        beginning with
+
+                        type.googleapis.com.
+
+
+                        Schemes other than `http`, `https` (or the empty scheme)
+                        might be
+
+                        used with implementation specific semantics.
+                  additionalProperties: {}
+                  description: >-
+                    `Any` contains an arbitrary serialized protocol buffer
+                    message along with a
+
+                    URL that describes the type of the serialized message.
+
+
+                    Protobuf library provides support to pack/unpack Any values
+                    in the form
+
+                    of utility functions or additional generated methods of the
+                    Any type.
+
+
+                    Example 1: Pack and unpack a message in C++.
+
+                        Foo foo = ...;
+                        Any any;
+                        any.PackFrom(foo);
+                        ...
+                        if (any.UnpackTo(&foo)) {
+                          ...
+                        }
+
+                    Example 2: Pack and unpack a message in Java.
+
+                        Foo foo = ...;
+                        Any any = Any.pack(foo);
+                        ...
+                        if (any.is(Foo.class)) {
+                          foo = any.unpack(Foo.class);
+                        }
+
+                     Example 3: Pack and unpack a message in Python.
+
+                        foo = Foo(...)
+                        any = Any()
+                        any.Pack(foo)
+                        ...
+                        if any.Is(Foo.DESCRIPTOR):
+                          any.Unpack(foo)
+                          ...
+
+                     Example 4: Pack and unpack a message in Go
+
+                         foo := &pb.Foo{...}
+                         any, err := anypb.New(foo)
+                         if err != nil {
+                           ...
+                         }
+                         ...
+                         foo := &pb.Foo{}
+                         if err := any.UnmarshalTo(foo); err != nil {
+                           ...
+                         }
+
+                    The pack methods provided by protobuf library will by
+                    default use
+
+                    'type.googleapis.com/full.type.name' as the type URL and the
+                    unpack
+
+                    methods only use the fully qualified type name after the
+                    last '/'
+
+                    in the type URL, for example "foo.bar.com/x/y.z" will yield
+                    type
+
+                    name "y.z".
+
+
+
+                    JSON
+
+                    ====
+
+                    The JSON representation of an `Any` value uses the regular
+
+                    representation of the deserialized, embedded message, with
+                    an
+
+                    additional field `@type` which contains the type URL.
+                    Example:
+
+                        package google.profile;
+                        message Person {
+                          string first_name = 1;
+                          string last_name = 2;
+                        }
+
+                        {
+                          "@type": "type.googleapis.com/google.profile.Person",
+                          "firstName": <string>,
+                          "lastName": <string>
+                        }
+
+                    If the embedded message type is well-known and has a custom
+                    JSON
+
+                    representation, that representation will be embedded adding
+                    a field
+
+                    `value` which holds the custom JSON in addition to the
+                    `@type`
+
+                    field. Example (for message [google.protobuf.Duration][]):
+
+                        {
+                          "@type": "type.googleapis.com/google.protobuf.Duration",
+                          "value": "1.212s"
+                        }
+      tags:
+        - Query
   /poktroll/servicer/params:
     get:
       summary: Parameters queries the parameters of the module.
@@ -46769,7 +47495,174 @@ paths:
                   properties:
                     '@type':
                       type: string
+                      description: >-
+                        A URL/resource name that uniquely identifies the type of
+                        the serialized
+
+                        protocol buffer message. This string must contain at
+                        least
+
+                        one "/" character. The last segment of the URL's path
+                        must represent
+
+                        the fully qualified name of the type (as in
+
+                        `path/google.protobuf.Duration`). The name should be in
+                        a canonical form
+
+                        (e.g., leading "." is not accepted).
+
+
+                        In practice, teams usually precompile into the binary
+                        all types that they
+
+                        expect it to use in the context of Any. However, for
+                        URLs which use the
+
+                        scheme `http`, `https`, or no scheme, one can optionally
+                        set up a type
+
+                        server that maps type URLs to message definitions as
+                        follows:
+
+
+                        * If no scheme is provided, `https` is assumed.
+
+                        * An HTTP GET on the URL must yield a
+                        [google.protobuf.Type][]
+                          value in binary format, or produce an error.
+                        * Applications are allowed to cache lookup results based
+                        on the
+                          URL, or have them precompiled into a binary to avoid any
+                          lookup. Therefore, binary compatibility needs to be preserved
+                          on changes to types. (Use versioned type names to manage
+                          breaking changes.)
+
+                        Note: this functionality is not currently available in
+                        the official
+
+                        protobuf release, and it is not used for type URLs
+                        beginning with
+
+                        type.googleapis.com.
+
+
+                        Schemes other than `http`, `https` (or the empty scheme)
+                        might be
+
+                        used with implementation specific semantics.
                   additionalProperties: {}
+                  description: >-
+                    `Any` contains an arbitrary serialized protocol buffer
+                    message along with a
+
+                    URL that describes the type of the serialized message.
+
+
+                    Protobuf library provides support to pack/unpack Any values
+                    in the form
+
+                    of utility functions or additional generated methods of the
+                    Any type.
+
+
+                    Example 1: Pack and unpack a message in C++.
+
+                        Foo foo = ...;
+                        Any any;
+                        any.PackFrom(foo);
+                        ...
+                        if (any.UnpackTo(&foo)) {
+                          ...
+                        }
+
+                    Example 2: Pack and unpack a message in Java.
+
+                        Foo foo = ...;
+                        Any any = Any.pack(foo);
+                        ...
+                        if (any.is(Foo.class)) {
+                          foo = any.unpack(Foo.class);
+                        }
+
+                     Example 3: Pack and unpack a message in Python.
+
+                        foo = Foo(...)
+                        any = Any()
+                        any.Pack(foo)
+                        ...
+                        if any.Is(Foo.DESCRIPTOR):
+                          any.Unpack(foo)
+                          ...
+
+                     Example 4: Pack and unpack a message in Go
+
+                         foo := &pb.Foo{...}
+                         any, err := anypb.New(foo)
+                         if err != nil {
+                           ...
+                         }
+                         ...
+                         foo := &pb.Foo{}
+                         if err := any.UnmarshalTo(foo); err != nil {
+                           ...
+                         }
+
+                    The pack methods provided by protobuf library will by
+                    default use
+
+                    'type.googleapis.com/full.type.name' as the type URL and the
+                    unpack
+
+                    methods only use the fully qualified type name after the
+                    last '/'
+
+                    in the type URL, for example "foo.bar.com/x/y.z" will yield
+                    type
+
+                    name "y.z".
+
+
+
+                    JSON
+
+                    ====
+
+                    The JSON representation of an `Any` value uses the regular
+
+                    representation of the deserialized, embedded message, with
+                    an
+
+                    additional field `@type` which contains the type URL.
+                    Example:
+
+                        package google.profile;
+                        message Person {
+                          string first_name = 1;
+                          string last_name = 2;
+                        }
+
+                        {
+                          "@type": "type.googleapis.com/google.profile.Person",
+                          "firstName": <string>,
+                          "lastName": <string>
+                        }
+
+                    If the embedded message type is well-known and has a custom
+                    JSON
+
+                    representation, that representation will be embedded adding
+                    a field
+
+                    `value` which holds the custom JSON in addition to the
+                    `@type`
+
+                    field. Example (for message [google.protobuf.Duration][]):
+
+                        {
+                          "@type": "type.googleapis.com/google.protobuf.Duration",
+                          "value": "1.212s"
+                        }
       tags:
         - Query
   /poktroll/servicer/servicers:
@@ -46803,6 +47696,258 @@ paths:
                         custom method
 
                         signatures required by gogoproto.
+                    services:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                title: unique identifier for the service
+                              name:
+                                type: string
+                                title: human-readable name for the service
+                          endpoints:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                url:
+                                  type: string
+                                  title: The URL of the endpoint
+                                rpc_type:
+                                  title: The type of the RPC
+                                  type: string
+                                  enum:
+                                    - UNKNOWN_RPC
+                                    - GRPC
+                                    - WEBSOCKET
+                                    - JSON_RPC
+                                  default: UNKNOWN_RPC
+                                  description: >-
+                                    Enum to define various RPC types
+
+                                    DISCUSS: Enums are nice but in the `.json`
+                                    files (e.g. see servicer1.json), we have to
+                                    represent it as an int, which defeats half
+                                    the purpose of using enums.
+
+                                     - JSON_RPC: Add new RPC types here as needed
+                                metadata:
+                                  type: object
+                                  additionalProperties:
+                                    type: string
+                                  title: Additional metadata about the endpoint
+                                configs:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      key:
+                                        type: string
+                                        enum:
+                                          - UNKNOWN_CONFIG
+                                          - TIMEOUT
+                                        default: UNKNOWN_CONFIG
+                                        description: >-
+                                          Enum to define configuration options for
+                                          the endpoint
+
+                                          DISCUSS: Enums are nice but in the
+                                          `.json` files (e.g. see servicer1.json),
+                                          we have to represent it as an int, which
+                                          defeats half the purpose of using enums.
+
+                                           - TIMEOUT: Add new config options here as needed
+                                      value:
+                                        type: string
+                                    title: >-
+                                      NB: proto maps cannot be keyed be enums,
+                                      so we create a key-value wrapper instead
+                                  title: Configuration options for the endpoint
+                          metadata:
+                            type: object
+                            additionalProperties:
+                              type: object
+                              properties:
+                                '@type':
+                                  type: string
+                                  description: >-
+                                    A URL/resource name that uniquely identifies
+                                    the type of the serialized
+
+                                    protocol buffer message. This string must
+                                    contain at least
+
+                                    one "/" character. The last segment of the
+                                    URL's path must represent
+
+                                    the fully qualified name of the type (as in
+
+                                    `path/google.protobuf.Duration`). The name
+                                    should be in a canonical form
+
+                                    (e.g., leading "." is not accepted).
+
+
+                                    In practice, teams usually precompile into
+                                    the binary all types that they
+
+                                    expect it to use in the context of Any.
+                                    However, for URLs which use the
+
+                                    scheme `http`, `https`, or no scheme, one
+                                    can optionally set up a type
+
+                                    server that maps type URLs to message
+                                    definitions as follows:
+
+
+                                    * If no scheme is provided, `https` is
+                                    assumed.
+
+                                    * An HTTP GET on the URL must yield a
+                                    [google.protobuf.Type][]
+                                      value in binary format, or produce an error.
+                                    * Applications are allowed to cache lookup
+                                    results based on the
+                                      URL, or have them precompiled into a binary to avoid any
+                                      lookup. Therefore, binary compatibility needs to be preserved
+                                      on changes to types. (Use versioned type names to manage
+                                      breaking changes.)
+
+                                    Note: this functionality is not currently
+                                    available in the official
+
+                                    protobuf release, and it is not used for
+                                    type URLs beginning with
+
+                                    type.googleapis.com.
+
+
+                                    Schemes other than `http`, `https` (or the
+                                    empty scheme) might be
+
+                                    used with implementation specific semantics.
+                              additionalProperties: {}
+                              description: >-
+                                `Any` contains an arbitrary serialized protocol
+                                buffer message along with a
+
+                                URL that describes the type of the serialized
+                                message.
+
+
+                                Protobuf library provides support to pack/unpack
+                                Any values in the form
+
+                                of utility functions or additional generated
+                                methods of the Any type.
+
+
+                                Example 1: Pack and unpack a message in C++.
+
+                                    Foo foo = ...;
+                                    Any any;
+                                    any.PackFrom(foo);
+                                    ...
+                                    if (any.UnpackTo(&foo)) {
+                                      ...
+                                    }
+
+                                Example 2: Pack and unpack a message in Java.
+
+                                    Foo foo = ...;
+                                    Any any = Any.pack(foo);
+                                    ...
+                                    if (any.is(Foo.class)) {
+                                      foo = any.unpack(Foo.class);
+                                    }
+
+                                 Example 3: Pack and unpack a message in Python.
+
+                                    foo = Foo(...)
+                                    any = Any()
+                                    any.Pack(foo)
+                                    ...
+                                    if any.Is(Foo.DESCRIPTOR):
+                                      any.Unpack(foo)
+                                      ...
+
+                                 Example 4: Pack and unpack a message in Go
+
+                                     foo := &pb.Foo{...}
+                                     any, err := anypb.New(foo)
+                                     if err != nil {
+                                       ...
+                                     }
+                                     ...
+                                     foo := &pb.Foo{}
+                                     if err := any.UnmarshalTo(foo); err != nil {
+                                       ...
+                                     }
+
+                                The pack methods provided by protobuf library
+                                will by default use
+
+                                'type.googleapis.com/full.type.name' as the type
+                                URL and the unpack
+
+                                methods only use the fully qualified type name
+                                after the last '/'
+
+                                in the type URL, for example "foo.bar.com/x/y.z"
+                                will yield type
+
+                                name "y.z".
+
+
+
+                                JSON
+
+                                ====
+
+                                The JSON representation of an `Any` value uses
+                                the regular
+
+                                representation of the deserialized, embedded
+                                message, with an
+
+                                additional field `@type` which contains the type
+                                URL. Example:
+
+                                    package google.profile;
+                                    message Person {
+                                      string first_name = 1;
+                                      string last_name = 2;
+                                    }
+
+                                    {
+                                      "@type": "type.googleapis.com/google.profile.Person",
+                                      "firstName": <string>,
+                                      "lastName": <string>
+                                    }
+
+                                If the embedded message type is well-known and
+                                has a custom JSON
+
+                                representation, that representation will be
+                                embedded adding a field
+
+                                `value` which holds the custom JSON in addition
+                                to the `@type`
+
+                                field. Example (for message
+                                [google.protobuf.Duration][]):
+
+                                    {
+                                      "@type": "type.googleapis.com/google.protobuf.Duration",
+                                      "value": "1.212s"
+                                    }
+                            title: metadata to allow for future extensibility
                   title: >-
                     CLEANUP: Use `Servicer` instead of `Servicers` when
                     scaffolding the servicer map in the non-alpha repo
@@ -46851,7 +47996,174 @@ paths:
                   properties:
                     '@type':
                       type: string
+                      description: >-
+                        A URL/resource name that uniquely identifies the type of
+                        the serialized
+
+                        protocol buffer message. This string must contain at
+                        least
+
+                        one "/" character. The last segment of the URL's path
+                        must represent
+
+                        the fully qualified name of the type (as in
+
+                        `path/google.protobuf.Duration`). The name should be in
+                        a canonical form
+
+                        (e.g., leading "." is not accepted).
+
+
+                        In practice, teams usually precompile into the binary
+                        all types that they
+
+                        expect it to use in the context of Any. However, for
+                        URLs which use the
+
+                        scheme `http`, `https`, or no scheme, one can optionally
+                        set up a type
+
+                        server that maps type URLs to message definitions as
+                        follows:
+
+
+                        * If no scheme is provided, `https` is assumed.
+
+                        * An HTTP GET on the URL must yield a
+                        [google.protobuf.Type][]
+                          value in binary format, or produce an error.
+                        * Applications are allowed to cache lookup results based
+                        on the
+                          URL, or have them precompiled into a binary to avoid any
+                          lookup. Therefore, binary compatibility needs to be preserved
+                          on changes to types. (Use versioned type names to manage
+                          breaking changes.)
+
+                        Note: this functionality is not currently available in
+                        the official
+
+                        protobuf release, and it is not used for type URLs
+                        beginning with
+
+                        type.googleapis.com.
+
+
+                        Schemes other than `http`, `https` (or the empty scheme)
+                        might be
+
+                        used with implementation specific semantics.
                   additionalProperties: {}
+                  description: >-
+                    `Any` contains an arbitrary serialized protocol buffer
+                    message along with a
+
+                    URL that describes the type of the serialized message.
+
+
+                    Protobuf library provides support to pack/unpack Any values
+                    in the form
+
+                    of utility functions or additional generated methods of the
+                    Any type.
+
+
+                    Example 1: Pack and unpack a message in C++.
+
+                        Foo foo = ...;
+                        Any any;
+                        any.PackFrom(foo);
+                        ...
+                        if (any.UnpackTo(&foo)) {
+                          ...
+                        }
+
+                    Example 2: Pack and unpack a message in Java.
+
+                        Foo foo = ...;
+                        Any any = Any.pack(foo);
+                        ...
+                        if (any.is(Foo.class)) {
+                          foo = any.unpack(Foo.class);
+                        }
+
+                     Example 3: Pack and unpack a message in Python.
+
+                        foo = Foo(...)
+                        any = Any()
+                        any.Pack(foo)
+                        ...
+                        if any.Is(Foo.DESCRIPTOR):
+                          any.Unpack(foo)
+                          ...
+
+                     Example 4: Pack and unpack a message in Go
+
+                         foo := &pb.Foo{...}
+                         any, err := anypb.New(foo)
+                         if err != nil {
+                           ...
+                         }
+                         ...
+                         foo := &pb.Foo{}
+                         if err := any.UnmarshalTo(foo); err != nil {
+                           ...
+                         }
+
+                    The pack methods provided by protobuf library will by
+                    default use
+
+                    'type.googleapis.com/full.type.name' as the type URL and the
+                    unpack
+
+                    methods only use the fully qualified type name after the
+                    last '/'
+
+                    in the type URL, for example "foo.bar.com/x/y.z" will yield
+                    type
+
+                    name "y.z".
+
+
+
+                    JSON
+
+                    ====
+
+                    The JSON representation of an `Any` value uses the regular
+
+                    representation of the deserialized, embedded message, with
+                    an
+
+                    additional field `@type` which contains the type URL.
+                    Example:
+
+                        package google.profile;
+                        message Person {
+                          string first_name = 1;
+                          string last_name = 2;
+                        }
+
+                        {
+                          "@type": "type.googleapis.com/google.profile.Person",
+                          "firstName": <string>,
+                          "lastName": <string>
+                        }
+
+                    If the embedded message type is well-known and has a custom
+                    JSON
+
+                    representation, that representation will be embedded adding
+                    a field
+
+                    `value` which holds the custom JSON in addition to the
+                    `@type`
+
+                    field. Example (for message [google.protobuf.Duration][]):
+
+                        {
+                          "@type": "type.googleapis.com/google.protobuf.Duration",
+                          "value": "1.212s"
+                        }
       parameters:
         - name: pagination.key
           description: |-
@@ -46941,6 +48253,258 @@ paths:
                       custom method
 
                       signatures required by gogoproto.
+                  services:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              title: unique identifier for the service
+                            name:
+                              type: string
+                              title: human-readable name for the service
+                        endpoints:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              url:
+                                type: string
+                                title: The URL of the endpoint
+                              rpc_type:
+                                title: The type of the RPC
+                                type: string
+                                enum:
+                                  - UNKNOWN_RPC
+                                  - GRPC
+                                  - WEBSOCKET
+                                  - JSON_RPC
+                                default: UNKNOWN_RPC
+                                description: >-
+                                  Enum to define various RPC types
+
+                                  DISCUSS: Enums are nice but in the `.json`
+                                  files (e.g. see servicer1.json), we have to
+                                  represent it as an int, which defeats half the
+                                  purpose of using enums.
+
+                                   - JSON_RPC: Add new RPC types here as needed
+                              metadata:
+                                type: object
+                                additionalProperties:
+                                  type: string
+                                title: Additional metadata about the endpoint
+                              configs:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    key:
+                                      type: string
+                                      enum:
+                                        - UNKNOWN_CONFIG
+                                        - TIMEOUT
+                                      default: UNKNOWN_CONFIG
+                                      description: >-
+                                        Enum to define configuration options for
+                                        the endpoint
+
+                                        DISCUSS: Enums are nice but in the
+                                        `.json` files (e.g. see servicer1.json),
+                                        we have to represent it as an int, which
+                                        defeats half the purpose of using enums.
+
+                                         - TIMEOUT: Add new config options here as needed
+                                    value:
+                                      type: string
+                                  title: >-
+                                    NB: proto maps cannot be keyed be enums, so
+                                    we create a key-value wrapper instead
+                                title: Configuration options for the endpoint
+                        metadata:
+                          type: object
+                          additionalProperties:
+                            type: object
+                            properties:
+                              '@type':
+                                type: string
+                                description: >-
+                                  A URL/resource name that uniquely identifies
+                                  the type of the serialized
+
+                                  protocol buffer message. This string must
+                                  contain at least
+
+                                  one "/" character. The last segment of the
+                                  URL's path must represent
+
+                                  the fully qualified name of the type (as in
+
+                                  `path/google.protobuf.Duration`). The name
+                                  should be in a canonical form
+
+                                  (e.g., leading "." is not accepted).
+
+
+                                  In practice, teams usually precompile into the
+                                  binary all types that they
+
+                                  expect it to use in the context of Any.
+                                  However, for URLs which use the
+
+                                  scheme `http`, `https`, or no scheme, one can
+                                  optionally set up a type
+
+                                  server that maps type URLs to message
+                                  definitions as follows:
+
+
+                                  * If no scheme is provided, `https` is
+                                  assumed.
+
+                                  * An HTTP GET on the URL must yield a
+                                  [google.protobuf.Type][]
+                                    value in binary format, or produce an error.
+                                  * Applications are allowed to cache lookup
+                                  results based on the
+                                    URL, or have them precompiled into a binary to avoid any
+                                    lookup. Therefore, binary compatibility needs to be preserved
+                                    on changes to types. (Use versioned type names to manage
+                                    breaking changes.)
+
+                                  Note: this functionality is not currently
+                                  available in the official
+
+                                  protobuf release, and it is not used for type
+                                  URLs beginning with
+
+                                  type.googleapis.com.
+
+
+                                  Schemes other than `http`, `https` (or the
+                                  empty scheme) might be
+
+                                  used with implementation specific semantics.
+                            additionalProperties: {}
+                            description: >-
+                              `Any` contains an arbitrary serialized protocol
+                              buffer message along with a
+
+                              URL that describes the type of the serialized
+                              message.
+
+
+                              Protobuf library provides support to pack/unpack
+                              Any values in the form
+
+                              of utility functions or additional generated
+                              methods of the Any type.
+
+
+                              Example 1: Pack and unpack a message in C++.
+
+                                  Foo foo = ...;
+                                  Any any;
+                                  any.PackFrom(foo);
+                                  ...
+                                  if (any.UnpackTo(&foo)) {
+                                    ...
+                                  }
+
+                              Example 2: Pack and unpack a message in Java.
+
+                                  Foo foo = ...;
+                                  Any any = Any.pack(foo);
+                                  ...
+                                  if (any.is(Foo.class)) {
+                                    foo = any.unpack(Foo.class);
+                                  }
+
+                               Example 3: Pack and unpack a message in Python.
+
+                                  foo = Foo(...)
+                                  any = Any()
+                                  any.Pack(foo)
+                                  ...
+                                  if any.Is(Foo.DESCRIPTOR):
+                                    any.Unpack(foo)
+                                    ...
+
+                               Example 4: Pack and unpack a message in Go
+
+                                   foo := &pb.Foo{...}
+                                   any, err := anypb.New(foo)
+                                   if err != nil {
+                                     ...
+                                   }
+                                   ...
+                                   foo := &pb.Foo{}
+                                   if err := any.UnmarshalTo(foo); err != nil {
+                                     ...
+                                   }
+
+                              The pack methods provided by protobuf library will
+                              by default use
+
+                              'type.googleapis.com/full.type.name' as the type
+                              URL and the unpack
+
+                              methods only use the fully qualified type name
+                              after the last '/'
+
+                              in the type URL, for example "foo.bar.com/x/y.z"
+                              will yield type
+
+                              name "y.z".
+
+
+
+                              JSON
+
+                              ====
+
+                              The JSON representation of an `Any` value uses the
+                              regular
+
+                              representation of the deserialized, embedded
+                              message, with an
+
+                              additional field `@type` which contains the type
+                              URL. Example:
+
+                                  package google.profile;
+                                  message Person {
+                                    string first_name = 1;
+                                    string last_name = 2;
+                                  }
+
+                                  {
+                                    "@type": "type.googleapis.com/google.profile.Person",
+                                    "firstName": <string>,
+                                    "lastName": <string>
+                                  }
+
+                              If the embedded message type is well-known and has
+                              a custom JSON
+
+                              representation, that representation will be
+                              embedded adding a field
+
+                              `value` which holds the custom JSON in addition to
+                              the `@type`
+
+                              field. Example (for message
+                              [google.protobuf.Duration][]):
+
+                                  {
+                                    "@type": "type.googleapis.com/google.protobuf.Duration",
+                                    "value": "1.212s"
+                                  }
+                          title: metadata to allow for future extensibility
                 title: >-
                   CLEANUP: Use `Servicer` instead of `Servicers` when
                   scaffolding the servicer map in the non-alpha repo
@@ -46961,7 +48525,174 @@ paths:
                   properties:
                     '@type':
                       type: string
+                      description: >-
+                        A URL/resource name that uniquely identifies the type of
+                        the serialized
+
+                        protocol buffer message. This string must contain at
+                        least
+
+                        one "/" character. The last segment of the URL's path
+                        must represent
+
+                        the fully qualified name of the type (as in
+
+                        `path/google.protobuf.Duration`). The name should be in
+                        a canonical form
+
+                        (e.g., leading "." is not accepted).
+
+
+                        In practice, teams usually precompile into the binary
+                        all types that they
+
+                        expect it to use in the context of Any. However, for
+                        URLs which use the
+
+                        scheme `http`, `https`, or no scheme, one can optionally
+                        set up a type
+
+                        server that maps type URLs to message definitions as
+                        follows:
+
+
+                        * If no scheme is provided, `https` is assumed.
+
+                        * An HTTP GET on the URL must yield a
+                        [google.protobuf.Type][]
+                          value in binary format, or produce an error.
+                        * Applications are allowed to cache lookup results based
+                        on the
+                          URL, or have them precompiled into a binary to avoid any
+                          lookup. Therefore, binary compatibility needs to be preserved
+                          on changes to types. (Use versioned type names to manage
+                          breaking changes.)
+
+                        Note: this functionality is not currently available in
+                        the official
+
+                        protobuf release, and it is not used for type URLs
+                        beginning with
+
+                        type.googleapis.com.
+
+
+                        Schemes other than `http`, `https` (or the empty scheme)
+                        might be
+
+                        used with implementation specific semantics.
                   additionalProperties: {}
+                  description: >-
+                    `Any` contains an arbitrary serialized protocol buffer
+                    message along with a
+
+                    URL that describes the type of the serialized message.
+
+
+                    Protobuf library provides support to pack/unpack Any values
+                    in the form
+
+                    of utility functions or additional generated methods of the
+                    Any type.
+
+
+                    Example 1: Pack and unpack a message in C++.
+
+                        Foo foo = ...;
+                        Any any;
+                        any.PackFrom(foo);
+                        ...
+                        if (any.UnpackTo(&foo)) {
+                          ...
+                        }
+
+                    Example 2: Pack and unpack a message in Java.
+
+                        Foo foo = ...;
+                        Any any = Any.pack(foo);
+                        ...
+                        if (any.is(Foo.class)) {
+                          foo = any.unpack(Foo.class);
+                        }
+
+                     Example 3: Pack and unpack a message in Python.
+
+                        foo = Foo(...)
+                        any = Any()
+                        any.Pack(foo)
+                        ...
+                        if any.Is(Foo.DESCRIPTOR):
+                          any.Unpack(foo)
+                          ...
+
+                     Example 4: Pack and unpack a message in Go
+
+                         foo := &pb.Foo{...}
+                         any, err := anypb.New(foo)
+                         if err != nil {
+                           ...
+                         }
+                         ...
+                         foo := &pb.Foo{}
+                         if err := any.UnmarshalTo(foo); err != nil {
+                           ...
+                         }
+
+                    The pack methods provided by protobuf library will by
+                    default use
+
+                    'type.googleapis.com/full.type.name' as the type URL and the
+                    unpack
+
+                    methods only use the fully qualified type name after the
+                    last '/'
+
+                    in the type URL, for example "foo.bar.com/x/y.z" will yield
+                    type
+
+                    name "y.z".
+
+
+
+                    JSON
+
+                    ====
+
+                    The JSON representation of an `Any` value uses the regular
+
+                    representation of the deserialized, embedded message, with
+                    an
+
+                    additional field `@type` which contains the type URL.
+                    Example:
+
+                        package google.profile;
+                        message Person {
+                          string first_name = 1;
+                          string last_name = 2;
+                        }
+
+                        {
+                          "@type": "type.googleapis.com/google.profile.Person",
+                          "firstName": <string>,
+                          "lastName": <string>
+                        }
+
+                    If the embedded message type is well-known and has a custom
+                    JSON
+
+                    representation, that representation will be embedded adding
+                    a field
+
+                    `value` which holds the custom JSON in addition to the
+                    `@type`
+
+                    field. Example (for message [google.protobuf.Duration][]):
+
+                        {
+                          "@type": "type.googleapis.com/google.protobuf.Duration",
+                          "value": "1.212s"
+                        }
       parameters:
         - name: address
           in: path
@@ -46982,6 +48713,34 @@ paths:
               session:
                 type: object
                 properties:
+                  session_id:
+                    type: string
+                    description: >-
+                      TODO_CONSIDERATION: Reconsider the following set of fields
+                      in term of their type, need, naming, etc...
+                  session_number:
+                    type: string
+                    format: uint64
+                    title: The session number
+                  session_block_start_height:
+                    type: string
+                    format: uint64
+                    title: The height at which the session started
+                  num_blocks_per_session:
+                    type: string
+                    format: uint64
+                    title: >-
+                      The number of blocks the session will last (starting at
+                      block_height)
+                  service:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        title: unique identifier for the service
+                      name:
+                        type: string
+                        title: human-readable name for the service
                   application:
                     type: object
                     properties:
@@ -47003,6 +48762,17 @@ paths:
                           custom method
 
                           signatures required by gogoproto.
+                      services:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              title: unique identifier for the service
+                            name:
+                              type: string
+                              title: human-readable name for the service
                   servicers:
                     type: array
                     items:
@@ -47026,6 +48796,97 @@ paths:
                             the custom method
 
                             signatures required by gogoproto.
+                        services:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                    title: unique identifier for the service
+                                  name:
+                                    type: string
+                                    title: human-readable name for the service
+                              endpoints:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    url:
+                                      type: string
+                                      title: The URL of the endpoint
+                                    rpc_type:
+                                      title: The type of the RPC
+                                      type: string
+                                      enum:
+                                        - UNKNOWN_RPC
+                                        - GRPC
+                                        - WEBSOCKET
+                                        - JSON_RPC
+                                      default: UNKNOWN_RPC
+                                      description: >-
+                                        Enum to define various RPC types
+
+                                        DISCUSS: Enums are nice but in the
+                                        `.json` files (e.g. see servicer1.json),
+                                        we have to represent it as an int, which
+                                        defeats half the purpose of using enums.
+
+                                         - JSON_RPC: Add new RPC types here as needed
+                                    metadata:
+                                      title: Additional metadata about the endpoint
+                                      type: object
+                                      properties:
+                                        entries:
+                                          type: object
+                                          additionalProperties:
+                                            type: string
+                                          title: >-
+                                            map<string, google.protobuf.Any>
+                                            metadata = 3; // metadata to allow for
+                                            future extensibility
+                                    configs:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          key:
+                                            type: string
+                                            enum:
+                                              - UNKNOWN_CONFIG
+                                              - TIMEOUT
+                                            default: UNKNOWN_CONFIG
+                                            description: >-
+                                              Enum to define configuration options for
+                                              the endpoint
+
+                                              DISCUSS: Enums are nice but in the
+                                              `.json` files (e.g. see servicer1.json),
+                                              we have to represent it as an int, which
+                                              defeats half the purpose of using enums.
+
+                                               - TIMEOUT: Add new config options here as needed
+                                          value:
+                                            type: string
+                                        title: >-
+                                          NB: proto maps cannot be keyed be enums,
+                                          so we create a key-value wrapper instead
+                                      title: Configuration options for the endpoint
+                              metadata:
+                                title: metadata to allow for future extensibility
+                                type: object
+                                properties:
+                                  entries:
+                                    type: object
+                                    additionalProperties:
+                                      type: string
+                                    title: >-
+                                      map<string, google.protobuf.Any> metadata
+                                      = 3; // metadata to allow for future
+                                      extensibility
                       title: >-
                         CLEANUP: Use `Servicer` instead of `Servicers` when
                         scaffolding the servicer map in the non-alpha repo
@@ -47046,9 +48907,187 @@ paths:
                   properties:
                     '@type':
                       type: string
+                      description: >-
+                        A URL/resource name that uniquely identifies the type of
+                        the serialized
+
+                        protocol buffer message. This string must contain at
+                        least
+
+                        one "/" character. The last segment of the URL's path
+                        must represent
+
+                        the fully qualified name of the type (as in
+
+                        `path/google.protobuf.Duration`). The name should be in
+                        a canonical form
+
+                        (e.g., leading "." is not accepted).
+
+
+                        In practice, teams usually precompile into the binary
+                        all types that they
+
+                        expect it to use in the context of Any. However, for
+                        URLs which use the
+
+                        scheme `http`, `https`, or no scheme, one can optionally
+                        set up a type
+
+                        server that maps type URLs to message definitions as
+                        follows:
+
+
+                        * If no scheme is provided, `https` is assumed.
+
+                        * An HTTP GET on the URL must yield a
+                        [google.protobuf.Type][]
+                          value in binary format, or produce an error.
+                        * Applications are allowed to cache lookup results based
+                        on the
+                          URL, or have them precompiled into a binary to avoid any
+                          lookup. Therefore, binary compatibility needs to be preserved
+                          on changes to types. (Use versioned type names to manage
+                          breaking changes.)
+
+                        Note: this functionality is not currently available in
+                        the official
+
+                        protobuf release, and it is not used for type URLs
+                        beginning with
+
+                        type.googleapis.com.
+
+
+                        Schemes other than `http`, `https` (or the empty scheme)
+                        might be
+
+                        used with implementation specific semantics.
                   additionalProperties: {}
+                  description: >-
+                    `Any` contains an arbitrary serialized protocol buffer
+                    message along with a
+
+                    URL that describes the type of the serialized message.
+
+
+                    Protobuf library provides support to pack/unpack Any values
+                    in the form
+
+                    of utility functions or additional generated methods of the
+                    Any type.
+
+
+                    Example 1: Pack and unpack a message in C++.
+
+                        Foo foo = ...;
+                        Any any;
+                        any.PackFrom(foo);
+                        ...
+                        if (any.UnpackTo(&foo)) {
+                          ...
+                        }
+
+                    Example 2: Pack and unpack a message in Java.
+
+                        Foo foo = ...;
+                        Any any = Any.pack(foo);
+                        ...
+                        if (any.is(Foo.class)) {
+                          foo = any.unpack(Foo.class);
+                        }
+
+                     Example 3: Pack and unpack a message in Python.
+
+                        foo = Foo(...)
+                        any = Any()
+                        any.Pack(foo)
+                        ...
+                        if any.Is(Foo.DESCRIPTOR):
+                          any.Unpack(foo)
+                          ...
+
+                     Example 4: Pack and unpack a message in Go
+
+                         foo := &pb.Foo{...}
+                         any, err := anypb.New(foo)
+                         if err != nil {
+                           ...
+                         }
+                         ...
+                         foo := &pb.Foo{}
+                         if err := any.UnmarshalTo(foo); err != nil {
+                           ...
+                         }
+
+                    The pack methods provided by protobuf library will by
+                    default use
+
+                    'type.googleapis.com/full.type.name' as the type URL and the
+                    unpack
+
+                    methods only use the fully qualified type name after the
+                    last '/'
+
+                    in the type URL, for example "foo.bar.com/x/y.z" will yield
+                    type
+
+                    name "y.z".
+
+
+
+                    JSON
+
+                    ====
+
+                    The JSON representation of an `Any` value uses the regular
+
+                    representation of the deserialized, embedded message, with
+                    an
+
+                    additional field `@type` which contains the type URL.
+                    Example:
+
+                        package google.profile;
+                        message Person {
+                          string first_name = 1;
+                          string last_name = 2;
+                        }
+
+                        {
+                          "@type": "type.googleapis.com/google.profile.Person",
+                          "firstName": <string>,
+                          "lastName": <string>
+                        }
+
+                    If the embedded message type is well-known and has a custom
+                    JSON
+
+                    representation, that representation will be embedded adding
+                    a field
+
+                    `value` which holds the custom JSON in addition to the
+                    `@type`
+
+                    field. Example (for message [google.protobuf.Duration][]):
+
+                        {
+                          "@type": "type.googleapis.com/google.protobuf.Duration",
+                          "value": "1.212s"
+                        }
       parameters:
-        - name: appAddress
+        - name: block_height
+          description: height at which the session is being requested
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: app_address
+          in: query
+          required: false
+          type: string
+        - name: service_id
+          description: 'TODO_CONSIDER: Should this be a special type of string?'
           in: query
           required: false
           type: string
@@ -47087,7 +49126,174 @@ paths:
                   properties:
                     '@type':
                       type: string
+                      description: >-
+                        A URL/resource name that uniquely identifies the type of
+                        the serialized
+
+                        protocol buffer message. This string must contain at
+                        least
+
+                        one "/" character. The last segment of the URL's path
+                        must represent
+
+                        the fully qualified name of the type (as in
+
+                        `path/google.protobuf.Duration`). The name should be in
+                        a canonical form
+
+                        (e.g., leading "." is not accepted).
+
+
+                        In practice, teams usually precompile into the binary
+                        all types that they
+
+                        expect it to use in the context of Any. However, for
+                        URLs which use the
+
+                        scheme `http`, `https`, or no scheme, one can optionally
+                        set up a type
+
+                        server that maps type URLs to message definitions as
+                        follows:
+
+
+                        * If no scheme is provided, `https` is assumed.
+
+                        * An HTTP GET on the URL must yield a
+                        [google.protobuf.Type][]
+                          value in binary format, or produce an error.
+                        * Applications are allowed to cache lookup results based
+                        on the
+                          URL, or have them precompiled into a binary to avoid any
+                          lookup. Therefore, binary compatibility needs to be preserved
+                          on changes to types. (Use versioned type names to manage
+                          breaking changes.)
+
+                        Note: this functionality is not currently available in
+                        the official
+
+                        protobuf release, and it is not used for type URLs
+                        beginning with
+
+                        type.googleapis.com.
+
+
+                        Schemes other than `http`, `https` (or the empty scheme)
+                        might be
+
+                        used with implementation specific semantics.
                   additionalProperties: {}
+                  description: >-
+                    `Any` contains an arbitrary serialized protocol buffer
+                    message along with a
+
+                    URL that describes the type of the serialized message.
+
+
+                    Protobuf library provides support to pack/unpack Any values
+                    in the form
+
+                    of utility functions or additional generated methods of the
+                    Any type.
+
+
+                    Example 1: Pack and unpack a message in C++.
+
+                        Foo foo = ...;
+                        Any any;
+                        any.PackFrom(foo);
+                        ...
+                        if (any.UnpackTo(&foo)) {
+                          ...
+                        }
+
+                    Example 2: Pack and unpack a message in Java.
+
+                        Foo foo = ...;
+                        Any any = Any.pack(foo);
+                        ...
+                        if (any.is(Foo.class)) {
+                          foo = any.unpack(Foo.class);
+                        }
+
+                     Example 3: Pack and unpack a message in Python.
+
+                        foo = Foo(...)
+                        any = Any()
+                        any.Pack(foo)
+                        ...
+                        if any.Is(Foo.DESCRIPTOR):
+                          any.Unpack(foo)
+                          ...
+
+                     Example 4: Pack and unpack a message in Go
+
+                         foo := &pb.Foo{...}
+                         any, err := anypb.New(foo)
+                         if err != nil {
+                           ...
+                         }
+                         ...
+                         foo := &pb.Foo{}
+                         if err := any.UnmarshalTo(foo); err != nil {
+                           ...
+                         }
+
+                    The pack methods provided by protobuf library will by
+                    default use
+
+                    'type.googleapis.com/full.type.name' as the type URL and the
+                    unpack
+
+                    methods only use the fully qualified type name after the
+                    last '/'
+
+                    in the type URL, for example "foo.bar.com/x/y.z" will yield
+                    type
+
+                    name "y.z".
+
+
+
+                    JSON
+
+                    ====
+
+                    The JSON representation of an `Any` value uses the regular
+
+                    representation of the deserialized, embedded message, with
+                    an
+
+                    additional field `@type` which contains the type URL.
+                    Example:
+
+                        package google.profile;
+                        message Person {
+                          string first_name = 1;
+                          string last_name = 2;
+                        }
+
+                        {
+                          "@type": "type.googleapis.com/google.profile.Person",
+                          "firstName": <string>,
+                          "lastName": <string>
+                        }
+
+                    If the embedded message type is well-known and has a custom
+                    JSON
+
+                    representation, that representation will be embedded adding
+                    a field
+
+                    `value` which holds the custom JSON in addition to the
+                    `@type`
+
+                    field. Example (for message [google.protobuf.Duration][]):
+
+                        {
+                          "@type": "type.googleapis.com/google.protobuf.Duration",
+                          "value": "1.212s"
+                        }
       tags:
         - Query
 definitions:
@@ -75846,6 +78052,17 @@ definitions:
 
           NOTE: The amount field is an Int which implements the custom method
           signatures required by gogoproto.
+      services:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              title: unique identifier for the service
+            name:
+              type: string
+              title: human-readable name for the service
   poktroll.application.MsgStakeApplicationResponse:
     type: object
   poktroll.application.MsgUnstakeApplicationResponse:
@@ -75878,6 +78095,17 @@ definitions:
                 method
 
                 signatures required by gogoproto.
+            services:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    title: unique identifier for the service
+                  name:
+                    type: string
+                    title: human-readable name for the service
       pagination:
         type: object
         properties:
@@ -75927,6 +78155,17 @@ definitions:
               method
 
               signatures required by gogoproto.
+          services:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  title: unique identifier for the service
+                name:
+                  type: string
+                  title: human-readable name for the service
   poktroll.application.QueryParamsResponse:
     type: object
     properties:
@@ -75934,6 +78173,15 @@ definitions:
         description: params holds all the parameters of this module.
         type: object
     description: QueryParamsResponse is response type for the Query/Params RPC method.
+  poktroll.service.ServiceId:
+    type: object
+    properties:
+      id:
+        type: string
+        title: unique identifier for the service
+      name:
+        type: string
+        title: human-readable name for the service
   poktroll.poktroll.Params:
     type: object
     description: Params defines the parameters for the module.
@@ -75954,6 +78202,375 @@ definitions:
         description: params holds all the parameters of this module.
         type: object
     description: QueryParamsResponse is response type for the Query/Params RPC method.
+  poktroll.service.Params:
+    type: object
+    description: Params defines the parameters for the module.
+  poktroll.service.QueryParamsResponse:
+    type: object
+    properties:
+      params:
+        description: params holds all the parameters of this module.
+        type: object
+    description: QueryParamsResponse is response type for the Query/Params RPC method.
+  poktroll.service.ConfigOption:
+    type: object
+    properties:
+      key:
+        type: string
+        enum:
+          - UNKNOWN_CONFIG
+          - TIMEOUT
+        default: UNKNOWN_CONFIG
+        description: >-
+          Enum to define configuration options for the endpoint
+
+          DISCUSS: Enums are nice but in the `.json` files (e.g. see
+          servicer1.json), we have to represent it as an int, which defeats half
+          the purpose of using enums.
+
+           - TIMEOUT: Add new config options here as needed
+      value:
+        type: string
+    title: >-
+      NB: proto maps cannot be keyed be enums, so we create a key-value wrapper
+      instead
+  poktroll.service.ConfigOptions:
+    type: string
+    enum:
+      - UNKNOWN_CONFIG
+      - TIMEOUT
+    default: UNKNOWN_CONFIG
+    description: >-
+      Enum to define configuration options for the endpoint
+
+      DISCUSS: Enums are nice but in the `.json` files (e.g. see
+      servicer1.json), we have to represent it as an int, which defeats half the
+      purpose of using enums.
+
+       - TIMEOUT: Add new config options here as needed
+  poktroll.service.Endpoint:
+    type: object
+    properties:
+      url:
+        type: string
+        title: The URL of the endpoint
+      rpc_type:
+        title: The type of the RPC
+        type: string
+        enum:
+          - UNKNOWN_RPC
+          - GRPC
+          - WEBSOCKET
+          - JSON_RPC
+        default: UNKNOWN_RPC
+        description: >-
+          Enum to define various RPC types
+
+          DISCUSS: Enums are nice but in the `.json` files (e.g. see
+          servicer1.json), we have to represent it as an int, which defeats half
+          the purpose of using enums.
+
+           - JSON_RPC: Add new RPC types here as needed
+      metadata:
+        type: object
+        additionalProperties:
+          type: string
+        title: Additional metadata about the endpoint
+        properties:
+          entries:
+            type: object
+            additionalProperties:
+              type: string
+            title: >-
+              map<string, google.protobuf.Any> metadata = 3; // metadata to
+              allow for future extensibility
+      configs:
+        type: array
+        items:
+          type: object
+          properties:
+            key:
+              type: string
+              enum:
+                - UNKNOWN_CONFIG
+                - TIMEOUT
+              default: UNKNOWN_CONFIG
+              description: >-
+                Enum to define configuration options for the endpoint
+
+                DISCUSS: Enums are nice but in the `.json` files (e.g. see
+                servicer1.json), we have to represent it as an int, which
+                defeats half the purpose of using enums.
+
+                 - TIMEOUT: Add new config options here as needed
+            value:
+              type: string
+          title: >-
+            NB: proto maps cannot be keyed be enums, so we create a key-value
+            wrapper instead
+        title: Configuration options for the endpoint
+  poktroll.service.RPCType:
+    type: string
+    enum:
+      - UNKNOWN_RPC
+      - GRPC
+      - WEBSOCKET
+      - JSON_RPC
+    default: UNKNOWN_RPC
+    description: >-
+      Enum to define various RPC types
+
+      DISCUSS: Enums are nice but in the `.json` files (e.g. see
+      servicer1.json), we have to represent it as an int, which defeats half the
+      purpose of using enums.
+
+       - JSON_RPC: Add new RPC types here as needed
+  poktroll.service.ServiceConfig:
+    type: object
+    properties:
+      id:
+        type: object
+        properties:
+          id:
+            type: string
+            title: unique identifier for the service
+          name:
+            type: string
+            title: human-readable name for the service
+      endpoints:
+        type: array
+        items:
+          type: object
+          properties:
+            url:
+              type: string
+              title: The URL of the endpoint
+            rpc_type:
+              title: The type of the RPC
+              type: string
+              enum:
+                - UNKNOWN_RPC
+                - GRPC
+                - WEBSOCKET
+                - JSON_RPC
+              default: UNKNOWN_RPC
+              description: >-
+                Enum to define various RPC types
+
+                DISCUSS: Enums are nice but in the `.json` files (e.g. see
+                servicer1.json), we have to represent it as an int, which
+                defeats half the purpose of using enums.
+
+                 - JSON_RPC: Add new RPC types here as needed
+            metadata:
+              type: object
+              additionalProperties:
+                type: string
+              title: Additional metadata about the endpoint
+              properties:
+                entries:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  title: >-
+                    map<string, google.protobuf.Any> metadata = 3; // metadata
+                    to allow for future extensibility
+            configs:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                    enum:
+                      - UNKNOWN_CONFIG
+                      - TIMEOUT
+                    default: UNKNOWN_CONFIG
+                    description: >-
+                      Enum to define configuration options for the endpoint
+
+                      DISCUSS: Enums are nice but in the `.json` files (e.g. see
+                      servicer1.json), we have to represent it as an int, which
+                      defeats half the purpose of using enums.
+
+                       - TIMEOUT: Add new config options here as needed
+                  value:
+                    type: string
+                title: >-
+                  NB: proto maps cannot be keyed be enums, so we create a
+                  key-value wrapper instead
+              title: Configuration options for the endpoint
+      metadata:
+        type: object
+        additionalProperties:
+          type: object
+          properties:
+            '@type':
+              type: string
+              description: >-
+                A URL/resource name that uniquely identifies the type of the
+                serialized
+
+                protocol buffer message. This string must contain at least
+
+                one "/" character. The last segment of the URL's path must
+                represent
+
+                the fully qualified name of the type (as in
+
+                `path/google.protobuf.Duration`). The name should be in a
+                canonical form
+
+                (e.g., leading "." is not accepted).
+
+
+                In practice, teams usually precompile into the binary all types
+                that they
+
+                expect it to use in the context of Any. However, for URLs which
+                use the
+
+                scheme `http`, `https`, or no scheme, one can optionally set up
+                a type
+
+                server that maps type URLs to message definitions as follows:
+
+
+                * If no scheme is provided, `https` is assumed.
+
+                * An HTTP GET on the URL must yield a [google.protobuf.Type][]
+                  value in binary format, or produce an error.
+                * Applications are allowed to cache lookup results based on the
+                  URL, or have them precompiled into a binary to avoid any
+                  lookup. Therefore, binary compatibility needs to be preserved
+                  on changes to types. (Use versioned type names to manage
+                  breaking changes.)
+
+                Note: this functionality is not currently available in the
+                official
+
+                protobuf release, and it is not used for type URLs beginning
+                with
+
+                type.googleapis.com.
+
+
+                Schemes other than `http`, `https` (or the empty scheme) might
+                be
+
+                used with implementation specific semantics.
+          additionalProperties: {}
+          description: >-
+            `Any` contains an arbitrary serialized protocol buffer message along
+            with a
+
+            URL that describes the type of the serialized message.
+
+
+            Protobuf library provides support to pack/unpack Any values in the
+            form
+
+            of utility functions or additional generated methods of the Any
+            type.
+
+
+            Example 1: Pack and unpack a message in C++.
+
+                Foo foo = ...;
+                Any any;
+                any.PackFrom(foo);
+                ...
+                if (any.UnpackTo(&foo)) {
+                  ...
+                }
+
+            Example 2: Pack and unpack a message in Java.
+
+                Foo foo = ...;
+                Any any = Any.pack(foo);
+                ...
+                if (any.is(Foo.class)) {
+                  foo = any.unpack(Foo.class);
+                }
+
+             Example 3: Pack and unpack a message in Python.
+
+                foo = Foo(...)
+                any = Any()
+                any.Pack(foo)
+                ...
+                if any.Is(Foo.DESCRIPTOR):
+                  any.Unpack(foo)
+                  ...
+
+             Example 4: Pack and unpack a message in Go
+
+                 foo := &pb.Foo{...}
+                 any, err := anypb.New(foo)
+                 if err != nil {
+                   ...
+                 }
+                 ...
+                 foo := &pb.Foo{}
+                 if err := any.UnmarshalTo(foo); err != nil {
+                   ...
+                 }
+
+            The pack methods provided by protobuf library will by default use
+
+            'type.googleapis.com/full.type.name' as the type URL and the unpack
+
+            methods only use the fully qualified type name after the last '/'
+
+            in the type URL, for example "foo.bar.com/x/y.z" will yield type
+
+            name "y.z".
+
+
+
+            JSON
+
+            ====
+
+            The JSON representation of an `Any` value uses the regular
+
+            representation of the deserialized, embedded message, with an
+
+            additional field `@type` which contains the type URL. Example:
+
+                package google.profile;
+                message Person {
+                  string first_name = 1;
+                  string last_name = 2;
+                }
+
+                {
+                  "@type": "type.googleapis.com/google.profile.Person",
+                  "firstName": <string>,
+                  "lastName": <string>
+                }
+
+            If the embedded message type is well-known and has a custom JSON
+
+            representation, that representation will be embedded adding a field
+
+            `value` which holds the custom JSON in addition to the `@type`
+
+            field. Example (for message [google.protobuf.Duration][]):
+
+                {
+                  "@type": "type.googleapis.com/google.protobuf.Duration",
+                  "value": "1.212s"
+                }
+        title: metadata to allow for future extensibility
+        properties:
+          entries:
+            type: object
+            additionalProperties:
+              type: string
+            title: >-
+              map<string, google.protobuf.Any> metadata = 3; // metadata to
+              allow for future extensibility
   poktroll.servicer.MsgClaimResponse:
     type: object
   poktroll.servicer.MsgProofResponse:
@@ -75990,6 +78607,256 @@ definitions:
                 method
 
                 signatures required by gogoproto.
+            services:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        title: unique identifier for the service
+                      name:
+                        type: string
+                        title: human-readable name for the service
+                  endpoints:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                          title: The URL of the endpoint
+                        rpc_type:
+                          title: The type of the RPC
+                          type: string
+                          enum:
+                            - UNKNOWN_RPC
+                            - GRPC
+                            - WEBSOCKET
+                            - JSON_RPC
+                          default: UNKNOWN_RPC
+                          description: >-
+                            Enum to define various RPC types
+
+                            DISCUSS: Enums are nice but in the `.json` files
+                            (e.g. see servicer1.json), we have to represent it
+                            as an int, which defeats half the purpose of using
+                            enums.
+
+                             - JSON_RPC: Add new RPC types here as needed
+                        metadata:
+                          type: object
+                          additionalProperties:
+                            type: string
+                          title: Additional metadata about the endpoint
+                        configs:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              key:
+                                type: string
+                                enum:
+                                  - UNKNOWN_CONFIG
+                                  - TIMEOUT
+                                default: UNKNOWN_CONFIG
+                                description: >-
+                                  Enum to define configuration options for the
+                                  endpoint
+
+                                  DISCUSS: Enums are nice but in the `.json`
+                                  files (e.g. see servicer1.json), we have to
+                                  represent it as an int, which defeats half the
+                                  purpose of using enums.
+
+                                   - TIMEOUT: Add new config options here as needed
+                              value:
+                                type: string
+                            title: >-
+                              NB: proto maps cannot be keyed be enums, so we
+                              create a key-value wrapper instead
+                          title: Configuration options for the endpoint
+                  metadata:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        '@type':
+                          type: string
+                          description: >-
+                            A URL/resource name that uniquely identifies the
+                            type of the serialized
+
+                            protocol buffer message. This string must contain at
+                            least
+
+                            one "/" character. The last segment of the URL's
+                            path must represent
+
+                            the fully qualified name of the type (as in
+
+                            `path/google.protobuf.Duration`). The name should be
+                            in a canonical form
+
+                            (e.g., leading "." is not accepted).
+
+
+                            In practice, teams usually precompile into the
+                            binary all types that they
+
+                            expect it to use in the context of Any. However, for
+                            URLs which use the
+
+                            scheme `http`, `https`, or no scheme, one can
+                            optionally set up a type
+
+                            server that maps type URLs to message definitions as
+                            follows:
+
+
+                            * If no scheme is provided, `https` is assumed.
+
+                            * An HTTP GET on the URL must yield a
+                            [google.protobuf.Type][]
+                              value in binary format, or produce an error.
+                            * Applications are allowed to cache lookup results
+                            based on the
+                              URL, or have them precompiled into a binary to avoid any
+                              lookup. Therefore, binary compatibility needs to be preserved
+                              on changes to types. (Use versioned type names to manage
+                              breaking changes.)
+
+                            Note: this functionality is not currently available
+                            in the official
+
+                            protobuf release, and it is not used for type URLs
+                            beginning with
+
+                            type.googleapis.com.
+
+
+                            Schemes other than `http`, `https` (or the empty
+                            scheme) might be
+
+                            used with implementation specific semantics.
+                      additionalProperties: {}
+                      description: >-
+                        `Any` contains an arbitrary serialized protocol buffer
+                        message along with a
+
+                        URL that describes the type of the serialized message.
+
+
+                        Protobuf library provides support to pack/unpack Any
+                        values in the form
+
+                        of utility functions or additional generated methods of
+                        the Any type.
+
+
+                        Example 1: Pack and unpack a message in C++.
+
+                            Foo foo = ...;
+                            Any any;
+                            any.PackFrom(foo);
+                            ...
+                            if (any.UnpackTo(&foo)) {
+                              ...
+                            }
+
+                        Example 2: Pack and unpack a message in Java.
+
+                            Foo foo = ...;
+                            Any any = Any.pack(foo);
+                            ...
+                            if (any.is(Foo.class)) {
+                              foo = any.unpack(Foo.class);
+                            }
+
+                         Example 3: Pack and unpack a message in Python.
+
+                            foo = Foo(...)
+                            any = Any()
+                            any.Pack(foo)
+                            ...
+                            if any.Is(Foo.DESCRIPTOR):
+                              any.Unpack(foo)
+                              ...
+
+                         Example 4: Pack and unpack a message in Go
+
+                             foo := &pb.Foo{...}
+                             any, err := anypb.New(foo)
+                             if err != nil {
+                               ...
+                             }
+                             ...
+                             foo := &pb.Foo{}
+                             if err := any.UnmarshalTo(foo); err != nil {
+                               ...
+                             }
+
+                        The pack methods provided by protobuf library will by
+                        default use
+
+                        'type.googleapis.com/full.type.name' as the type URL and
+                        the unpack
+
+                        methods only use the fully qualified type name after the
+                        last '/'
+
+                        in the type URL, for example "foo.bar.com/x/y.z" will
+                        yield type
+
+                        name "y.z".
+
+
+
+                        JSON
+
+                        ====
+
+                        The JSON representation of an `Any` value uses the
+                        regular
+
+                        representation of the deserialized, embedded message,
+                        with an
+
+                        additional field `@type` which contains the type URL.
+                        Example:
+
+                            package google.profile;
+                            message Person {
+                              string first_name = 1;
+                              string last_name = 2;
+                            }
+
+                            {
+                              "@type": "type.googleapis.com/google.profile.Person",
+                              "firstName": <string>,
+                              "lastName": <string>
+                            }
+
+                        If the embedded message type is well-known and has a
+                        custom JSON
+
+                        representation, that representation will be embedded
+                        adding a field
+
+                        `value` which holds the custom JSON in addition to the
+                        `@type`
+
+                        field. Example (for message
+                        [google.protobuf.Duration][]):
+
+                            {
+                              "@type": "type.googleapis.com/google.protobuf.Duration",
+                              "value": "1.212s"
+                            }
+                    title: metadata to allow for future extensibility
           title: >-
             CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding the
             servicer map in the non-alpha repo
@@ -76042,6 +78909,253 @@ definitions:
               method
 
               signatures required by gogoproto.
+          services:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      title: unique identifier for the service
+                    name:
+                      type: string
+                      title: human-readable name for the service
+                endpoints:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        title: The URL of the endpoint
+                      rpc_type:
+                        title: The type of the RPC
+                        type: string
+                        enum:
+                          - UNKNOWN_RPC
+                          - GRPC
+                          - WEBSOCKET
+                          - JSON_RPC
+                        default: UNKNOWN_RPC
+                        description: >-
+                          Enum to define various RPC types
+
+                          DISCUSS: Enums are nice but in the `.json` files (e.g.
+                          see servicer1.json), we have to represent it as an
+                          int, which defeats half the purpose of using enums.
+
+                           - JSON_RPC: Add new RPC types here as needed
+                      metadata:
+                        type: object
+                        additionalProperties:
+                          type: string
+                        title: Additional metadata about the endpoint
+                      configs:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            key:
+                              type: string
+                              enum:
+                                - UNKNOWN_CONFIG
+                                - TIMEOUT
+                              default: UNKNOWN_CONFIG
+                              description: >-
+                                Enum to define configuration options for the
+                                endpoint
+
+                                DISCUSS: Enums are nice but in the `.json` files
+                                (e.g. see servicer1.json), we have to represent
+                                it as an int, which defeats half the purpose of
+                                using enums.
+
+                                 - TIMEOUT: Add new config options here as needed
+                            value:
+                              type: string
+                          title: >-
+                            NB: proto maps cannot be keyed be enums, so we
+                            create a key-value wrapper instead
+                        title: Configuration options for the endpoint
+                metadata:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      '@type':
+                        type: string
+                        description: >-
+                          A URL/resource name that uniquely identifies the type
+                          of the serialized
+
+                          protocol buffer message. This string must contain at
+                          least
+
+                          one "/" character. The last segment of the URL's path
+                          must represent
+
+                          the fully qualified name of the type (as in
+
+                          `path/google.protobuf.Duration`). The name should be
+                          in a canonical form
+
+                          (e.g., leading "." is not accepted).
+
+
+                          In practice, teams usually precompile into the binary
+                          all types that they
+
+                          expect it to use in the context of Any. However, for
+                          URLs which use the
+
+                          scheme `http`, `https`, or no scheme, one can
+                          optionally set up a type
+
+                          server that maps type URLs to message definitions as
+                          follows:
+
+
+                          * If no scheme is provided, `https` is assumed.
+
+                          * An HTTP GET on the URL must yield a
+                          [google.protobuf.Type][]
+                            value in binary format, or produce an error.
+                          * Applications are allowed to cache lookup results
+                          based on the
+                            URL, or have them precompiled into a binary to avoid any
+                            lookup. Therefore, binary compatibility needs to be preserved
+                            on changes to types. (Use versioned type names to manage
+                            breaking changes.)
+
+                          Note: this functionality is not currently available in
+                          the official
+
+                          protobuf release, and it is not used for type URLs
+                          beginning with
+
+                          type.googleapis.com.
+
+
+                          Schemes other than `http`, `https` (or the empty
+                          scheme) might be
+
+                          used with implementation specific semantics.
+                    additionalProperties: {}
+                    description: >-
+                      `Any` contains an arbitrary serialized protocol buffer
+                      message along with a
+
+                      URL that describes the type of the serialized message.
+
+
+                      Protobuf library provides support to pack/unpack Any
+                      values in the form
+
+                      of utility functions or additional generated methods of
+                      the Any type.
+
+
+                      Example 1: Pack and unpack a message in C++.
+
+                          Foo foo = ...;
+                          Any any;
+                          any.PackFrom(foo);
+                          ...
+                          if (any.UnpackTo(&foo)) {
+                            ...
+                          }
+
+                      Example 2: Pack and unpack a message in Java.
+
+                          Foo foo = ...;
+                          Any any = Any.pack(foo);
+                          ...
+                          if (any.is(Foo.class)) {
+                            foo = any.unpack(Foo.class);
+                          }
+
+                       Example 3: Pack and unpack a message in Python.
+
+                          foo = Foo(...)
+                          any = Any()
+                          any.Pack(foo)
+                          ...
+                          if any.Is(Foo.DESCRIPTOR):
+                            any.Unpack(foo)
+                            ...
+
+                       Example 4: Pack and unpack a message in Go
+
+                           foo := &pb.Foo{...}
+                           any, err := anypb.New(foo)
+                           if err != nil {
+                             ...
+                           }
+                           ...
+                           foo := &pb.Foo{}
+                           if err := any.UnmarshalTo(foo); err != nil {
+                             ...
+                           }
+
+                      The pack methods provided by protobuf library will by
+                      default use
+
+                      'type.googleapis.com/full.type.name' as the type URL and
+                      the unpack
+
+                      methods only use the fully qualified type name after the
+                      last '/'
+
+                      in the type URL, for example "foo.bar.com/x/y.z" will
+                      yield type
+
+                      name "y.z".
+
+
+
+                      JSON
+
+                      ====
+
+                      The JSON representation of an `Any` value uses the regular
+
+                      representation of the deserialized, embedded message, with
+                      an
+
+                      additional field `@type` which contains the type URL.
+                      Example:
+
+                          package google.profile;
+                          message Person {
+                            string first_name = 1;
+                            string last_name = 2;
+                          }
+
+                          {
+                            "@type": "type.googleapis.com/google.profile.Person",
+                            "firstName": <string>,
+                            "lastName": <string>
+                          }
+
+                      If the embedded message type is well-known and has a
+                      custom JSON
+
+                      representation, that representation will be embedded
+                      adding a field
+
+                      `value` which holds the custom JSON in addition to the
+                      `@type`
+
+                      field. Example (for message [google.protobuf.Duration][]):
+
+                          {
+                            "@type": "type.googleapis.com/google.protobuf.Duration",
+                            "value": "1.212s"
+                          }
+                  title: metadata to allow for future extensibility
         title: >-
           CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding the
           servicer map in the non-alpha repo
@@ -76069,9 +79183,278 @@ definitions:
 
           NOTE: The amount field is an Int which implements the custom method
           signatures required by gogoproto.
+      services:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: object
+              properties:
+                id:
+                  type: string
+                  title: unique identifier for the service
+                name:
+                  type: string
+                  title: human-readable name for the service
+            endpoints:
+              type: array
+              items:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    title: The URL of the endpoint
+                  rpc_type:
+                    title: The type of the RPC
+                    type: string
+                    enum:
+                      - UNKNOWN_RPC
+                      - GRPC
+                      - WEBSOCKET
+                      - JSON_RPC
+                    default: UNKNOWN_RPC
+                    description: >-
+                      Enum to define various RPC types
+
+                      DISCUSS: Enums are nice but in the `.json` files (e.g. see
+                      servicer1.json), we have to represent it as an int, which
+                      defeats half the purpose of using enums.
+
+                       - JSON_RPC: Add new RPC types here as needed
+                  metadata:
+                    type: object
+                    additionalProperties:
+                      type: string
+                    title: Additional metadata about the endpoint
+                    properties:
+                      entries:
+                        type: object
+                        additionalProperties:
+                          type: string
+                        title: >-
+                          map<string, google.protobuf.Any> metadata = 3; //
+                          metadata to allow for future extensibility
+                  configs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key:
+                          type: string
+                          enum:
+                            - UNKNOWN_CONFIG
+                            - TIMEOUT
+                          default: UNKNOWN_CONFIG
+                          description: >-
+                            Enum to define configuration options for the
+                            endpoint
+
+                            DISCUSS: Enums are nice but in the `.json` files
+                            (e.g. see servicer1.json), we have to represent it
+                            as an int, which defeats half the purpose of using
+                            enums.
+
+                             - TIMEOUT: Add new config options here as needed
+                        value:
+                          type: string
+                      title: >-
+                        NB: proto maps cannot be keyed be enums, so we create a
+                        key-value wrapper instead
+                    title: Configuration options for the endpoint
+            metadata:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  '@type':
+                    type: string
+                    description: >-
+                      A URL/resource name that uniquely identifies the type of
+                      the serialized
+
+                      protocol buffer message. This string must contain at least
+
+                      one "/" character. The last segment of the URL's path must
+                      represent
+
+                      the fully qualified name of the type (as in
+
+                      `path/google.protobuf.Duration`). The name should be in a
+                      canonical form
+
+                      (e.g., leading "." is not accepted).
+
+
+                      In practice, teams usually precompile into the binary all
+                      types that they
+
+                      expect it to use in the context of Any. However, for URLs
+                      which use the
+
+                      scheme `http`, `https`, or no scheme, one can optionally
+                      set up a type
+
+                      server that maps type URLs to message definitions as
+                      follows:
+
+
+                      * If no scheme is provided, `https` is assumed.
+
+                      * An HTTP GET on the URL must yield a
+                      [google.protobuf.Type][]
+                        value in binary format, or produce an error.
+                      * Applications are allowed to cache lookup results based
+                      on the
+                        URL, or have them precompiled into a binary to avoid any
+                        lookup. Therefore, binary compatibility needs to be preserved
+                        on changes to types. (Use versioned type names to manage
+                        breaking changes.)
+
+                      Note: this functionality is not currently available in the
+                      official
+
+                      protobuf release, and it is not used for type URLs
+                      beginning with
+
+                      type.googleapis.com.
+
+
+                      Schemes other than `http`, `https` (or the empty scheme)
+                      might be
+
+                      used with implementation specific semantics.
+                additionalProperties: {}
+                description: >-
+                  `Any` contains an arbitrary serialized protocol buffer message
+                  along with a
+
+                  URL that describes the type of the serialized message.
+
+
+                  Protobuf library provides support to pack/unpack Any values in
+                  the form
+
+                  of utility functions or additional generated methods of the
+                  Any type.
+
+
+                  Example 1: Pack and unpack a message in C++.
+
+                      Foo foo = ...;
+                      Any any;
+                      any.PackFrom(foo);
+                      ...
+                      if (any.UnpackTo(&foo)) {
+                        ...
+                      }
+
+                  Example 2: Pack and unpack a message in Java.
+
+                      Foo foo = ...;
+                      Any any = Any.pack(foo);
+                      ...
+                      if (any.is(Foo.class)) {
+                        foo = any.unpack(Foo.class);
+                      }
+
+                   Example 3: Pack and unpack a message in Python.
+
+                      foo = Foo(...)
+                      any = Any()
+                      any.Pack(foo)
+                      ...
+                      if any.Is(Foo.DESCRIPTOR):
+                        any.Unpack(foo)
+                        ...
+
+                   Example 4: Pack and unpack a message in Go
+
+                       foo := &pb.Foo{...}
+                       any, err := anypb.New(foo)
+                       if err != nil {
+                         ...
+                       }
+                       ...
+                       foo := &pb.Foo{}
+                       if err := any.UnmarshalTo(foo); err != nil {
+                         ...
+                       }
+
+                  The pack methods provided by protobuf library will by default
+                  use
+
+                  'type.googleapis.com/full.type.name' as the type URL and the
+                  unpack
+
+                  methods only use the fully qualified type name after the last
+                  '/'
+
+                  in the type URL, for example "foo.bar.com/x/y.z" will yield
+                  type
+
+                  name "y.z".
+
+
+
+                  JSON
+
+                  ====
+
+                  The JSON representation of an `Any` value uses the regular
+
+                  representation of the deserialized, embedded message, with an
+
+                  additional field `@type` which contains the type URL. Example:
+
+                      package google.profile;
+                      message Person {
+                        string first_name = 1;
+                        string last_name = 2;
+                      }
+
+                      {
+                        "@type": "type.googleapis.com/google.profile.Person",
+                        "firstName": <string>,
+                        "lastName": <string>
+                      }
+
+                  If the embedded message type is well-known and has a custom
+                  JSON
+
+                  representation, that representation will be embedded adding a
+                  field
+
+                  `value` which holds the custom JSON in addition to the `@type`
+
+                  field. Example (for message [google.protobuf.Duration][]):
+
+                      {
+                        "@type": "type.googleapis.com/google.protobuf.Duration",
+                        "value": "1.212s"
+                      }
+              title: metadata to allow for future extensibility
+              properties:
+                entries:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  title: >-
+                    map<string, google.protobuf.Any> metadata = 3; // metadata
+                    to allow for future extensibility
     title: >-
       CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding the
       servicer map in the non-alpha repo
+  poktroll.service.Metadata:
+    type: object
+    properties:
+      entries:
+        type: object
+        additionalProperties:
+          type: string
+        title: >-
+          map<string, google.protobuf.Any> metadata = 3; // metadata to allow
+          for future extensibility
   poktroll.session.Params:
     type: object
     description: Params defines the parameters for the module.
@@ -76081,6 +79464,34 @@ definitions:
       session:
         type: object
         properties:
+          session_id:
+            type: string
+            description: >-
+              TODO_CONSIDERATION: Reconsider the following set of fields in term
+              of their type, need, naming, etc...
+          session_number:
+            type: string
+            format: uint64
+            title: The session number
+          session_block_start_height:
+            type: string
+            format: uint64
+            title: The height at which the session started
+          num_blocks_per_session:
+            type: string
+            format: uint64
+            title: >-
+              The number of blocks the session will last (starting at
+              block_height)
+          service:
+            type: object
+            properties:
+              id:
+                type: string
+                title: unique identifier for the service
+              name:
+                type: string
+                title: human-readable name for the service
           application:
             type: object
             properties:
@@ -76101,6 +79512,17 @@ definitions:
                   method
 
                   signatures required by gogoproto.
+              services:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      title: unique identifier for the service
+                    name:
+                      type: string
+                      title: human-readable name for the service
           servicers:
             type: array
             items:
@@ -76123,6 +79545,96 @@ definitions:
                     method
 
                     signatures required by gogoproto.
+                services:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            title: unique identifier for the service
+                          name:
+                            type: string
+                            title: human-readable name for the service
+                      endpoints:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                              title: The URL of the endpoint
+                            rpc_type:
+                              title: The type of the RPC
+                              type: string
+                              enum:
+                                - UNKNOWN_RPC
+                                - GRPC
+                                - WEBSOCKET
+                                - JSON_RPC
+                              default: UNKNOWN_RPC
+                              description: >-
+                                Enum to define various RPC types
+
+                                DISCUSS: Enums are nice but in the `.json` files
+                                (e.g. see servicer1.json), we have to represent
+                                it as an int, which defeats half the purpose of
+                                using enums.
+
+                                 - JSON_RPC: Add new RPC types here as needed
+                            metadata:
+                              title: Additional metadata about the endpoint
+                              type: object
+                              properties:
+                                entries:
+                                  type: object
+                                  additionalProperties:
+                                    type: string
+                                  title: >-
+                                    map<string, google.protobuf.Any> metadata =
+                                    3; // metadata to allow for future
+                                    extensibility
+                            configs:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  key:
+                                    type: string
+                                    enum:
+                                      - UNKNOWN_CONFIG
+                                      - TIMEOUT
+                                    default: UNKNOWN_CONFIG
+                                    description: >-
+                                      Enum to define configuration options for
+                                      the endpoint
+
+                                      DISCUSS: Enums are nice but in the `.json`
+                                      files (e.g. see servicer1.json), we have
+                                      to represent it as an int, which defeats
+                                      half the purpose of using enums.
+
+                                       - TIMEOUT: Add new config options here as needed
+                                  value:
+                                    type: string
+                                title: >-
+                                  NB: proto maps cannot be keyed be enums, so we
+                                  create a key-value wrapper instead
+                              title: Configuration options for the endpoint
+                      metadata:
+                        title: metadata to allow for future extensibility
+                        type: object
+                        properties:
+                          entries:
+                            type: object
+                            additionalProperties:
+                              type: string
+                            title: >-
+                              map<string, google.protobuf.Any> metadata = 3; //
+                              metadata to allow for future extensibility
               title: >-
                 CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding
                 the servicer map in the non-alpha repo
@@ -76136,6 +79648,32 @@ definitions:
   poktroll.session.Session:
     type: object
     properties:
+      session_id:
+        type: string
+        description: >-
+          TODO_CONSIDERATION: Reconsider the following set of fields in term of
+          their type, need, naming, etc...
+      session_number:
+        type: string
+        format: uint64
+        title: The session number
+      session_block_start_height:
+        type: string
+        format: uint64
+        title: The height at which the session started
+      num_blocks_per_session:
+        type: string
+        format: uint64
+        title: The number of blocks the session will last (starting at block_height)
+      service:
+        type: object
+        properties:
+          id:
+            type: string
+            title: unique identifier for the service
+          name:
+            type: string
+            title: human-readable name for the service
       application:
         type: object
         properties:
@@ -76156,6 +79694,17 @@ definitions:
               method
 
               signatures required by gogoproto.
+          services:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  title: unique identifier for the service
+                name:
+                  type: string
+                  title: human-readable name for the service
       servicers:
         type: array
         items:
@@ -76178,6 +79727,95 @@ definitions:
                 method
 
                 signatures required by gogoproto.
+            services:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        title: unique identifier for the service
+                      name:
+                        type: string
+                        title: human-readable name for the service
+                  endpoints:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                          title: The URL of the endpoint
+                        rpc_type:
+                          title: The type of the RPC
+                          type: string
+                          enum:
+                            - UNKNOWN_RPC
+                            - GRPC
+                            - WEBSOCKET
+                            - JSON_RPC
+                          default: UNKNOWN_RPC
+                          description: >-
+                            Enum to define various RPC types
+
+                            DISCUSS: Enums are nice but in the `.json` files
+                            (e.g. see servicer1.json), we have to represent it
+                            as an int, which defeats half the purpose of using
+                            enums.
+
+                             - JSON_RPC: Add new RPC types here as needed
+                        metadata:
+                          title: Additional metadata about the endpoint
+                          type: object
+                          properties:
+                            entries:
+                              type: object
+                              additionalProperties:
+                                type: string
+                              title: >-
+                                map<string, google.protobuf.Any> metadata = 3;
+                                // metadata to allow for future extensibility
+                        configs:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              key:
+                                type: string
+                                enum:
+                                  - UNKNOWN_CONFIG
+                                  - TIMEOUT
+                                default: UNKNOWN_CONFIG
+                                description: >-
+                                  Enum to define configuration options for the
+                                  endpoint
+
+                                  DISCUSS: Enums are nice but in the `.json`
+                                  files (e.g. see servicer1.json), we have to
+                                  represent it as an int, which defeats half the
+                                  purpose of using enums.
+
+                                   - TIMEOUT: Add new config options here as needed
+                              value:
+                                type: string
+                            title: >-
+                              NB: proto maps cannot be keyed be enums, so we
+                              create a key-value wrapper instead
+                          title: Configuration options for the endpoint
+                  metadata:
+                    title: metadata to allow for future extensibility
+                    type: object
+                    properties:
+                      entries:
+                        type: object
+                        additionalProperties:
+                          type: string
+                        title: >-
+                          map<string, google.protobuf.Any> metadata = 3; //
+                          metadata to allow for future extensibility
           title: >-
             CLEANUP: Use `Servicer` instead of `Servicers` when scaffolding the
             servicer map in the non-alpha repo

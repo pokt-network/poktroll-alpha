@@ -33,22 +33,32 @@ func (k msgServer) StakeServicer(goCtx context.Context, msg *types.MsgStakeServi
 	var coinsToSend sdk.Coin
 	servicer, found := k.GetServicers(ctx, msg.Address)
 	if !found {
+		logger.Info(fmt.Sprintf("servicer not found, creating new servicer for address %s with stake amount %v", appAddress, newServicerStake))
+
 		// If the servicer is not found, create a new one
 		servicer = types.Servicers{
-			Address: msg.Address,
-			Stake:   msg.StakeAmount,
+			Address:  msg.Address,
+			Stake:    msg.StakeAmount,
+			Services: msg.Services,
 		}
+
+		// Determine the number of coins to send from the servicer address to the servicer module account
 		coinsToSend = newServicerStake
-		logger.Info(fmt.Sprintf("servicer not found, creating new servicer for address %s with stake amount %v", appAddress, newServicerStake))
 	} else {
+		logger.Info(fmt.Sprintf("servicer found, updating servicer stake from %v to %v", servicer.Stake, newServicerStake))
+
 		// If the servicer is found, make sure the stake amount has increased
 		if servicer.Stake.IsGTE(newServicerStake) {
 			logger.Error(fmt.Sprintf("stake amount must %v be higher than previous stake amount %v", newServicerStake, servicer.Stake))
 			return nil, types.ErrStakeAmountMustBeHigher
 		}
-		logger.Info(fmt.Sprintf("servicer found, updating servicer stake from %v to %v", servicer.Stake, newServicerStake))
+
+		// Determine the number of coins to send from the servicer address to the servicer module account
 		coinsToSend = newServicerStake.Sub(*servicer.Stake)
 		servicer.Stake = &newServicerStake
+
+		// Update the services (just an override operation)
+		servicer.Services = msg.Services
 	}
 
 	// Send coins to the servicer module account

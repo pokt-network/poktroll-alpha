@@ -1,6 +1,8 @@
 package types
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -39,11 +41,16 @@ func (msg *MsgStakeServicer) GetSignBytes() []byte {
 }
 
 // CLEANUP: Use `errors.Join` after upgrading to a newer version of go
+// TODO_TEST: So much validation that has to go into this to make it work better
 func (msg *MsgStakeServicer) ValidateBasic() error {
+	fmt.Println("MsgStakeServicer.ValidateBasic()", msg)
+	// Validate the address
 	_, err := sdk.AccAddressFromBech32(msg.Address)
 	if err != nil {
 		return sdkerrors.ErrInvalidAddress
 	}
+
+	// Validate the stake amount
 	if msg.StakeAmount == nil {
 		return ErrNilStakeAmount
 	}
@@ -54,5 +61,11 @@ func (msg *MsgStakeServicer) ValidateBasic() error {
 	if err != nil {
 		return err
 	}
+
+	// Validate the services
+	if len(msg.Services) == 0 {
+		return ErrNoServicesToStake
+	}
+
 	return nil
 }

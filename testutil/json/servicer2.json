@@ -1,0 +1,74 @@
+{
+  "stakeAmount": {
+    "denom": "stake",
+    "amount": "1000000"
+  },
+  "services": [
+    {
+      "id": {
+        "id": "svc2",
+        "name": "Pocket Network Service 2"
+      },
+      "endpoints": [
+        {
+          "rpc_type": 1,
+          "rpc_type_enum": "GRPC",
+          "metadata": {
+            "version": "1.0.0",
+            "region": "US-East"
+          },
+          "configs": [
+            {
+              "key": 1,
+              "key_enum": "TIMEOUT",
+              "value": "30s"
+            }
+          ]
+        },
+        {
+          "rpc_type": 2,
+          "rpc_type_enum": "WEBSOCKET",
+          "metadata": {
+            "version": "1.0.0",
+            "region": "EU-Central"
+          },
+          "configs": [
+            {
+              "key": 1,
+              "key_enum": "TIMEOUT",
+              "value": "30s"
+            }
+          ]
+        }
+      ],
+      "metadata": {}
+    },
+    {
+      "id": {
+        "id": "svc3",
+        "name": "Pocket Network Service 3"
+      },
+      "endpoints": [
+        {
+          "rpc_type": 3,
+          "rpc_type_enum": "JSON_RPC",
+          "metadata": {
+            "version": "2.0.0",
+            "region": "AP-South"
+          },
+          "configs": [
+            {
+              "key": 1,
+              "key_enum": "TIMEOUT",
+              "value": "60s"
+            }
+          ]
+        }
+      ],
+      "metadata": {
+        "description": "Service 2 description",
+        "documentation_url": "https://docs.pokt.network/svc2"
+      }
+    }
+  ]
+}

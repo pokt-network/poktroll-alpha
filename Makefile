@@ -2,6 +2,7 @@
 
 POKTROLLD_HOME := ./localnet/poktrolld
 POKTROLLD_NODE := tcp://127.0.0.1:36657
+SESSION_HEIGHT ?= 1 # Default height when retrieving session data
 
 .PHONY: prompt_user
 # Internal helper target - prompt the user before continuing
@@ -15,7 +16,7 @@ list:
 .PHONY: help ## Prints all the targets in all the Makefiles
 .DEFAULT_GOAL := help
 help:
-	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -h -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 
 .PHONY: go_version_check
@@ -125,10 +126,6 @@ poktroll_balance: ## Check the balances of both keys
 	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY1 --node $(POKTROLLD_NODE); \
 	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY2 --node $(POKTROLLD_NODE);
 
-.PHONY: poktroll_get_session
-poktroll_get_session: ## Queries the poktroll node for session data
-	poktrolld --home=$(POKTROLLD_HOME) query session get-session aaa --node $(POKTROLLD_NODE)
-
 # Ref: https://rollkit.dev/tutorials/gm-world-frontend
 .PHONY: poktroll_frontend_cosmology
 poktroll_frontend_cosmology: ## Start the poktroll cosmology frontend
@@ -140,33 +137,97 @@ poktroll_frontend_cosmology: ## Start the poktroll cosmology frontend
 poktroll_frontend_react: ## Start the poktroll react frontend
 	cd ./react && npm install && npm run dev
 
-.PHONY: poktroll_servicer_stake
-poktroll_servicer_stake: ## Stake tokens for the servicer specified
-	poktrolld --home=$(POKTROLLD_HOME) tx servicer stake-servicer 1000stake --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
-
-.PHONY: poktroll_servicers_get
-poktroll_servicers_get: ## Retrieves all servicers from the poktroll state
+.PHONY: servicers_get
+servicers_get: ## Retrieves all servicers from the poktroll state
 	poktrolld --home=$(POKTROLLD_HOME) q servicer list-servicers --node $(POKTROLLD_NODE)
 
-.PHONY: poktroll_servicer_unstake
-poktroll_servicer_unstake: ## Unstake tokens for the servicer specified
-	poktrolld --home=$(POKTROLLD_HOME) tx servicer unstake-servicer --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+.PHONY: servicer_stake
+servicer_stake: ## Stake tokens for the servicer specified (must specify the SERVICER env var)
+	poktrolld --home=$(POKTROLLD_HOME) tx servicer stake-servicer ./testutil/json/$(SERVICER).json --keyring-backend test --from $(SERVICER) --node $(POKTROLLD_NODE)
 
-.PHONY: poktroll_app_stake
-poktroll_app_stake: ## Stake tokens for the application specified
-	poktrolld --home=$(POKTROLLD_HOME) tx application stake-application 1000stake --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+.PHONY: servicer1_stake
+servicer1_stake: ## Stake for servicer1
+	SERVICER=servicer1 make servicer_stake
 
-.PHONY: poktroll_apps_get
-poktroll_apps_get: ## Retrieves all applications from the poktroll state
+.PHONY: servicer2_stake
+servicer2_stake: ## Stake for servicer2
+	SERVICER=servicer2 make servicer_stake
+
+.PHONY: servicer3_stake
+servicer3_stake: ## Stake for servicer3
+	SERVICER=servicer3 make servicer_stake
+
+.PHONY: servicer_unstake
+servicer_unstake: ## Unstake tokens for the servicer specified
+	poktrolld --home=$(POKTROLLD_HOME) tx servicer unstake-servicer --keyring-backend test --from $(SERVICER) --node $(POKTROLLD_NODE)
+
+.PHONY: servicer1_unstake
+servicer1_unstake: ## Unstake for servicer1
+	SERVICER=servicer1 make servicer_unstake
+
+.PHONY: servicer2_unstake
+servicer2_unstake: ## Unstake for servicer2
+	SERVICER=servicer2 make servicer_unstake
+
+.PHONY: servicer3_unstake
+servicer3_unstake: ## Unstake for servicer3
+	SERVICER=servicer3 make servicer_unstake
+
+.PHONY: apps_get
+apps_get: ## Retrieves all applications from the poktroll state
 	poktrolld --home=$(POKTROLLD_HOME) q application list-application --node $(POKTROLLD_NODE)
 
-.PHONY: poktroll_app_unstake
-poktroll_app_unstake: ## Unstake tokens for the application specified
-	poktrolld --home=$(POKTROLLD_HOME) tx application unstake-application --keyring-backend test --from poktroll-key --node $(POKTROLLD_NODE)
+.PHONY: app_stake
+app_stake: ## Stake tokens for the application specified (must specify the APP and SERVICES env vars)
+	poktrolld --home=$(POKTROLLD_HOME) tx application stake-application 1000stake $(SERVICES) --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+
+.PHONY: app1_stake
+app1_stake: ## Stake for app1
+	SERVICES=svc1,svc2 APP=app1 make app_stake
+
+.PHONY: app2_stake
+app2_stake: ## Stake for app2
+	SERVICES=svc2,svc3 APP=app2 make app_stake
+
+.PHONY: app3_stake
+app3_stake: ## Stake for app3
+	SERVICES=svc3,svc4 APP=app3 make app_stake
+
+.PHONY: app_unstake
+app_unstake: ## Unstake tokens for the application specified (must specify the APP env var)
+	poktrolld --home=$(POKTROLLD_HOME) tx application unstake-application --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+
+.PHONY: app1_unstake
+app1_unstake: ## Unstake for app1
+	APP=app1 make app_unstake
+
+.PHONY: app2_unstake
+app2_unstake: ## Unstake for app2
+	APP=app2 make app_unstake
+
+.PHONY: app3_unstake
+app3_unstake: ## Unstake for app3
+	APP=app3 make app_unstake
 
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests
 	go test -v ./...
+
+.PHONY: session_get
+session_get: ## Queries the poktroll node for session data
+	poktrolld --home=$(POKTROLLD_HOME) query session get-session $(APP) $(SVC) $(HEIGHT) --node $(POKTROLLD_NODE)
+
+.PHONY: session_get_app1_svc1
+session_get_app1_svc1: ## Getting the session for app1 and svc1 and height1
+	APP=pokt1aj5m44gpvdmqcr3q0fm24vtff8g8j78004wn43 SVC=svc1 HEIGHT=$(SESSION_HEIGHT) make session_get
+
+.PHONY: session_get_app2_svc2
+session_get_app2_svc2: ## Getting the session for app2 and svc2 and height1
+	APP=pokt1c0aal6vmfh094v7xuk3ynkfexep3txdpjk6xhz SVC=svc2 HEIGHT=$(SESSION_HEIGHT) make session_get
+
+.PHONY: session_get_app3_svc3
+session_get_app3_svc3: ## Getting the session for app3 and svc3 and height1
+	APP=pokt1c0aal6vmfh094v7xuk3ynkfexep3txdpjk6xhz SVC=svc3 HEIGHT=$(SESSION_HEIGHT) make session_get
 
 .PHONY: localnet_up
 localnet_up: ## Starts localnet

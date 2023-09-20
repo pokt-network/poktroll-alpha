@@ -3,6 +3,7 @@ syntax = "proto3";
 package poktroll.servicer;
 
 import "cosmos/base/v1beta1/coin.proto";
+import "poktroll/service/service.proto";
 
 import "poktroll/servicer/proof.proto";
 
@@ -18,6 +19,7 @@ service Msg {
 message MsgStakeServicer {
   string                   address = 1;
   cosmos.base.v1beta1.Coin stakeAmount = 2;
+  repeated service.ServiceConfig services = 3;
 }
 
 message MsgStakeServicerResponse {}
