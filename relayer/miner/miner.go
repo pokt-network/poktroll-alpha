@@ -35,6 +35,14 @@ func NewMiner(hasher hash.Hash, store smt.KVStore, client types.ServicerClient) 
 }
 
 func (m *Miner) submitProof(hash []byte, root []byte) error {
+	defer func() {
+		if r := recover(); r != nil {
+			// TODO_THIS_COMMIT: Remove this defer. This is a temporary change
+			// for convenience during development until this method stops
+			// panicing.
+		}
+	}()
+
 	path, valueHash, sum, proof, err := m.smst.ProveClosest(hash)
 	if err != nil {
 		return err
