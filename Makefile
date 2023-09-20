@@ -219,11 +219,11 @@ session_get: ## Queries the poktroll node for session data
 
 .PHONY: session_get_app1_svc1
 session_get_app1_svc1: ## Getting the session for app1 and svc1 and height1
-	APP=pokt1aj5m44gpvdmqcr3q0fm24vtff8g8j78004wn43 SVC=svc1 HEIGHT=$(SESSION_HEIGHT) make session_get
+	APP=pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4 SVC=svc1 HEIGHT=$(SESSION_HEIGHT) make session_get
 
 .PHONY: session_get_app2_svc2
 session_get_app2_svc2: ## Getting the session for app2 and svc2 and height1
-	APP=pokt1c0aal6vmfh094v7xuk3ynkfexep3txdpjk6xhz SVC=svc2 HEIGHT=$(SESSION_HEIGHT) make session_get
+	APP=pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4 SVC=svc2 HEIGHT=$(SESSION_HEIGHT) make session_get
 
 .PHONY: session_get_app3_svc3
 session_get_app3_svc3: ## Getting the session for app3 and svc3 and height1
