@@ -314,8 +314,8 @@ ignite_regenerate: ## Regenerate the ignite boilerplate
 ignite_acc_list: ## List all the accounts in the ignite boilerplate
 	ignite account list  --keyring-dir $(POKTROLLD_HOME) --keyring-backend test
 
-.PHONY: regenesis
-regenesis:
+.PHONY: localnet_regenesis
+localnet_regenesis:
 	# NOTE: intentionally not using --home <dir> flag to avoid overwriting the test keyring
 	ignite chain init --skip-proto
 	rm -rf ./localnet/poktrolld/*
