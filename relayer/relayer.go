@@ -45,6 +45,13 @@ func (relayer *Relayer) WithBlocksPerSession(ctx context.Context, blocksPerSessi
 	return relayer
 }
 
+// IMPROVE: we tried this pattern because it seemed to be conventional across
+// some cosmos-sdk code. In our use case, it turned out to be problematic. In
+// the presence of shared and/or nested dependencies, call order starts to
+// matter.
+// CONSIDERATION: perhaps the `depinject` cosmos-sdk system or a builder
+// pattern would be more appropriate.
+// see: https://github.com/cosmos/cosmos-sdk/tree/main/depinject#depinject
 func (relayer *Relayer) WithKVStorePath(storePath string) *Relayer {
 	// IMPROVE: separate configuration from subcomponent construction
 	kvStore, err := smt.NewKVStore(storePath)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"poktroll/relayer/client"
 	"sync"
 
 	cosmosclient "github.com/cosmos/cosmos-sdk/client"
@@ -12,7 +13,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"poktroll/relayer"
-	"poktroll/relayer/client"
 )
 
 var signingKeyName string
@@ -51,7 +51,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 
 	// CONSIDERATION: there may be a more conventional, idomatic, and/or convenient
 	// way to track and cleanup goroutines. In the wait group solution, goroutines get a
-	// reference to it via the context value and are expected to call `wg.Add(n)` and 
+	// reference to it via the context value and are expected to call `wg.Add(n)` and
 	// `wg.Done()` appropriately.
 	wg := new(sync.WaitGroup)
 	ctx, cancelCtx := context.WithCancel(
@@ -62,14 +62,6 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		),
 	)
 
-	// IMPROVE: we tried this pattern because it seemed to be conventional across
-	// some cosmos-sdk code. In our use case, it turned out to be problematic. In
-	// the presence of shared and/or nested dependencies, call order starts to
-	// matter.
-	// CONSIDERATION: perhaps the `depinject` cosmos-sdk system or a builder
-	// pattern would be more appropriate.
-	// see: https://github.com/cosmos/cosmos-sdk/tree/main/depinject#depinject
-	func (relayer *Relayer) WithKVStorePath(storePath string) *Relayer {
 	c := client.NewServicerClient().
 		WithTxFactory(clientFactory).
 		WithSigningKeyUID(signingKeyName).
