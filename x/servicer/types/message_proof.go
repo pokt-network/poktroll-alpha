@@ -14,21 +14,16 @@ func NewMsgProof(
 	root,
 	path,
 	valueHash []byte,
-	sum int32,
+	sum uint64,
 	proofBz []byte,
 ) (*MsgProof, error) {
-	proof := new(Proof)
-	if err := proof.Unmarshal(proofBz); err != nil {
-		return nil, err
-	}
-
 	return &MsgProof{
 		Creator:   creator,
 		Root:      root,
 		Path:      path,
 		ValueHash: valueHash,
 		Sum:       sum,
-		Proof:     proof,
+		Proof:     proofBz,
 	}, nil
 }
 

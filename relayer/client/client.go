@@ -83,13 +83,18 @@ func (client *servicerClient) SubmitProof(
 		return errEmptyAddress
 	}
 
+	proofBz, err := smtProof.Marshal()
+	if err != nil {
+		return err
+	}
+
 	msg := &types.MsgProof{
 		Creator:   client.address,
 		Root:      smtRootHash,
 		Path:      closestKey,
 		ValueHash: closestValueHash,
-		Sum:       int32(closestSum),
-		Proof:     newProof(smtProof),
+		Sum:       closestSum,
+		Proof:     proofBz,
 	}
 	if err := client.broadcastMessageTx(ctx, msg); err != nil {
 		return err
@@ -236,13 +241,4 @@ func (client *servicerClient) WithTxFactory(txFactory txClient.Factory) *service
 func (client *servicerClient) WithClientCtx(clientCtx cosmosClient.Context) *servicerClient {
 	client.clientCtx = clientCtx
 	return client
-}
-
-func newProof(smtProof *smt.SparseMerkleProof) *types.Proof {
-	return &types.Proof{
-		SideNodes:             smtProof.SideNodes,
-		NonMembershipLeafData: smtProof.NonMembershipLeafData,
-		SiblingData:           smtProof.SiblingData,
-	}
-
 }

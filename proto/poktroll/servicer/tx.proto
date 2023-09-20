@@ -5,8 +5,6 @@ package poktroll.servicer;
 import "cosmos/base/v1beta1/coin.proto";
 import "poktroll/service/service.proto";
 
-import "poktroll/servicer/proof.proto";
-
 option go_package = "poktroll/x/servicer/types";
 
 // Msg defines the Msg service.
@@ -42,8 +40,8 @@ message MsgProof {
   bytes root = 2;
   bytes path = 3;
   bytes valueHash = 4;
-  int32  sum = 5;
-  Proof proof = 6;
+  uint64  sum = 5;
+  bytes proof = 6;
 }
 
 message MsgProofResponse {}
