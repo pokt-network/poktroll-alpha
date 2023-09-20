@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"strconv"
 
+	"poktroll/x/servicer/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
-	"poktroll/x/servicer/types"
 )
 
 var _ = strconv.Itoa(0)
@@ -36,7 +37,7 @@ func CmdProof() *cobra.Command {
 				return fmt.Errorf("unable to hex decode value hash argument: %w", err)
 			}
 
-			argSum, err := cast.ToInt32E(args[3])
+			argSum, err := cast.ToUint64E(args[3])
 			if err != nil {
 				return err
 			}
