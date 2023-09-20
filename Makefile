@@ -318,5 +318,7 @@ ignite_acc_list: ## List all the accounts in the ignite boilerplate
 localnet_regenesis:
 	# NOTE: intentionally not using --home <dir> flag to avoid overwriting the test keyring
 	ignite chain init --skip-proto
-	rm -rf ./localnet/poktrolld/*
-	cp -r ${HOME}/.poktroll/* ./localnet/poktrolld/
+	rm -rf ./localnet/poktrolld/keyring-test
+	cp -r ${HOME}/.poktroll/keyring-test ./localnet/poktrolld/
+	cp ${HOME}/.poktroll/config/*_key.json ./localnet/poktrolld/config/
+	cp ${HOME}/.poktroll/config/genesis.json ./localnet/
