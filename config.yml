@@ -57,3 +57,6 @@ validators:
     bonded: 900000000stake
     config:
       moniker: "validator1"
+# We can persist arbitrary genesis values via 1 to 1 mapping to genesis.json
+genesis:
+  # genesis_time: "2023-09-20T07:37:07.239355799Z"
