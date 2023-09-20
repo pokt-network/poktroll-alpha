@@ -19,3 +19,5 @@ localnet/poktrolld/*
 
 **/*.pb.go
 **/*.pb.gw.go
+
+ts-client/
