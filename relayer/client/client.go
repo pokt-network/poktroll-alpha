@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	cosmosClient "github.com/cosmos/cosmos-sdk/client"
 	txClient "github.com/cosmos/cosmos-sdk/client/tx"
@@ -19,14 +20,15 @@ var (
 )
 
 type servicerClient struct {
-	keyName         string
-	address         string
-	txFactory       txClient.Factory
-	clientCtx       cosmosClient.Context
-	wsURL           string
-	committedClaims map[string]chan struct{}
-	nextRequestId   uint64
-	blocksNotifee   utils.Observable[types.Block]
+	keyName          string
+	address          string
+	txFactory        txClient.Factory
+	clientCtx        cosmosClient.Context
+	wsURL            string
+	nextRequestId    uint64
+	blocksNotifee    utils.Observable[types.Block]
+	commitedClaimsMu sync.Mutex
+	committedClaims  map[string]chan struct{}
 }
 
 func NewServicerClient() *servicerClient {

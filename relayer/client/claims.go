@@ -15,6 +15,8 @@ func (client *servicerClient) SubmitClaim(
 		return errEmptyAddress
 	}
 
+	client.commitedClaimsMu.Lock()
+	defer client.commitedClaimsMu.Unlock()
 	if _, ok := client.committedClaims[string(smtRootHash)]; ok {
 		<-client.committedClaims[string(smtRootHash)]
 		return nil
@@ -42,6 +44,9 @@ func (client *servicerClient) subscribeToClaims(ctx context.Context) {
 		if err := json.Unmarshal(msg, &claim); err != nil {
 			return err
 		}
+
+		client.commitedClaimsMu.Lock()
+		defer client.commitedClaimsMu.Unlock()
 		if claimCommittedCh, ok := client.committedClaims[string(claim.SmtRootHash)]; ok {
 			claimCommittedCh <- struct{}{}
 		}
