@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"sync"
@@ -37,20 +38,22 @@ func (b Block) Hash() []byte {
 }
 
 type servicerClient struct {
-	keyName   string
-	address   string
-	txFactory txClient.Factory
-	clientCtx cosmosClient.Context
-	wsClient  *websocket.Conn
-	newBlocks utils.Observable[types.Block]
+	keyName         string
+	address         string
+	txFactory       txClient.Factory
+	clientCtx       cosmosClient.Context
+	wsURL           string
+	committedClaims map[string]chan struct{}
+	nextRequestId   uint64
+	blocksNotifee   utils.Observable[types.Block]
 }
 
 func NewServicerClient() *servicerClient {
 	return &servicerClient{}
 }
 
-func (client *servicerClient) NewBlocks() utils.Observable[types.Block] {
-	return client.newBlocks
+func (client *servicerClient) Blocks() utils.Observable[types.Block] {
+	return client.blocksNotifee
 }
 
 func (client *servicerClient) SubmitClaim(
@@ -61,6 +64,13 @@ func (client *servicerClient) SubmitClaim(
 		return errEmptyAddress
 	}
 
+	if _, ok := client.committedClaims[string(smtRootHash)]; ok {
+		<-client.committedClaims[string(smtRootHash)]
+		return nil
+	}
+
+	client.committedClaims[string(smtRootHash)] = make(chan struct{})
+
 	msg := &types.MsgClaim{
 		Creator:     client.address,
 		SmtRootHash: smtRootHash,
@@ -68,6 +78,8 @@ func (client *servicerClient) SubmitClaim(
 	if err := client.broadcastMessageTx(ctx, msg); err != nil {
 		return err
 	}
+
+	<-client.committedClaims[string(smtRootHash)]
 	return nil
 }
 
@@ -140,7 +152,7 @@ func (client *servicerClient) broadcastMessageTx(
 
 // listen blocks on reading messages from a websocket connection, it is intended
 // to be called from within a go routine.
-func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.Block) {
+func (client *servicerClient) listen(ctx context.Context, conn *websocket.Conn, msgHandler messageHandler) {
 	wg, haveWaitGroup := ctx.Value(relayer.WaitGroupContextKey).(*sync.WaitGroup)
 	if haveWaitGroup {
 		// Increment the relayer wait group to track this goroutine
@@ -151,7 +163,7 @@ func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.B
 		select {
 		case <-ctx.Done():
 			log.Println("closing websocket")
-			_ = client.wsClient.Close()
+			_ = conn.Close()
 			if haveWaitGroup {
 				// Decrement the wait group as this goroutine stops
 				wg.Done()
@@ -160,7 +172,7 @@ func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.B
 		default:
 		}
 
-		_, msg, err := client.wsClient.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err) {
 				// NB: stop this goroutine if the websocket connection is closed
@@ -171,21 +183,10 @@ func (client *servicerClient) listen(ctx context.Context, newBlocks chan types.B
 			continue
 		}
 
-		block, err := NewTendermintBlockEvent(msg)
-		if err != nil {
-			log.Printf("skipping due to new block event error: %s\n", err)
-			// TODO: handle error
+		if err := msgHandler(ctx, msg); err != nil {
+			log.Printf("skipping due to message handler error: %s\n", err)
 			continue
 		}
-
-		// If msg does not contain data then block is nil, we can ignore it
-		if block == nil {
-			log.Println("skipping because block is nil")
-			continue
-		}
-
-		log.Printf("new block; height: %d, hash: %x\n", block.Height(), block.Hash())
-		newBlocks <- block
 	}
 }
 
@@ -208,28 +209,9 @@ func (client *servicerClient) WithSigningKeyUID(uid string) *servicerClient {
 }
 
 func (client *servicerClient) WithWsURL(ctx context.Context, wsURL string) *servicerClient {
-	// IMPROVE: separate configuration from subcomponent construction & setup.
-	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-	if err != nil {
-		panic(fmt.Errorf("failed to connect to websocket: %w", err))
-	}
-
-	conn.WriteJSON(map[string]interface{}{
-		"jsonrpc": "2.0",
-		"method":  "subscribe",
-		"id":      0,
-		"params": map[string]interface{}{
-			"query": "tm.event='NewBlock'",
-		},
-	})
-
-	newBlocks, controller := utils.NewControlledObservable[types.Block](nil)
-
-	client.wsClient = conn
-	client.newBlocks = newBlocks
-
-	go client.listen(ctx, controller)
-
+	client.wsURL = wsURL
+	client.blocksNotifee = client.subscribeToBlocks(ctx)
+	client.subscribeToClaims(ctx)
 	return client
 }
 
@@ -241,4 +223,75 @@ func (client *servicerClient) WithTxFactory(txFactory txClient.Factory) *service
 func (client *servicerClient) WithClientCtx(clientCtx cosmosClient.Context) *servicerClient {
 	client.clientCtx = clientCtx
 	return client
+}
+
+type messageHandler func(ctx context.Context, msg []byte) error
+
+func (client *servicerClient) subscribeWithQuery(ctx context.Context, query string, msgHandler messageHandler) {
+	conn, _, err := websocket.DefaultDialer.Dial(client.wsURL, nil)
+	if err != nil {
+		panic(fmt.Errorf("failed to connect to websocket: %w", err))
+	}
+
+	requestId := client.getNextRequestId()
+	conn.WriteJSON(map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method":  "subscribe",
+		"id":      requestId,
+		"params": map[string]interface{}{
+			"query": query,
+		},
+	})
+
+	go client.listen(ctx, conn, msgHandler)
+}
+
+func (client *servicerClient) subscribeToBlocks(ctx context.Context) utils.Observable[types.Block] {
+	query := "tm.event='NewBlock'"
+
+	blocksNotifee, blocksNotifier := utils.NewControlledObservable[types.Block](nil)
+	msgHandler := handleBlocksFactory(blocksNotifier)
+	client.subscribeWithQuery(ctx, query, msgHandler)
+
+	return blocksNotifee
+}
+
+func (client *servicerClient) subscribeToClaims(ctx context.Context) {
+	query := fmt.Sprintf("message.module='servicer' AND message.action='claim' AND message.sender='%s'", client.address)
+
+	msgHandler := func(ctx context.Context, msg []byte) error {
+		var claim types.EventClaimed
+		if err := json.Unmarshal(msg, &claim); err != nil {
+			return err
+		}
+		if claimCommittedCh, ok := client.committedClaims[string(claim.Root)]; ok {
+			claimCommittedCh <- struct{}{}
+		}
+		return nil
+	}
+	client.subscribeWithQuery(ctx, query, msgHandler)
+}
+
+func (client *servicerClient) getNextRequestId() uint64 {
+	client.nextRequestId++
+	return client.nextRequestId
+}
+
+func handleBlocksFactory(blocksNotifier chan types.Block) messageHandler {
+	return func(ctx context.Context, msg []byte) error {
+		block, err := NewTendermintBlockEvent(msg)
+		if err != nil {
+			return fmt.Errorf("skipping due to new block event error: %w", err)
+		}
+
+		// If msg does not contain data then block is nil, we can ignore it
+		if block == nil {
+			return fmt.Errorf("skipping because block is nil")
+		}
+
+		log.Printf("new block; height: %d, hash: %x\n", block.Height(), block.Hash())
+		blocksNotifier <- block
+
+		return nil
+	}
 }
