@@ -34,25 +34,6 @@ func (blockEvent *tendermintBlockEvent) Hash() []byte {
 	return blockEvent.hash
 }
 
-func newTendermintBlockEvent(blockEventMessage []byte) (_ types.Block, err error) {
-	blockEvent := new(tendermintBlockEvent)
-	if err := json.Unmarshal(blockEventMessage, blockEvent); err != nil {
-		return nil, err
-	}
-
-	if blockEvent.Block == (tendermintBlock{}) {
-		return nil, nil
-	}
-
-	blockEvent.height = blockEvent.Block.Header.Height
-	blockEvent.hash, err = hex.DecodeString(blockEvent.Block.Header.LastCommitHash)
-	if err != nil {
-		return nil, err
-	}
-
-	return blockEvent, nil
-}
-
 func (client *servicerClient) Blocks() utils.Observable[types.Block] {
 	return client.blocksNotifee
 }
@@ -84,4 +65,23 @@ func handleBlocksFactory(blocksNotifier chan types.Block) messageHandler {
 
 		return nil
 	}
+}
+
+func newTendermintBlockEvent(blockEventMessage []byte) (_ types.Block, err error) {
+	blockEvent := new(tendermintBlockEvent)
+	if err := json.Unmarshal(blockEventMessage, blockEvent); err != nil {
+		return nil, err
+	}
+
+	if blockEvent.Block == (tendermintBlock{}) {
+		return nil, nil
+	}
+
+	blockEvent.height = blockEvent.Block.Header.Height
+	blockEvent.hash, err = hex.DecodeString(blockEvent.Block.Header.LastCommitHash)
+	if err != nil {
+		return nil, err
+	}
+
+	return blockEvent, nil
 }
