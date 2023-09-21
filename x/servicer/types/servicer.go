@@ -9,7 +9,7 @@ import (
 )
 
 type ServicerClient interface {
-	NewBlocks() utils.Observable[Block]
+	Blocks() utils.Observable[Block]
 	SubmitClaim(context.Context, []byte) error
 	SubmitProof(
 		ctx context.Context,

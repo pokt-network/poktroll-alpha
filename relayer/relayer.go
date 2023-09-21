@@ -39,7 +39,7 @@ func (relayer *Relayer) WithServicerClient(client types.ServicerClient) *Relayer
 }
 
 func (relayer *Relayer) WithBlocksPerSession(ctx context.Context, blocksPerSession uint32) *Relayer {
-	sessionTracker := sessiontracker.NewSessionTracker(ctx, blocksPerSession, relayer.servicerClient.NewBlocks())
+	sessionTracker := sessiontracker.NewSessionTracker(ctx, blocksPerSession, relayer.servicerClient.Blocks())
 	relayer.sessionTracker = sessionTracker
 
 	return relayer
