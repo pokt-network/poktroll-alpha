@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package poktroll.servicer;
+
+option go_package = "poktroll/x/servicer/types";
+
+message EventClaimed {
+  bytes root = 1;
+  string servicer_address = 2;
+}
