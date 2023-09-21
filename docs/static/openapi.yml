@@ -78104,20 +78104,6 @@ definitions:
   poktroll.servicer.Params:
     type: object
     description: Params defines the parameters for the module.
-  poktroll.servicer.Proof:
-    type: object
-    properties:
-      sideNodes:
-        type: array
-        items:
-          type: string
-          format: byte
-      nonMembershipLeafData:
-        type: string
-        format: byte
-      siblingData:
-        type: string
-        format: byte
   poktroll.servicer.QueryAllServicersResponse:
     type: object
     properties:
