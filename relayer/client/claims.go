@@ -11,18 +11,19 @@ func (client *servicerClient) SubmitClaim(
 	ctx context.Context,
 	smtRootHash []byte,
 ) error {
+	smtRootHashStr := string(smtRootHash)
 	if client.address == "" {
 		return errEmptyAddress
 	}
 
 	client.commitedClaimsMu.Lock()
 	defer client.commitedClaimsMu.Unlock()
-	if _, ok := client.committedClaims[string(smtRootHash)]; ok {
+	if _, ok := client.committedClaims[smtRootHashStr]; ok {
 		<-client.committedClaims[string(smtRootHash)]
 		return nil
 	}
 
-	client.committedClaims[string(smtRootHash)] = make(chan struct{})
+	client.committedClaims[smtRootHashStr] = make(chan struct{})
 
 	msg := &types.MsgClaim{
 		Creator:     client.address,
@@ -32,7 +33,7 @@ func (client *servicerClient) SubmitClaim(
 		return err
 	}
 
-	<-client.committedClaims[string(smtRootHash)]
+	<-client.committedClaims[smtRootHashStr]
 	return nil
 }
 
