@@ -49,7 +49,9 @@ type servicerClient struct {
 }
 
 func NewServicerClient() *servicerClient {
-	return &servicerClient{}
+	return &servicerClient{
+		committedClaims: make(map[string]chan struct{}),
+	}
 }
 
 func (client *servicerClient) Blocks() utils.Observable[types.Block] {
