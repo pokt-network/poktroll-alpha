@@ -50,15 +50,32 @@ func (client *servicerClient) broadcastMessageTx(
 	}
 
 	// sign tx
+	log.Printf("signing key name: %s", client.keyName)
+	_, err := client.txFactory.Keybase().Key(client.keyName)
+	if err != nil {
+		return fmt.Errorf("failed to get key with UID %q: %w", client.keyName, err)
+	}
+
 	if err := authClient.SignTx(
 		client.txFactory,
 		client.clientCtx,
 		client.keyName,
 		txBuilder,
 		false,
-		false,
+		true,
 	); err != nil {
 		return err
+	}
+
+	txBuilder.SetGasLimit(200000)
+	tx := txBuilder.GetTx()
+	sigs, err := tx.GetSignaturesV2()
+	for _, sig := range sigs {
+		sigJSON, err := json.MarshalIndent(sig, "", "  ")
+		if err != nil {
+			return err
+		}
+		log.Printf(string(sigJSON))
 	}
 
 	// serialize tx
