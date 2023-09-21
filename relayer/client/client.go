@@ -2,14 +2,15 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	authClient "github.com/cosmos/cosmos-sdk/x/auth/client"
+	"log"
 	"sync"
 
 	cosmosClient "github.com/cosmos/cosmos-sdk/client"
 	txClient "github.com/cosmos/cosmos-sdk/client/tx"
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
-	authClient "github.com/cosmos/cosmos-sdk/x/auth/client"
-
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
 )
@@ -66,9 +67,19 @@ func (client *servicerClient) broadcastMessageTx(
 		return err
 	}
 
-	if _, err := client.clientCtx.BroadcastTxSync(txBz); err != nil {
+	//var txBz []byte
+	txRes, err := client.clientCtx.BroadcastTxSync(txBz)
+	if err != nil {
 		return err
 	}
+
+	txResJSON, err := json.MarshalIndent(txRes, "", "  ")
+	if err != nil {
+		return err
+	}
+	log.Printf(string(txResJSON))
+
+	log.Printf("broadcast tx w/ hash: %q", txRes.TxHash)
 
 	return nil
 }

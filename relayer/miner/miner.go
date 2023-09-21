@@ -59,7 +59,8 @@ func (m *Miner) MineRelays(relays utils.Observable[*types.Relay], sessions utils
 func (m *Miner) handleSessionEnd() {
 	ch := m.sessions.Subscribe().Ch()
 	for session := range ch {
-		claim := m.smst.Root()
+		//claim := m.smst.Root()
+		claim := []byte("garbage claim; this is not a valid SMT root hash, obviously")
 		if err := m.client.SubmitClaim(context.TODO(), claim); err != nil {
 			log.Printf("failed to submit claim: %s", err)
 			continue
@@ -89,7 +90,7 @@ func (m *Miner) handleRelays() {
 		if err := m.smst.Update(hash, relayBz, 1); err != nil {
 			// TODO_THIS_COMMIT: log error
 		}
-		// INCOMPLETE: still need to check the difficulty against 
+		// INCOMPLETE: still need to check the difficulty against
 		// something & conditionally insert into the smt.
 	}
 }

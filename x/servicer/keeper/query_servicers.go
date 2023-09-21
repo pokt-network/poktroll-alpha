@@ -19,6 +19,7 @@ func (k Keeper) ServicersAll(goCtx context.Context, req *types.QueryAllServicers
 
 	var servicerss []types.Servicers
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	k.Logger(ctx).With("method", "ServicersAll").Error("SERVICERS ALL QUERIED")
 
 	store := ctx.KVStore(k.storeKey)
 	servicersStore := prefix.NewStore(store, types.KeyPrefix(types.ServicersKeyPrefix))

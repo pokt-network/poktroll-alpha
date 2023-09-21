@@ -3,11 +3,15 @@ package client
 import (
 	"context"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
-	"poktroll/relayer"
 	"sync"
+
+	"github.com/gorilla/websocket"
+
+	"poktroll/relayer"
 )
+
+type messageHandler func(ctx context.Context, msg []byte) error
 
 // listen blocks on reading messages from a websocket connection, it is intended
 // to be called from within a go routine.
@@ -34,12 +38,13 @@ func (client *servicerClient) listen(ctx context.Context, conn *websocket.Conn, 
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err) {
-				// NB: stop this goroutine if the websocket connection is closed
-				return
+				log.Printf("skipping due to websocket error: %s\n", err)
+				// TODO: handle other errors (?)
 			}
-			log.Printf("skipping due to websocket error: %s\n", err)
-			// TODO: handle other errors (?)
-			continue
+			if haveWaitGroup {
+				wg.Done()
+			}
+			return
 		}
 
 		if err := msgHandler(ctx, msg); err != nil {
@@ -49,8 +54,6 @@ func (client *servicerClient) listen(ctx context.Context, conn *websocket.Conn, 
 	}
 }
 
-type messageHandler func(ctx context.Context, msg []byte) error
-
 func (client *servicerClient) subscribeWithQuery(ctx context.Context, query string, msgHandler messageHandler) {
 	conn, _, err := websocket.DefaultDialer.Dial(client.wsURL, nil)
 	if err != nil {
@@ -58,14 +61,16 @@ func (client *servicerClient) subscribeWithQuery(ctx context.Context, query stri
 	}
 
 	requestId := client.getNextRequestId()
-	conn.WriteJSON(map[string]interface{}{
+	if err := conn.WriteJSON(map[string]interface{}{
 		"jsonrpc": "2.0",
 		"method":  "subscribe",
 		"id":      requestId,
 		"params": map[string]interface{}{
 			"query": query,
 		},
-	})
+	}); err != nil {
+		// TECHDEBT: handler error
+	}
 
 	go client.listen(ctx, conn, msgHandler)
 }
