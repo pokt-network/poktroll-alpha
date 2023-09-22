@@ -2,36 +2,35 @@ package client
 
 import (
 	"context"
-	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
+
+	cometTypes "github.com/cometbft/cometbft/types"
 
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
 )
 
-var _ types.Block = &tendermintBlockEvent{}
+var (
+	_              types.Block = &cometBlockWebsocketMsg{}
+	errNotBlockMsg             = "expected block websocket msg; got: %s"
+)
 
-type tendermintBlockEvent struct {
-	Block  tendermintBlock `json:"block"`
-	height uint64
-	hash   []byte
+// cometBlockWebsocketMsg is used to deserialize incoming websocket messages from
+// the block subscription. It implements the types.Block interface by loosely
+// wrapping cometbft's block type, into which messages are deserialized.
+type cometBlockWebsocketMsg struct {
+	Block cometTypes.Block `json:"block"`
 }
 
-type tendermintBlock struct {
-	Header struct {
-		Height         uint64 `json:"height"`
-		LastCommitHash string `json:"last_commit_hash"`
-	} `json:"header"`
+func (blockEvent *cometBlockWebsocketMsg) Height() uint64 {
+	return uint64(blockEvent.Block.Height)
 }
 
-func (blockEvent *tendermintBlockEvent) Height() uint64 {
-	return blockEvent.height
-}
-
-func (blockEvent *tendermintBlockEvent) Hash() []byte {
-	return blockEvent.hash
+func (blockEvent *cometBlockWebsocketMsg) Hash() []byte {
+	return blockEvent.Block.LastCommitHash.Bytes()
 }
 
 func (client *servicerClient) Blocks() utils.Observable[types.Block] {
@@ -50,38 +49,31 @@ func (client *servicerClient) subscribeToBlocks(ctx context.Context) utils.Obser
 
 func handleBlocksFactory(blocksNotifier chan types.Block) messageHandler {
 	return func(ctx context.Context, msg []byte) error {
-		block, err := newTendermintBlockEvent(msg)
-		if err != nil {
-			return fmt.Errorf("skipping due to new block event error: %w", err)
+		blockMsg, err := newCometBlockMsg(msg)
+		switch {
+		case errors.Is(err, fmt.Errorf(errNotBlockMsg, string(msg))):
+			return nil
+		case err != nil:
+			return fmt.Errorf("skipping due to new blockMsg event error: %w", err)
 		}
 
-		// If msg does not contain data then block is nil, we can ignore it
-		if block == nil {
-			return fmt.Errorf("skipping because block is nil")
-		}
-
-		log.Printf("new block; height: %d, hash: %x\n", block.Height(), block.Hash())
-		blocksNotifier <- block
+		log.Printf("new blockMsg; height: %d, hash: %x\n", blockMsg.Height(), blockMsg.Hash())
+		blocksNotifier <- blockMsg
 
 		return nil
 	}
 }
 
-func newTendermintBlockEvent(blockEventMessage []byte) (_ types.Block, err error) {
-	blockEvent := new(tendermintBlockEvent)
-	if err := json.Unmarshal(blockEventMessage, blockEvent); err != nil {
+func newCometBlockMsg(blockMsgBz []byte) (types.Block, error) {
+	blockMsg := new(cometBlockWebsocketMsg)
+	if err := json.Unmarshal(blockMsgBz, blockMsg); err != nil {
 		return nil, err
 	}
 
-	if blockEvent.Block == (tendermintBlock{}) {
-		return nil, nil
+	// If msg does not match the expected format then block will be its zero value.
+	if blockMsg.Block.Header.Height == 0 {
+		return nil, fmt.Errorf(errNotBlockMsg, string(blockMsgBz))
 	}
 
-	blockEvent.height = blockEvent.Block.Header.Height
-	blockEvent.hash, err = hex.DecodeString(blockEvent.Block.Header.LastCommitHash)
-	if err != nil {
-		return nil, err
-	}
-
-	return blockEvent, nil
+	return blockMsg, nil
 }
