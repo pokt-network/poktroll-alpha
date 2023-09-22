@@ -1,5 +1,5 @@
 {
-  "genesis_time": "2023-09-20T07:37:07.239355799Z",
+  "genesis_time": "2023-09-22T10:07:43.100343223Z",
   "chain_id": "poktroll",
   "initial_height": "1",
   "consensus_params": {
@@ -111,10 +111,6 @@
             {
               "denom": "stake",
               "amount": "220000000"
-            },
-            {
-              "denom": "token",
-              "amount": "22000"
             }
           ]
         },
@@ -124,10 +120,6 @@
             {
               "denom": "stake",
               "amount": "110000000"
-            },
-            {
-              "denom": "token",
-              "amount": "11000"
             }
           ]
         },
@@ -137,10 +129,6 @@
             {
               "denom": "stake",
               "amount": "200000000"
-            },
-            {
-              "denom": "token",
-              "amount": "20000"
             }
           ]
         },
@@ -150,10 +138,6 @@
             {
               "denom": "stake",
               "amount": "900000000"
-            },
-            {
-              "denom": "token",
-              "amount": "90000"
             }
           ]
         },
@@ -163,10 +147,6 @@
             {
               "denom": "stake",
               "amount": "330000000"
-            },
-            {
-              "denom": "token",
-              "amount": "33000"
             }
           ]
         },
@@ -176,10 +156,6 @@
             {
               "denom": "stake",
               "amount": "100000000"
-            },
-            {
-              "denom": "token",
-              "amount": "10000"
             }
           ]
         },
@@ -188,10 +164,6 @@
           "coins": [
             {
               "denom": "stake",
-              "amount": "999999999999999999"
-            },
-            {
-              "denom": "token",
               "amount": "999999999999999999"
             }
           ]
@@ -202,10 +174,6 @@
             {
               "denom": "stake",
               "amount": "300000000"
-            },
-            {
-              "denom": "token",
-              "amount": "30000"
             }
           ]
         }
