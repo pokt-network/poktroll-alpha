@@ -2,6 +2,7 @@ package miner
 
 import (
 	"context"
+	"encoding/hex"
 	"hash"
 	"log"
 
@@ -58,18 +59,21 @@ func (m *Miner) MineRelays(relays utils.Observable[*types.Relay], sessions utils
 
 func (m *Miner) handleSessionEnd() {
 	ch := m.sessions.Subscribe().Ch()
-	for session := range ch {
+	for _ = range ch {
 		//claim := m.smst.Root()
-		claim := []byte("garbage claim; this is not a valid SMT root hash, obviously")
+		claim, err := hex.DecodeString("DEADBEEF")
+		if err != nil {
+			panic("failed to decode claim hex")
+		}
 		if err := m.client.SubmitClaim(context.TODO(), claim); err != nil {
 			log.Printf("failed to submit claim: %s", err)
 			continue
 		}
 
 		// Wait for some time
-		if err := m.submitProof(session.BlockHash(), claim); err != nil {
-			log.Printf("failed to submit proof: %s", err)
-		}
+		//if err := m.submitProof(session.BlockHash(), claim); err != nil {
+		//	log.Printf("failed to submit proof: %s", err)
+		//}
 	}
 }
 
