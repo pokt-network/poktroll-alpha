@@ -29,7 +29,8 @@ func (client *servicerClient) SubmitClaim(
 		Creator:     client.address,
 		SmtRootHash: smtRootHash,
 	}
-	if err := client.broadcastMessageTx(ctx, msg); err != nil {
+	txHash, timeoutHeight, err := client.signAndBroadcastMessageTx(ctx, msg)
+	if err != nil {
 		return err
 	}
 
