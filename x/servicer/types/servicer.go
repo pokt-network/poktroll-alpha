@@ -9,8 +9,8 @@ import (
 )
 
 type ServicerClient interface {
-	Blocks() utils.Observable[Block]
-	SubmitClaim(context.Context, []byte) error
+	Blocks() (blocksNotifee utils.Observable[Block])
+	SubmitClaim(ctx context.Context, smtRootHash []byte) error
 	SubmitProof(
 		ctx context.Context,
 		smtRootHash []byte,
