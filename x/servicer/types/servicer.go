@@ -10,6 +10,7 @@ import (
 
 type ServicerClient interface {
 	Blocks() (blocksNotifee utils.Observable[Block])
+	LatestBlock() Block
 	SubmitClaim(ctx context.Context, smtRootHash []byte) error
 	SubmitProof(
 		ctx context.Context,

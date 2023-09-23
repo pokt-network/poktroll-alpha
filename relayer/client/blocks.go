@@ -36,6 +36,12 @@ func (client *servicerClient) Blocks() utils.Observable[types.Block] {
 	return client.blocksNotifee
 }
 
+func (client *servicerClient) LatestBlock() types.Block {
+	client.latestBlockMutex.RLock()
+	defer client.latestBlockMutex.RUnlock()
+	return client.latestBlock
+}
+
 func (client *servicerClient) subscribeToBlocks(ctx context.Context) utils.Observable[types.Block] {
 	query := "tm.event='NewBlock'"
 
