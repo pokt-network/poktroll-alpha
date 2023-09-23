@@ -58,8 +58,9 @@ func (m *Miner) MineRelays(relays utils.Observable[*types.Relay], sessions utils
 
 func (m *Miner) handleSessionEnd() {
 	ch := m.sessions.Subscribe().Ch()
-	for session := range ch {
-		claim := m.smst.Root()
+	for _ = range ch {
+		//claim := m.smst.Root()
+		claim := []byte("3q2+7w==")
 		log.Println("submitting cliam")
 		if err := m.client.SubmitClaim(context.TODO(), claim); err != nil {
 			log.Printf("failed to submit claim: %s", err)
@@ -68,9 +69,9 @@ func (m *Miner) handleSessionEnd() {
 		log.Println("cliam submitted")
 
 		// Wait for some time
-		if err := m.submitProof(session.BlockHash(), claim); err != nil {
-			log.Printf("failed to submit proof: %s", err)
-		}
+		// if err := m.submitProof(session.BlockHash(), claim); err != nil {
+		// 	log.Printf("failed to submit proof: %s", err)
+		// }
 	}
 }
 
