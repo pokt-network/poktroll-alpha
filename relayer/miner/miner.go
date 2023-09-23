@@ -28,9 +28,6 @@ func NewMiner(hasher hash.Hash, store smt.KVStore, client types.ServicerClient) 
 		client: client,
 	}
 
-	go m.handleSessionEnd()
-	go m.handleRelays()
-
 	return m
 }
 
@@ -54,6 +51,9 @@ func (m *Miner) submitProof(hash []byte, root []byte) error {
 func (m *Miner) MineRelays(relays utils.Observable[*types.Relay], sessions utils.Observable[types.Session]) {
 	m.relays = relays
 	m.sessions = sessions
+
+	go m.handleSessionEnd()
+	go m.handleRelays()
 }
 
 func (m *Miner) handleSessionEnd() {
