@@ -60,10 +60,12 @@ func (m *Miner) handleSessionEnd() {
 	ch := m.sessions.Subscribe().Ch()
 	for session := range ch {
 		claim := m.smst.Root()
+		log.Println("submitting cliam")
 		if err := m.client.SubmitClaim(context.TODO(), claim); err != nil {
 			log.Printf("failed to submit claim: %s", err)
 			continue
 		}
+		log.Println("cliam submitted")
 
 		// Wait for some time
 		if err := m.submitProof(session.BlockHash(), claim); err != nil {
