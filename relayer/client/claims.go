@@ -26,7 +26,7 @@ func (client *servicerClient) SubmitClaim(
 	client.committedClaims[smtRootHashStr] = make(chan struct{})
 
 	msg := &types.MsgClaim{
-		Creator:     client.address,
+		Servicer:    client.address,
 		SmtRootHash: smtRootHash,
 	}
 	if err := client.broadcastMessageTx(ctx, msg); err != nil {

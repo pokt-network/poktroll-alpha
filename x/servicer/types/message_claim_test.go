@@ -3,9 +3,10 @@ package types
 import (
 	"testing"
 
+	"poktroll/testutil/sample"
+
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
-	"poktroll/testutil/sample"
 )
 
 func TestMsgClaim_ValidateBasic(t *testing.T) {
@@ -17,13 +18,13 @@ func TestMsgClaim_ValidateBasic(t *testing.T) {
 		{
 			name: "invalid address",
 			msg: MsgClaim{
-				Creator: "invalid_address",
+				Servicer: "invalid_address",
 			},
 			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgClaim{
-				Creator: sample.AccAddress(),
+				Servicer: sample.AccAddress(),
 			},
 		},
 	}

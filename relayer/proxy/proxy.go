@@ -1,211 +1,138 @@
 package proxy
 
 import (
-	"bufio"
-	"bytes"
-	"io"
+	"context"
+	"errors"
 	"log"
-	"net"
 	"net/http"
 
-	"poktroll/utils"
-	"poktroll/x/servicer/types"
-
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+
+	"poktroll/utils"
+	"poktroll/x/service/types"
+	svcTypes "poktroll/x/servicer/types"
+	sessionTypes "poktroll/x/session/types"
 )
 
+type responseSigner func(*svcTypes.RelayResponse) error
+
+type RelayWithSession struct {
+	Relay   *svcTypes.Relay
+	Session *sessionTypes.Session
+}
+
 type Proxy struct {
-	localAddr        string
-	serviceAddr      string
-	keyring          keyring.Keyring
-	keyName          string
-	logger           *log.Logger
-	output           chan *types.Relay
-	outputObservable utils.Observable[*types.Relay]
+	services            []*types.ServiceConfig
+	keyring             keyring.Keyring
+	keyName             string
+	client              svcTypes.ServicerClient
+	servicerQueryClient svcTypes.QueryClient
+	sessionQueryClient  sessionTypes.QueryClient
+	relayNotifier       chan *RelayWithSession
+	relayNotifee        utils.Observable[*RelayWithSession]
 }
 
 // IMPROVE: be consistent with component configuration & setup.
 // (We got burned by the `WithXXX` pattern and just did this for now).
-func NewProxy(logger *log.Logger, keyring keyring.Keyring, keyName string) *Proxy {
-	proxy := &Proxy{
-		output:  make(chan *types.Relay),
-		logger:  logger,
-		keyring: keyring,
-		keyName: keyName,
+func NewProxy(
+	ctx context.Context,
+	keyring keyring.Keyring,
+	keyName string,
+	address string,
+	clientCtx client.Context,
+) *Proxy {
+	servicerQueryClient := svcTypes.NewQueryClient(clientCtx)
+	servicerInfo, err := servicerQueryClient.Servicers(ctx, &svcTypes.QueryGetServicersRequest{
+		Address: address,
+	})
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	proxy.outputObservable, _ = utils.NewControlledObservable[*types.Relay](proxy.output)
+	proxy := &Proxy{
+		services:            servicerInfo.Servicers.Services,
+		sessionQueryClient:  sessionTypes.NewQueryClient(clientCtx),
+		servicerQueryClient: servicerQueryClient,
+		keyring:             keyring,
+		keyName:             keyName,
+	}
 
-        // TECHDEBT: move these into config/flags/etc.
-        proxy.localAddr = "localhost:8545"
-	proxy.serviceAddr = "localhost:8546"
+	proxy.relayNotifee, proxy.relayNotifier = utils.NewControlledObservable[*RelayWithSession](nil)
 
 	go proxy.listen()
 
 	return proxy
 }
 
-func (proxy *Proxy) Relays() utils.Observable[*types.Relay] {
-	return proxy.outputObservable
+func (proxy *Proxy) Relays() utils.Observable[*RelayWithSession] {
+	return proxy.relayNotifee
 }
 
 func (proxy *Proxy) listen() {
-	if err := http.ListenAndServe(proxy.localAddr, proxy); err != nil {
-		proxy.logger.Fatal(err)
+	// create a proxy for each endpoint of each service
+	for _, service := range proxy.services {
+		for _, endpoint := range service.Endpoints {
+			switch endpoint.RpcType {
+			case types.RPCType_JSON_RPC:
+				go func(serviceId, url string) {
+					// TODO: support https
+					// httpProxy should support both JSON-RPC and REST endpoints
+					httpProxy := NewHttpProxy(
+						// serviceAddr should be sourced from config files/params mapping to the service endpoint
+						"localhost:8546",
+						proxy.sessionQueryClient,
+						proxy.client,
+						proxy.relayNotifier,
+						proxy.signResponse,
+						serviceId,
+					)
+
+					if err := http.ListenAndServe(url, httpProxy); err != nil {
+						log.Fatal(err)
+					}
+				}(service.Id.Id, endpoint.Url)
+			case types.RPCType_WEBSOCKET:
+				go func(serviceId, url string) {
+					// TODO: support wss
+					websocketProxy := NewWsProxy(
+						// serviceAddr should be sourced from config files/params mapping to the service endpoint
+						"localhost:8546",
+						proxy.sessionQueryClient,
+						proxy.client,
+						proxy.relayNotifier,
+						proxy.signResponse,
+						serviceId,
+					)
+
+					if err := http.ListenAndServe(url, websocketProxy); err != nil {
+						log.Fatal(err)
+					}
+				}(service.Id.Id, endpoint.Url)
+			default:
+				log.Fatalf("unsupported rpc type: %v", endpoint.RpcType)
+			}
+		}
 	}
 }
 
-// ServeHTTP implements the http.Handler interface; called by http.ListenAndServe().
-// It re-uses the incoming request, updating the host and URL to match the service,
-// the body to a new io.ReadCloser containing the relay request payload, and then
-// sending it to the service.
-func (proxy *Proxy) ServeHTTP(httpResponseWriter http.ResponseWriter, req *http.Request) {
-	relayRequest, err := newRelayRequest(req)
-	if err != nil {
-		if err := proxy.replyWithError(500, err, httpResponseWriter); err != nil {
-			// TECHDEBT: log error
-		}
-		return
-	}
-
-	relayResponse, err := proxy.executeRelay(req, relayRequest.Payload)
-	if err != nil {
-		if err := proxy.replyWithError(500, err, httpResponseWriter); err != nil {
-			// TECHDEBT: log error
-		}
-		return
-	}
-
-	if err := sendRelayResponse(relayResponse, httpResponseWriter); err != nil {
-		// TODO: log error
-		return
-	}
-
-	relay := &types.Relay{
-		Req: relayRequest,
-		Res: relayResponse,
-	}
-
-	proxy.output <- relay
-}
-
-func (proxy *Proxy) signResponse(relayResponse *types.RelayResponse) error {
+func (proxy *Proxy) signResponse(relayResponse *svcTypes.RelayResponse) error {
 	relayResBz, err := relayResponse.Marshal()
 	if err != nil {
 		return err
 	}
 
-	relayResponse.Signature, _, err = proxy.keyring.Sign(proxy.keyName, relayResBz)
+	relayResponse.ServicerSignature, _, err = proxy.keyring.Sign(proxy.keyName, relayResBz)
 	return nil
 }
 
-func (proxy *Proxy) replyWithError(statusCode int, err error, wr http.ResponseWriter) error {
-	wr.WriteHeader(statusCode)
-	if _, err := wr.Write([]byte(err.Error())); err != nil {
-		return err
-	}
-	return nil
-}
+func validateSessionRequest(session *sessionTypes.Session, relayRequest *svcTypes.RelayRequest) error {
+	// TODO: validate relayRequest signature
 
-func (proxy *Proxy) executeRelay(req *http.Request, requestPayload []byte) (*types.RelayResponse, error) {
-	// Change the request host to the service address
-	req.Host = proxy.serviceAddr
-	req.URL.Host = proxy.serviceAddr
-	req.Body = io.NopCloser(bytes.NewBuffer(requestPayload))
-
-	serviceResponse, err := proxyServiceRequest(req)
-	if err != nil {
-		return nil, err
+	// a similar SessionId means it's been generated from the same params
+	if session.SessionId != relayRequest.SessionId {
+		return errors.New("invalid session id")
 	}
 
-	relayResponse, err := newRelayResponse(serviceResponse)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := proxy.signResponse(relayResponse); err != nil {
-		return nil, err
-	}
-	return relayResponse, nil
-}
-
-func newRelayRequest(req *http.Request) (*types.RelayRequest, error) {
-	requestHeaders := make(map[string]string)
-	for k, v := range req.Header {
-		requestHeaders[k] = v[0]
-	}
-
-	relayRequest := &types.RelayRequest{
-		Method:  req.Method,
-		Url:     req.URL.String(),
-		Headers: requestHeaders,
-	}
-
-	if req.Body != nil {
-		// Read the request body
-		requestBody, err := io.ReadAll(req.Body)
-		if err != nil {
-			return nil, err
-		}
-		relayRequest.Payload = requestBody
-	}
-	return relayRequest, nil
-}
-
-func proxyServiceRequest(req *http.Request) (*http.Response, error) {
-	// Connect to the service
-	remoteConnection, err := net.Dial("tcp", req.Host)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = remoteConnection.Close()
-	}()
-
-	// Send the request to the service
-	err = req.Write(remoteConnection)
-	if err != nil {
-		return nil, err
-	}
-
-	// Read the response from the service
-	return http.ReadResponse(bufio.NewReader(remoteConnection), req)
-}
-
-func newRelayResponse(serviceResponse *http.Response) (_ *types.RelayResponse, err error) {
-	relayResponse := &types.RelayResponse{
-		Headers:    make(map[string]string),
-		StatusCode: int32(serviceResponse.StatusCode),
-	}
-
-	if serviceResponse.Body != nil {
-		// Read the response from the service
-		relayResponse.Payload, err = io.ReadAll(serviceResponse.Body)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	for key, value := range serviceResponse.Header {
-		// TECHDEBT: this drops all but the first value for headers with
-		// multiple values
-		relayResponse.Headers[key] = value[0]
-	}
-	return relayResponse, nil
-}
-
-func sendRelayResponse(relayResponse *types.RelayResponse, wr http.ResponseWriter) error {
-	// Set HTTP statuscode to match the service response's
-	wr.WriteHeader(int(relayResponse.StatusCode))
-
-	// Set relay response headers to match the service response's
-	for k, v := range relayResponse.Headers {
-		wr.Header().Add(k, v)
-	}
-
-	// Send the response to the client
-	if _, err := wr.Write(relayResponse.Payload); err != nil {
-		return err
-	}
 	return nil
 }

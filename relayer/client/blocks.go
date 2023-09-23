@@ -37,17 +37,21 @@ func (client *servicerClient) Blocks() utils.Observable[types.Block] {
 	return client.blocksNotifee
 }
 
+func (client *servicerClient) GetLatestBlock() types.Block {
+	return client.latestBlock
+}
+
 func (client *servicerClient) subscribeToBlocks(ctx context.Context) utils.Observable[types.Block] {
 	query := "tm.event='NewBlock'"
 
 	blocksNotifee, blocksNotifier := utils.NewControlledObservable[types.Block](nil)
-	msgHandler := handleBlocksFactory(blocksNotifier)
+	msgHandler := handleBlocksFactory(blocksNotifier, client.latestBlock)
 	client.subscribeWithQuery(ctx, query, msgHandler)
 
 	return blocksNotifee
 }
 
-func handleBlocksFactory(blocksNotifier chan types.Block) messageHandler {
+func handleBlocksFactory(blocksNotifier chan types.Block, latestBlock types.Block) messageHandler {
 	return func(ctx context.Context, msg []byte) error {
 		blockMsg, err := newCometBlockMsg(msg)
 		switch {
@@ -58,6 +62,7 @@ func handleBlocksFactory(blocksNotifier chan types.Block) messageHandler {
 		}
 
 		log.Printf("new blockMsg; height: %d, hash: %x\n", blockMsg.Height(), blockMsg.Hash())
+		latestBlock = blockMsg
 		blocksNotifier <- blockMsg
 
 		return nil

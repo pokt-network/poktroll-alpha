@@ -10,6 +10,7 @@ import (
 
 type ServicerClient interface {
 	Blocks() utils.Observable[Block]
+	GetLatestBlock() Block
 	SubmitClaim(context.Context, []byte) error
 	SubmitProof(
 		ctx context.Context,
