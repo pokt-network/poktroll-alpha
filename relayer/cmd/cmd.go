@@ -66,7 +66,9 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		WithTxFactory(clientFactory).
 		WithSigningKeyUID(signingKeyName).
 		WithClientCtx(clientCtx).
-		WithWsURL(ctx, wsURL)
+		WithWsURL(ctx, wsURL).
+		// TECHDEBT: this should be a config field.
+		WithTxTimeoutHeightOffset(5)
 
 	// The order of the WithXXX methods matters for now.
 	// TODO: Refactor this to a builder pattern.
