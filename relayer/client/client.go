@@ -91,26 +91,17 @@ func NewServicerClient() *servicerClient {
 func (client *servicerClient) signAndBroadcastMessageTx(
 	ctx context.Context,
 	msg cosmosTypes.Msg,
-) (txHash string, timeoutHeight uint64, err error) {
+) (txErrCh chan error, err error) {
 	// construct tx
 	txConfig := client.clientCtx.TxConfig
 	txBuilder := txConfig.NewTxBuilder()
 	if err = txBuilder.SetMsgs(msg); err != nil {
-		return "", 0, err
+		return nil, err
 	}
 
 	// calculate timeout height
-	timeoutHeight = client.LatestBlock().Height() +
+	timeoutHeight := client.LatestBlock().Height() +
 		uint64(client.txTimeoutHeightOffset)
-
-	client.txsMutex.Lock()
-	defer client.txsMutex.Unlock()
-
-	txsByHash, ok := client.txsByHashByTimeout[timeoutHeight]
-	if !ok {
-		txsByHash = make(map[string]chan error)
-		client.txsByHashByTimeout[timeoutHeight] = txsByHash
-	}
 
 	txBuilder.SetGasLimit(200000)
 	txBuilder.SetTimeoutHeight(timeoutHeight)
@@ -124,24 +115,24 @@ func (client *servicerClient) signAndBroadcastMessageTx(
 		false,
 		false,
 	); err != nil {
-		return "", 0, err
+		return nil, err
 	}
 
 	// ensure tx is valid
 	// NOTE: this makes the tx valid; i.e. it is *REQUIRED*
 	if err := txBuilder.GetTx().ValidateBasic(); err != nil {
-		return "", 0, err
+		return nil, err
 	}
 
 	// serialize tx
 	txBz, err := client.encodeTx(txBuilder)
 	if err != nil {
-		return "", 0, err
+		return nil, err
 	}
 
 	txResponse, err := client.clientCtx.BroadcastTxSync(txBz)
 	if err != nil {
-		return "", 0, err
+		return nil, err
 	}
 
 	txResponseJSON, err := json.MarshalIndent(txResponse, "", "  ")
@@ -149,22 +140,45 @@ func (client *servicerClient) signAndBroadcastMessageTx(
 		panic(err)
 	}
 
-	txHash = strings.ToLower(txResponse.TxHash)
-	newTxErrCh := make(chan error, 1)
-	txErrCh, ok := txsByHash[txHash]
+	txHash := strings.ToLower(txResponse.TxHash)
+	log.Printf("txResponse: %s\n", txResponseJSON)
+
+	return client.updateTxs(ctx, txHash, timeoutHeight)
+}
+
+func (client *servicerClient) updateTxs(
+	ctx context.Context,
+	txHash string,
+	timeoutHeight uint64,
+) (txErrCh chan error, err error) {
+	client.txsMutex.Lock()
+	defer client.txsMutex.Unlock()
+
+	// Initialize txsByHashByTimeout map if necessary.
+	txsByHash, ok := client.txsByHashByTimeout[timeoutHeight]
 	if !ok {
-		txErrCh = newTxErrCh
+		txsByHash = make(map[string]chan error)
+		client.txsByHashByTimeout[timeoutHeight] = txsByHash
+	}
+
+	// Initialize txsByHash map in txsByHashByTimeout map if necessary.
+	txErrCh, ok = txsByHash[txHash]
+	if !ok {
+		// NB: intentionally buffered to avoid blocking on send. Only intended
+		// to send/receive a single error.
+		txErrCh = make(chan error, 1)
 		txsByHash[txHash] = txErrCh
 	}
+	// Initialize txsByHash map if necessary.
 	if _, ok := client.txsByHash[txHash]; !ok {
+		// NB: both maps hold a reference to the same channel so that we can check
+		// if the channel has already been closed when timing out.
 		client.txsByHash[txHash] = txErrCh
 	}
 
 	// TODO_THIS_COMMIT: check txResponse for error in logs, parse & send on
 	// txErrCh if tx failed!!!
-	log.Printf("txResponse: %s\n", txResponseJSON)
-
-	return txHash, timeoutHeight, nil
+	return txErrCh, nil
 }
 
 func (client *servicerClient) encodeTx(txBuilder cosmosClient.TxBuilder) ([]byte, error) {

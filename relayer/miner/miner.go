@@ -85,21 +85,29 @@ func (m *Miner) handleSessionEnd() {
 func (m *Miner) handleRelays() {
 	ch := m.relays.Subscribe().Ch()
 	for relay := range ch {
-		relayBz, err := relay.Marshal()
-		if err != nil {
-			log.Printf("failed to marshal relay: %s\n", err)
-			continue
-		}
-
-		// Is it correct that we need to hash the key while smst.Update() could do it
-		// since smst has a reference to the hasher
-		m.hasher.Write(relayBz)
-		hash := m.hasher.Sum(nil)
-		m.hasher.Reset()
-		if err := m.smst.Update(hash, relayBz, 1); err != nil {
-			// TODO_THIS_COMMIT: log error
-		}
-		// INCOMPLETE: still need to check the difficulty against
-		// something & conditionally insert into the smt.
+		// NB: handle relays concurrently
+		go m.handleRelay(relay)
 	}
+}
+
+// handleRelay validates, executes, & hashes the relay. If the relay's difficulty
+// is above the mining difficulty, it's inserted into SMST.
+func (m *Miner) handleRelay(relay *types.Relay) {
+	relayBz, err := relay.Marshal()
+	if err != nil {
+		log.Printf("failed to marshal relay: %s\n", err)
+		// TODO_THIS_COMMIT: return error to requestor.
+		return
+	}
+
+	// Is it correct that we need to hash the key while smst.Update() could do it
+	// since smst has a reference to the hasher
+	m.hasher.Write(relayBz)
+	hash := m.hasher.Sum(nil)
+	m.hasher.Reset()
+	if err := m.smst.Update(hash, relayBz, 1); err != nil {
+		// TODO_THIS_COMMIT: log error
+	}
+	// INCOMPLETE: still need to check the difficulty against
+	// something & conditionally insert into the smt.
 }
