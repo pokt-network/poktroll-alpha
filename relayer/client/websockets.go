@@ -33,17 +33,23 @@ func (client *servicerClient) listen(ctx context.Context, conn *websocket.Conn, 
 
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err) {
-				// NB: stop this goroutine if the websocket connection is closed
-				return
+			if haveWaitGroup {
+				// Decrement the wait group as this goroutine stops
+				wg.Done()
 			}
-			log.Printf("skipping due to websocket error: %s\n", err)
-			// TODO: handle other errors (?)
-			continue
+
+			// Stop this goroutine if there's an error.
+			//
+			// See gorilla websocket `Conn#NextReader()` docs:
+			// | Applications must break out of the application's read loop when this method
+			// | returns a non-nil error value. Errors returned from this method are
+			// | permanent. Once this method returns a non-nil error, all subsequent calls to
+			// | this method return the same error.
+			return
 		}
 
 		if err := msgHandler(ctx, msg); err != nil {
-			log.Printf("skipping due to message handler error: %s\n", err)
+			log.Printf("failed to handle websocket msg: %s\n", err)
 			continue
 		}
 	}
@@ -51,6 +57,8 @@ func (client *servicerClient) listen(ctx context.Context, conn *websocket.Conn, 
 
 type messageHandler func(ctx context.Context, msg []byte) error
 
+// TODO_CONSIDERATION: the cosmos-sdk CLI code seems to use
+// subscribeWithQuery subscribes to a websocket connection with the given query,
 func (client *servicerClient) subscribeWithQuery(ctx context.Context, query string, msgHandler messageHandler) {
 	conn, _, err := websocket.DefaultDialer.Dial(client.wsURL, nil)
 	if err != nil {
