@@ -10,6 +10,9 @@ import (
 func (k msgServer) Claim(goCtx context.Context, msg *types.MsgClaim) (*types.MsgClaimResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
+	// INCOMPLETE: using an error for high contrast in log output; revert this.
+	ctx.Logger().With("method", "Claim").Error("CLAIM SUBMITTED")
+
 	// TODO: Handling the message
 	_ = ctx
 
