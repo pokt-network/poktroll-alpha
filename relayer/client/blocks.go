@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 
@@ -50,11 +49,13 @@ func (client *servicerClient) subscribeToBlocks(ctx context.Context) utils.Obser
 func handleBlocksFactory(blocksNotifier chan types.Block) messageHandler {
 	return func(ctx context.Context, msg []byte) error {
 		blockMsg, err := newCometBlockMsg(msg)
+		expectedErr := fmt.Errorf(errNotBlockMsg, string(msg))
 		switch {
-		case errors.Is(err, fmt.Errorf(errNotBlockMsg, string(msg))):
+		case err == nil:
+		case err.Error() == expectedErr.Error():
 			return nil
 		case err != nil:
-			return fmt.Errorf("skipping due to new blockMsg event error: %w", err)
+			return fmt.Errorf("failed to parse new block message: %w", err)
 		}
 
 		log.Printf("new blockMsg; height: %d, hash: %x\n", blockMsg.Height(), blockMsg.Hash())
