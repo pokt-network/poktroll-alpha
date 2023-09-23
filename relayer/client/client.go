@@ -19,29 +19,60 @@ import (
 )
 
 var (
-	_               types.ServicerClient = &servicerClient{}
-	errEmptyAddress                      = fmt.Errorf("client address is empty")
+	_ types.ServicerClient = &servicerClient{}
+	// errEmptyAddress is used when address hasn't been configured but is required.
+	errEmptyAddress = fmt.Errorf("client address is empty")
 )
 
 type servicerClient struct {
+	// nextRequestId is a *unique* ID intended to be monotonically incremented
+	// and used to uniquely identify distinct RPC requests.
 	nextRequestId uint64
-	address       string
-	txFactory     txClient.Factory
-	clientCtx     cosmosClient.Context
+	// address is the on-chain account address of this client (relayer / servicer).
+	address string
+	// txFactory is a cosmos-sdk tx factory which encapsulates everything
+	// necessary to sign transactions given a client context.
+	txFactory txClient.Factory
+	// clientCtx is a cosmos-sdk client context which encapsulates everything
+	// necessary to construct, encode, and broadcast transactions.
+	clientCtx cosmosClient.Context
 
 	blocksNotifee utils.Observable[types.Block]
-	txsNotifee    utils.Observable[*cosmosTypes.TxResponse]
+	// TODO_CONSIDERATION: using an observable for received tx messages & a filter
+	// for `#signAndBroadcastTx()` callers to react to the specific tx in question
+	// instead of using shared memory across goroutines (`txByHash`) would likely
+	// improve readability and maintainability. This would likely require a new
+	// "buffered controllable observable"; i.e. a controlled observable which uses
+	// buffered channels to avoid blocking channel sender.
+	//
+	//txsNotifee    utils.Observable[*cosmosTypes.TxResponse]
 
-	txsMutex           sync.Mutex
-	txsByHash          map[string]chan error
+	// txsMutex protectx txsByHash and txsByHashByTimeout maps
+	txsMutex sync.Mutex
+	// txsByHash maps tx hash to a channel which will receive an error or nil,
+	// and close, when the tx with the given hash is committed.
+	txsByHash map[string]chan error
+	// txsByHashByTimeout maps timeout (block) height to a map of txsByHash. It
+	// is used to ensure that tx error channels receive and close in the event
+	// that they have not already by the given timeout height.
 	txsByHashByTimeout map[uint64]map[string]chan error
 
+	// latestBlockMutex protext latestBlock.
 	latestBlockMutex sync.RWMutex
-	latestBlock      types.Block
+	// latestBlock is the latest block that has been committed.
+	latestBlock types.Block
 
 	// Configuration
-	keyName               string
-	wsURL                 string
+	// =============
+	// keyName is the name of the key as per the CLI keyring/keybase.
+	// See: `poktrolld keys list --help`.
+	keyName string
+	// wsURL is the URL of the websocket endpoint to connect to for RPC
+	// service over websocket transport (with /subscribe support).
+	wsURL string
+	// INCOMPLETE: this should be configurable & integrated w/ viper, flags, etc.
+	// txTimeoutHeightOffset is the number of blocks after the latest block
+	// that a tx should be considered invalid if it has not been committed.
 	txTimeoutHeightOffset uint32
 }
 

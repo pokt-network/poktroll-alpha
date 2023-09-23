@@ -48,6 +48,8 @@ func (m *Miner) submitProof(hash []byte, root []byte) error {
 	return m.client.SubmitProof(context.TODO(), root, path, valueHash, sum, proof)
 }
 
+// MineRelays assigns the relays and sessions observables & starts their
+// respective consumer goroutines.
 func (m *Miner) MineRelays(relays utils.Observable[*types.Relay], sessions utils.Observable[types.Session]) {
 	m.relays = relays
 	m.sessions = sessions
@@ -56,6 +58,9 @@ func (m *Miner) MineRelays(relays utils.Observable[*types.Relay], sessions utils
 	go m.handleRelays()
 }
 
+// handleSessionEnd submits a claim for the ended session & starts a goroutine
+// which will submit the corresponding proof when the respective proof window
+// opens.
 func (m *Miner) handleSessionEnd() {
 	ch := m.sessions.Subscribe().Ch()
 	for _ = range ch {
@@ -75,6 +80,8 @@ func (m *Miner) handleSessionEnd() {
 	}
 }
 
+// handleRelays blocks until a relay is received, then handles it in a new
+// goroutine.
 func (m *Miner) handleRelays() {
 	ch := m.relays.Subscribe().Ch()
 	for relay := range ch {

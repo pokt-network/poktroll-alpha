@@ -6,6 +6,7 @@ import (
 	"poktroll/x/servicer/types"
 )
 
+// SubmitClaim implements the respective method on the ServicerClient interface.
 func (client *servicerClient) SubmitClaim(
 	ctx context.Context,
 	smtRootHash []byte,
