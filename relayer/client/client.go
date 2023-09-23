@@ -96,6 +96,12 @@ func (client *servicerClient) signAndBroadcastMessageTx(
 		return "", 0, err
 	}
 
+	// ensure tx is valid
+	// NOTE: this makes the tx valid; i.e. it is *REQUIRED*
+	if err := txBuilder.GetTx().ValidateBasic(); err != nil {
+		return "", 0, err
+	}
+
 	// serialize tx
 	txBz, err := client.encodeTx(txBuilder)
 	if err != nil {
