@@ -55,10 +55,16 @@ func (client *servicerClient) listen(ctx context.Context, conn *websocket.Conn, 
 	}
 }
 
+// messageHandler is a function that handles a websocket chain-event subscription message.
 type messageHandler func(ctx context.Context, msg []byte) error
 
-// TODO_CONSIDERATION: the cosmos-sdk CLI code seems to use
-// subscribeWithQuery subscribes to a websocket connection with the given query,
+// TODO_CONSIDERATION: the cosmos-sdk CLI code seems to use a cometbft RPC client
+// which includes a `#Subscribe()` method for a simlar prupose. Perhaps we could
+// replace this custom websocket client with that.
+// (see: https://github.com/cometbft/cometbft/blob/main/rpc/client/http/http.go#L110)
+// (see: https://github.com/cosmos/cosmos-sdk/blob/main/client/rpc/tx.go#L114)
+// subscribeWithQuery subscribes to chain event messages matching the given query,
+// via a websocket connection.
 func (client *servicerClient) subscribeWithQuery(ctx context.Context, query string, msgHandler messageHandler) {
 	conn, _, err := websocket.DefaultDialer.Dial(client.wsURL, nil)
 	if err != nil {
@@ -78,6 +84,8 @@ func (client *servicerClient) subscribeWithQuery(ctx context.Context, query stri
 	go client.listen(ctx, conn, msgHandler)
 }
 
+// getNextRequestId increments and returns the JSON-RPC request ID which should
+// be used for the next request. These IDs are expected to be unique (per request).
 func (client *servicerClient) getNextRequestId() uint64 {
 	client.nextRequestId++
 	return client.nextRequestId

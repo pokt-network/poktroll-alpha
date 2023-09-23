@@ -22,6 +22,8 @@ type cometTxResponseWebsocketMsg struct {
 	Tx []byte `json:"tx"`
 }
 
+// subscribeToOwnTxs subscribes to txs which were signed/sent by this client's
+// address using a single websocket connection.
 func (client *servicerClient) subscribeToOwnTxs(
 	ctx context.Context,
 	blocksNotifee utils.Observable[types.Block],
@@ -97,7 +99,9 @@ func (client *servicerClient) timeoutTxs(
 	}
 }
 
-// func handleTxsFactory(txsNotifier chan *cosmosTypes.TxResponse) messageHandler {
+// handleTxsFactory returns a websocket message handler function which attempts
+// to deserialize a tx event message, find its corresponding txErrCh, send an
+// error if present, & close it.
 func (client *servicerClient) handleTxsFactory() messageHandler {
 	return func(ctx context.Context, msg []byte) error {
 		txMsg, err := client.newCometTxResponseMsg(msg)
@@ -145,6 +149,9 @@ func (client *servicerClient) handleTxsFactory() messageHandler {
 	}
 }
 
+// newCometTxResponseMsg attempts to deserialize the given bytes into a comet tx event byte slic.
+// if the resulting block has a height of zero, assume the message was not a
+// block message and return an errNotBlockMsg error.
 func (client *servicerClient) newCometTxResponseMsg(txMsgBz []byte) (*cometTxResponseWebsocketMsg, error) {
 	txResponseMsg := new(cometTxResponseWebsocketMsg)
 	if err := json.Unmarshal(txMsgBz, txResponseMsg); err != nil {

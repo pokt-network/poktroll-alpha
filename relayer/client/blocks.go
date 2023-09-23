@@ -30,16 +30,20 @@ func (blockEvent *cometBlockWebsocketMsg) Hash() []byte {
 	return blockEvent.Block.LastCommitHash.Bytes()
 }
 
+// Blocks implements the respective method on the ServicerClient interface.
 func (client *servicerClient) Blocks() utils.Observable[types.Block] {
 	return client.blocksNotifee
 }
 
+// LatestBlocks implements the respective method on the ServicerClient interface.
 func (client *servicerClient) LatestBlock() types.Block {
 	client.latestBlockMutex.RLock()
 	defer client.latestBlockMutex.RUnlock()
 	return client.latestBlock
 }
 
+// subscribeToBlocks subscribes to committed blocks using a single websocket
+// connection.
 func (client *servicerClient) subscribeToBlocks(ctx context.Context) utils.Observable[types.Block] {
 	query := "tm.event='NewBlock'"
 
@@ -50,6 +54,9 @@ func (client *servicerClient) subscribeToBlocks(ctx context.Context) utils.Obser
 	return blocksNotifee
 }
 
+// handleBlocksFactory returns a websocket message handler function which attempts
+// to deserialize a block event message & send it over the blocksNotifier channel
+// which will cause it to be emitted by the corresponding blocksNotifee observable.
 func handleBlocksFactory(blocksNotifier chan types.Block) messageHandler {
 	return func(ctx context.Context, msg []byte) error {
 		blockMsg, err := newCometBlockMsg(msg)
@@ -67,6 +74,9 @@ func handleBlocksFactory(blocksNotifier chan types.Block) messageHandler {
 	}
 }
 
+// newCometBlockMsg attempts to deserialize the given bytes into a comet block.
+// if the resulting block has a height of zero, assume the message was not a
+// block message and return an errNotBlockMsg error.
 func newCometBlockMsg(blockMsgBz []byte) (types.Block, error) {
 	blockMsg := new(cometBlockWebsocketMsg)
 	if err := json.Unmarshal(blockMsgBz, blockMsg); err != nil {
