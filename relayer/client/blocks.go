@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-
 	cometTypes "github.com/cometbft/cometbft/types"
 
 	"poktroll/utils"
@@ -64,9 +62,7 @@ func handleBlocksFactory(blocksNotifier chan types.Block) messageHandler {
 			return fmt.Errorf("failed to parse new block message: %w", err)
 		}
 
-		log.Printf("new blockMsg; height: %d, hash: %x\n", blockMsg.Height(), blockMsg.Hash())
 		blocksNotifier <- blockMsg
-
 		return nil
 	}
 }

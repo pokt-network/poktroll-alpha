@@ -91,7 +91,7 @@ func (m *Miner) handleRelays() {
 		if err := m.smst.Update(hash, relayBz, 1); err != nil {
 			// TODO_THIS_COMMIT: log error
 		}
-		// INCOMPLETE: still need to check the difficulty against 
+		// INCOMPLETE: still need to check the difficulty against
 		// something & conditionally insert into the smt.
 	}
 }
