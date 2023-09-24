@@ -13,13 +13,15 @@ import (
 	txClient "github.com/cosmos/cosmos-sdk/client/tx"
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
 	authClient "github.com/cosmos/cosmos-sdk/x/auth/client"
+	"github.com/spacemonkeygo/monkit/v3"
 
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
 )
 
 var (
-	_ types.ServicerClient = &servicerClient{}
+	_   types.ServicerClient = &servicerClient{}
+	mon                      = monkit.Package()
 	// errEmptyAddress is used when address hasn't been configured but is required.
 	errEmptyAddress = fmt.Errorf("client address is empty")
 )
@@ -92,6 +94,8 @@ func (client *servicerClient) signAndBroadcastMessageTx(
 	ctx context.Context,
 	msg cosmosTypes.Msg,
 ) (txErrCh chan error, err error) {
+	defer mon.Task()(&ctx)(&err)
+
 	// construct tx
 	txConfig := client.clientCtx.TxConfig
 	txBuilder := txConfig.NewTxBuilder()
@@ -125,7 +129,7 @@ func (client *servicerClient) signAndBroadcastMessageTx(
 	}
 
 	// serialize tx
-	txBz, err := client.encodeTx(txBuilder)
+	txBz, err := client.encodeTx(ctx, txBuilder)
 	if err != nil {
 		return nil, err
 	}
@@ -151,6 +155,8 @@ func (client *servicerClient) updateTxs(
 	txHash string,
 	timeoutHeight uint64,
 ) (txErrCh chan error, err error) {
+	defer mon.Task()(&ctx)(&err)
+
 	client.txsMutex.Lock()
 	defer client.txsMutex.Unlock()
 
@@ -181,7 +187,12 @@ func (client *servicerClient) updateTxs(
 	return txErrCh, nil
 }
 
-func (client *servicerClient) encodeTx(txBuilder cosmosClient.TxBuilder) ([]byte, error) {
+func (client *servicerClient) encodeTx(
+	ctx context.Context,
+	txBuilder cosmosClient.TxBuilder,
+) (txBz []byte, err error) {
+	defer mon.Task()(&ctx)(&err)
+
 	return client.clientCtx.TxConfig.TxEncoder()(txBuilder.GetTx())
 }
 

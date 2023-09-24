@@ -51,6 +51,8 @@ func (client *servicerClient) timeoutTxs(
 	ctx context.Context,
 	blocksNotifee utils.Observable[types.Block],
 ) {
+	defer mon.Task()(&ctx)(nil)
+
 	ch := blocksNotifee.Subscribe().Ch()
 	for block := range ch {
 		select {
@@ -103,7 +105,9 @@ func (client *servicerClient) timeoutTxs(
 // to deserialize a tx event message, find its corresponding txErrCh, send an
 // error if present, & close it.
 func (client *servicerClient) handleTxsFactory() messageHandler {
-	return func(ctx context.Context, msg []byte) error {
+	return func(ctx context.Context, msg []byte) (err error) {
+		defer mon.Task()(&ctx)(&err)
+
 		txMsg, err := client.newCometTxResponseMsg(msg)
 		expectedErr := fmt.Errorf(errNotTxMsg, string(msg))
 		switch {

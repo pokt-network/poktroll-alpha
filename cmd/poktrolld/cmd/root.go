@@ -2,15 +2,20 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"io"
+	"log"
+	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	dbm "github.com/cometbft/cometbft-db"
 	tmcfg "github.com/cometbft/cometbft/config"
 	tmcli "github.com/cometbft/cometbft/libs/cli"
-	"github.com/cometbft/cometbft/libs/log"
+	cometLog "github.com/cometbft/cometbft/libs/log"
 	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -33,6 +38,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/spacemonkeygo/monkit/v3"
+	"github.com/spacemonkeygo/monkit/v3/environment"
+	"github.com/spacemonkeygo/monkit/v3/present"
 	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -42,6 +50,18 @@ import (
 	"poktroll/app"
 	appparams "poktroll/app/params"
 	relayer "poktroll/relayer/cmd"
+)
+
+const (
+	metricsEnabledFlag   = "metrics"
+	metricsListenURLFlag = "metrics-url"
+	hangForMetricsFlag   = "metrics-hang"
+)
+
+var (
+	metricsEnabled   bool
+	metricsListenURL string
+	hangForMetrics   bool
 )
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
@@ -79,11 +99,45 @@ func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
 
 			customAppTemplate, customAppConfig := initAppConfig()
 			customTMConfig := initTendermintConfig()
-			return server.InterceptConfigsPreRunHandler(
+			if err := server.InterceptConfigsPreRunHandler(
 				cmd, customAppTemplate, customAppConfig, customTMConfig,
-			)
+			); err != nil {
+				return err
+			}
+
+			if metricsEnabled {
+				initMonkit(metricsListenURL)
+				if hangForMetrics {
+					go interceptInterruptAndKillSignals()
+				}
+			}
+			return nil
+		},
+		PersistentPostRun: func(cmd *cobra.Command, _ []string) {
+			if metricsEnabled && hangForMetrics {
+				select {}
+			}
 		},
 	}
+
+	rootCmd.PersistentFlags().BoolVar(
+		&metricsEnabled,
+		metricsEnabledFlag,
+		false,
+		"enable metrics, tracing, & local HTTP UI",
+	)
+	rootCmd.PersistentFlags().StringVar(
+		&metricsListenURL,
+		metricsListenURLFlag,
+		"localhost:9000",
+		"sets the listening URL for the local metrics server",
+	)
+	rootCmd.PersistentFlags().BoolVar(
+		&hangForMetrics,
+		hangForMetricsFlag,
+		true,
+		"intercept the interrupt signal to hang the process to allow for metrics inspection",
+	)
 
 	initRootCmd(rootCmd, encodingConfig)
 	overwriteFlagDefaults(rootCmd, map[string]string{
@@ -148,6 +202,33 @@ func initRootCmd(
 		txCommand(),
 		keys.Commands(app.DefaultNodeHome),
 	)
+}
+
+func initMonkit(listenURL string) {
+	environment.Register(monkit.Default)
+	go startMonkitServer(listenURL)
+}
+
+func startMonkitServer(listenURL string) {
+	log.Printf("starting monkit server on %s", listenURL)
+	if err := http.ListenAndServe(
+		listenURL,
+		present.HTTP(monkit.Default),
+	); err != nil {
+		log.Fatalf("failed to start monkit server: %s", err)
+	}
+}
+
+func interceptInterruptAndKillSignals() {
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+	// Block until we receive an interrupt or kill signal (OS-agnostic)
+	<-sigCh
+	log.Printf("received interrupt/kill signal, hanging process for metrics inspection\n")
+	fmt.Printf("send another interrupt signal (Ctrl+c) to exit\n")
+	fmt.Printf("(metrics server URL: %s)\n", metricsListenURL)
+	<-sigCh
+	os.Exit(0)
 }
 
 // queryCommand returns the sub-command to send queries to the app
@@ -229,7 +310,7 @@ type appCreator struct {
 
 // newApp creates a new Cosmos SDK app
 func (a appCreator) newApp(
-	logger log.Logger,
+	logger cometLog.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
 	appOpts servertypes.AppOptions,
@@ -304,7 +385,7 @@ func (a appCreator) newApp(
 
 // appExport creates a new simapp (optionally at a given height)
 func (a appCreator) appExport(
-	logger log.Logger,
+	logger cometLog.Logger,
 	db dbm.DB,
 	traceStore io.Writer,
 	height int64,

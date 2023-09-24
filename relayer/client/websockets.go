@@ -54,6 +54,9 @@ type messageHandler func(ctx context.Context, msg []byte) error
 // subscribeWithQuery subscribes to chain event messages matching the given query,
 // via a websocket connection.
 func (client *servicerClient) subscribeWithQuery(ctx context.Context, query string, msgHandler messageHandler) {
+	var err error
+	defer mon.Task()(&ctx)(&err)
+
 	conn, _, err := websocket.DefaultDialer.Dial(client.wsURL, nil)
 	if err != nil {
 		panic(fmt.Errorf("failed to connect to websocket: %w", err))
@@ -73,7 +76,7 @@ func (client *servicerClient) subscribeWithQuery(ctx context.Context, query stri
 	go func() {
 		<-ctx.Done()
 		log.Println("closing websocket")
-		_ = conn.Close()
+		err = conn.Close()
 	}()
 }
 
