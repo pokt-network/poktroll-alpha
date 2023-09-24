@@ -84,8 +84,8 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 	// The order of the WithXXX methods matters for now.
 	// TODO: Refactor this to a builder pattern.
 	relayer := relayer.NewRelayer().
-		WithKey(ctx, clientFactory.Keybase(), signingKeyName, address.String(), clientCtx).
 		WithServicerClient(c).
+		WithKey(ctx, clientFactory.Keybase(), signingKeyName, address.String(), clientCtx).
 		WithKVStorePath(ctx, smtStorePath)
 
 	if err := relayer.Start(); err != nil {
@@ -94,7 +94,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 	}
 
 	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt, os.Kill)
+	signal.Notify(sigCh, os.Interrupt)
 	// Block until we receive an interrupt or kill signal (OS-agnostic)
 	<-sigCh
 

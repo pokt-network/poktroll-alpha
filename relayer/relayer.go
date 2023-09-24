@@ -44,16 +44,16 @@ func (relayer *Relayer) WithServicerClient(client types.ServicerClient) *Relayer
 // pattern would be more appropriate.
 // see: https://github.com/cosmos/cosmos-sdk/tree/main/depinject#depinject
 func (relayer *Relayer) WithKVStorePath(ctx context.Context, storePath string) *Relayer {
+	relayer.sessionManager = sessionmanager.NewSessionManager(ctx, storePath, relayer.servicerClient)
 	relayer.miner = miner.NewMiner(sha256.New(), relayer.servicerClient, relayer.sessionManager)
 	relayer.miner.MineRelays(ctx, relayer.proxy.Relays())
-	relayer.sessionManager = sessionmanager.NewSessionManager(ctx, storePath, relayer.servicerClient)
 
 	return relayer
 }
 
 func (relayer *Relayer) WithKey(ctx context.Context, keyring keyring.Keyring, keyName string, address string, clientCtx client.Context) *Relayer {
 	// IMPROVE: separate configuration from subcomponent construction
-	relayer.proxy = proxy.NewProxy(ctx, keyring, keyName, address, clientCtx)
+	relayer.proxy = proxy.NewProxy(ctx, keyring, keyName, address, clientCtx, relayer.servicerClient)
 
 	return relayer
 }

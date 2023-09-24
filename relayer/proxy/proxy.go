@@ -41,6 +41,7 @@ func NewProxy(
 	keyName string,
 	address string,
 	clientCtx client.Context,
+	client svcTypes.ServicerClient,
 ) *Proxy {
 	servicerQueryClient := svcTypes.NewQueryClient(clientCtx)
 	servicerInfo, err := servicerQueryClient.Servicers(ctx, &svcTypes.QueryGetServicersRequest{
@@ -56,6 +57,7 @@ func NewProxy(
 		servicerQueryClient: servicerQueryClient,
 		keyring:             keyring,
 		keyName:             keyName,
+		client:              client,
 	}
 
 	proxy.relayNotifee, proxy.relayNotifier = utils.NewControlledObservable[*RelayWithSession](nil)
@@ -72,7 +74,7 @@ func (proxy *Proxy) Relays() utils.Observable[*RelayWithSession] {
 func (proxy *Proxy) listen() {
 	// create a proxy for each endpoint of each service
 	for _, service := range proxy.services {
-		for _, endpoint := range service.Endpoints {
+		for i, endpoint := range service.Endpoints {
 			switch endpoint.RpcType {
 			case types.RPCType_JSON_RPC:
 				go func(serviceId, url string) {
