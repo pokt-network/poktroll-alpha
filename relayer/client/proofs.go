@@ -2,8 +2,9 @@ package client
 
 import (
 	"context"
-	"github.com/pokt-network/smt"
 	"poktroll/x/servicer/types"
+
+	"github.com/pokt-network/smt"
 )
 
 func (client *servicerClient) SubmitProof(
@@ -24,8 +25,8 @@ func (client *servicerClient) SubmitProof(
 	}
 
 	msg := &types.MsgProof{
-		Creator:   client.address,
-		Root:      smtRootHash,
+		Servicer:  client.address,
+		SmtRoot:   smtRootHash,
 		Path:      closestKey,
 		ValueHash: closestValueHash,
 		Sum:       closestSum,

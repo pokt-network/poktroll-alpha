@@ -15,7 +15,7 @@ func (client *servicerClient) SubmitClaim(
 	}
 
 	msg := &types.MsgClaim{
-		Creator:     client.address,
+		Servicer:    client.address,
 		SmtRootHash: smtRootHash,
 	}
 	txErrCh, err := client.signAndBroadcastMessageTx(ctx, msg)

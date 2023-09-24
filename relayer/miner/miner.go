@@ -5,97 +5,104 @@ import (
 	"hash"
 	"log"
 
-	"github.com/pokt-network/smt"
-
+	"poktroll/relayer/proxy"
+	"poktroll/relayer/sessionmanager"
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
 )
 
 type Miner struct {
-	smst     smt.SMST
-	relays   utils.Observable[*types.Relay]
-	sessions utils.Observable[types.Session]
-	client   types.ServicerClient
-	hasher   hash.Hash
+	relays         utils.Observable[*proxy.RelayWithSession]
+	sessionManager *sessionmanager.SessionManager
+	client         types.ServicerClient
+	hasher         hash.Hash
 }
 
 // IMPROVE: be consistent with component configuration & setup.
 // (We got burned by the `WithXXX` pattern and just did this for now).
-func NewMiner(hasher hash.Hash, store smt.KVStore, client types.ServicerClient) *Miner {
+func NewMiner(
+	hasher hash.Hash,
+	client types.ServicerClient,
+	sessionManager *sessionmanager.SessionManager,
+) *Miner {
 	m := &Miner{
-		smst:   *smt.NewSparseMerkleSumTree(store, hasher),
-		hasher: hasher,
-		client: client,
+		hasher:         hasher,
+		client:         client,
+		sessionManager: sessionManager,
 	}
 
 	return m
 }
 
-func (m *Miner) submitProof(hash []byte, root []byte) error {
-	defer func() {
-		if r := recover(); r != nil {
-			// TODO_THIS_COMMIT: Remove this defer. This is a temporary change
-			// for convenience during development until this method stops
-			// panicing.
-		}
-	}()
-
-	path, valueHash, sum, proof, err := m.smst.ProveClosest(hash)
-	if err != nil {
-		return err
-	}
-
-	return m.client.SubmitProof(context.TODO(), root, path, valueHash, sum, proof)
-}
-
 // MineRelays assigns the relays and sessions observables & starts their
 // respective consumer goroutines.
-func (m *Miner) MineRelays(relays utils.Observable[*types.Relay], sessions utils.Observable[types.Session]) {
+func (m *Miner) MineRelays(ctx context.Context, relays utils.Observable[*proxy.RelayWithSession]) {
 	m.relays = relays
-	m.sessions = sessions
 
-	go m.handleSessionEnd()
-	go m.handleRelays()
+	// these methods block, waiting for new sessions and relays respectively.
+	go m.handleSessions(ctx)
+	go m.handleRelays(ctx)
 }
 
-// handleSessionEnd submits a claim for the ended session & starts a goroutine
-// which will submit the corresponding proof when the respective proof window
-// opens.
-func (m *Miner) handleSessionEnd() {
-	ch := m.sessions.Subscribe().Ch()
-	for session := range ch {
-		claim := m.smst.Root()
-		log.Println("submitting cliam")
-		if err := m.client.SubmitClaim(context.TODO(), claim); err != nil {
-			log.Printf("failed to submit claim: %s", err)
-			continue
-		}
-		log.Println("cliam submitted")
 
-		// Wait for some time
-		if err := m.submitProof(session.BlockHash(), claim); err != nil {
-			log.Printf("failed to submit proof: %s", err)
+func (m *Miner) handleSessions(ctx context.Context) {
+	ch := m.sessionManager.Sessions().Subscribe().Ch()
+	// this emits each time a batch of sessions is ready to be processed.
+	for closedSessions := range ch {
+		// process sessions in parallel.
+		for _, session := range closedSessions {
+			go m.handleSingleSession(ctx, session)
 		}
+	}
+}
+
+func (m *Miner) handleSingleSession(ctx context.Context, session sessionmanager.SessionWithTree) {
+	// this session should no longer be updated
+	claimRoot, err := session.CloseTree()
+	if err != nil {
+		log.Printf("failed to close tree: %s", err)
+		return
+	}
+
+	// SubmitClaim ensures on-chain claim inclusion
+	if err := m.client.SubmitClaim(ctx, claimRoot); err != nil {
+		log.Printf("failed to submit claim: %s", err)
+		return
+	}
+
+	// TODO: implement wait logic here
+
+	// generate and submit proof
+	// past this point the proof is included on-chain and the session can be pruned.
+	if err := m.submitProof(ctx, session, claimRoot); err != nil {
+		log.Printf("failed to submit proof: %s", err)
+		return
+	}
+
+	// prune tree now that proof is submitted
+	if err := session.PruneTree(); err != nil {
+		log.Printf("failed to prune tree: %s", err)
+		return
 	}
 }
 
 // handleRelays blocks until a relay is received, then handles it in a new
 // goroutine.
-func (m *Miner) handleRelays() {
+func (m *Miner) handleRelays(ctx context.Context) {
 	ch := m.relays.Subscribe().Ch()
+	// process each relay in parallel
 	for relay := range ch {
-		// NB: handle relays concurrently
-		go m.handleRelay(relay)
+		go m.handleSingleRelay(ctx, relay)
 	}
 }
 
-// handleRelay validates, executes, & hashes the relay. If the relay's difficulty
-// is above the mining difficulty, it's inserted into SMST.
-func (m *Miner) handleRelay(relay *types.Relay) {
-	relayBz, err := relay.Marshal()
+func (m *Miner) handleSingleRelay(
+	ctx context.Context,
+	relayWithSession *proxy.RelayWithSession,
+) {
+	relayBz, err := relayWithSession.Relay.Marshal()
 	if err != nil {
 		log.Printf("failed to marshal relay: %s\n", err)
-		// TODO_THIS_COMMIT: return error to requestor.
 		return
 	}
 
@@ -104,9 +111,40 @@ func (m *Miner) handleRelay(relay *types.Relay) {
 	m.hasher.Write(relayBz)
 	hash := m.hasher.Sum(nil)
 	m.hasher.Reset()
-	if err := m.smst.Update(hash, relayBz, 1); err != nil {
-		// TODO_THIS_COMMIT: log error
+
+	// ensure the session tree exists for this relay
+	smst := m.sessionManager.EnsureSessionTree(relayWithSession.Session)
+
+	if err := smst.Update(hash, relayBz, 1); err != nil {
+		log.Printf("failed to update smt: %s\n", err)
+		return
 	}
 	// INCOMPLETE: still need to check the difficulty against
 	// something & conditionally insert into the smt.
+}
+
+func (m *Miner) submitProof(ctx context.Context, session sessionmanager.SessionWithTree, claimRoot []byte) error {
+	defer func() {
+		if r := recover(); r != nil {
+			// TODO_THIS_COMMIT: Remove this defer. This is a temporary change
+			// for convenience during development until this method stops
+			// panicing.
+		}
+	}()
+
+	// at this point the miner already waited for a number of blocks
+	// use the latest block hash as the key to prove against.
+	currentBlockHash := m.client.LatestBlock().Hash()
+	path, valueHash, sum, proof, err := session.SessionTree().ProveClosest(currentBlockHash)
+	if err != nil {
+		return err
+	}
+
+	// SubmitProof ensures on-chain proof inclusion so we can safely prune the tree.
+	err = m.client.SubmitProof(ctx, claimRoot, path, valueHash, sum, proof)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

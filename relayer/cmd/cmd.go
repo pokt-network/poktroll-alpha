@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"poktroll/relayer/client"
@@ -62,9 +63,19 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		),
 	)
 
+	// Factor out the key retrieval and address extraction.
+	key, err := clientFactory.Keybase().Key(signingKeyName)
+	if err != nil {
+		panic(fmt.Errorf("failed to get key with UID %q: %w", signingKeyName, err))
+	}
+	address, err := key.GetAddress()
+	if err != nil {
+		panic(fmt.Errorf("failed to get address for key with UID %q: %w", signingKeyName, err))
+	}
+
 	c := client.NewServicerClient().
 		WithTxFactory(clientFactory).
-		WithSigningKeyUID(signingKeyName).
+		WithSigningKey(signingKeyName, address.String()).
 		WithClientCtx(clientCtx).
 		WithWsURL(ctx, wsURL).
 		// TECHDEBT: this should be a config field.
@@ -73,10 +84,9 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 	// The order of the WithXXX methods matters for now.
 	// TODO: Refactor this to a builder pattern.
 	relayer := relayer.NewRelayer().
-		WithKey(clientFactory.Keybase(), signingKeyName).
+		WithKey(ctx, clientFactory.Keybase(), signingKeyName, address.String(), clientCtx).
 		WithServicerClient(c).
-		WithBlocksPerSession(ctx, blocksPerSession).
-		WithKVStorePath(smtStorePath)
+		WithKVStorePath(ctx, smtStorePath)
 
 	if err := relayer.Start(); err != nil {
 		cancelCtx()

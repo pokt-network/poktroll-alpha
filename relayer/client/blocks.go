@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	cometTypes "github.com/cometbft/cometbft/types"
 
 	"poktroll/utils"

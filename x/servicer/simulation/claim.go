@@ -3,11 +3,12 @@ package simulation
 import (
 	"math/rand"
 
+	"poktroll/x/servicer/keeper"
+	"poktroll/x/servicer/types"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"poktroll/x/servicer/keeper"
-	"poktroll/x/servicer/types"
 )
 
 func SimulateMsgClaim(
@@ -19,7 +20,7 @@ func SimulateMsgClaim(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgClaim{
-			Creator: simAccount.Address.String(),
+			Servicer: simAccount.Address.String(),
 		}
 
 		// TODO: Handling the Claim simulation

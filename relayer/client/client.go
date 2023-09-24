@@ -185,20 +185,10 @@ func (client *servicerClient) encodeTx(txBuilder cosmosClient.TxBuilder) ([]byte
 	return client.clientCtx.TxConfig.TxEncoder()(txBuilder.GetTx())
 }
 
-func (client *servicerClient) WithSigningKeyUID(uid string) *servicerClient {
-	key, err := client.txFactory.Keybase().Key(uid)
-
-	if err != nil {
-		panic(fmt.Errorf("failed to get key with UID %q: %w", uid, err))
-	}
-
-	address, err := key.GetAddress()
-	if err != nil {
-		panic(fmt.Errorf("failed to get address for key with UID %q: %w", uid, err))
-	}
-
-	client.keyName = uid
-	client.address = address.String()
+// TODO_IMPROVE: Implement proper options for `servicerClient`
+func (client *servicerClient) WithSigningKey(keyName string, address string) *servicerClient {
+	client.keyName = keyName
+	client.address = address
 
 	return client
 }
