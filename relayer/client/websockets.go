@@ -19,18 +19,6 @@ func (client *servicerClient) listen(ctx context.Context, conn *websocket.Conn, 
 	}
 
 	for {
-		select {
-		case <-ctx.Done():
-			log.Println("closing websocket")
-			_ = conn.Close()
-			if haveWaitGroup {
-				// Decrement the wait group as this goroutine stops
-				wg.Done()
-			}
-			return
-		default:
-		}
-
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			if haveWaitGroup {
@@ -82,6 +70,11 @@ func (client *servicerClient) subscribeWithQuery(ctx context.Context, query stri
 	})
 
 	go client.listen(ctx, conn, msgHandler)
+	go func() {
+		<-ctx.Done()
+		log.Println("closing websocket")
+		_ = conn.Close()
+	}()
 }
 
 // getNextRequestId increments and returns the JSON-RPC request ID which should
