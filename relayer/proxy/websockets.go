@@ -58,7 +58,7 @@ func (wsProxy *wsProxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  relayRequest.ApplicationAddress,
 		ServiceId:   wsProxy.serviceId,
-		BlockHeight: wsProxy.client.GetLatestBlock().Height(),
+		BlockHeight: wsProxy.client.LatestBlock().Height(),
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?
@@ -143,7 +143,7 @@ func (wsProxy *wsProxy) handleWsRequestMessage(
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  relayRequest.ApplicationAddress,
 		ServiceId:   wsProxy.serviceId,
-		BlockHeight: wsProxy.client.GetLatestBlock().Height(),
+		BlockHeight: wsProxy.client.LatestBlock().Height(),
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?
@@ -193,7 +193,7 @@ func (wsProxy *wsProxy) handleWsResponseMessage(
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  appAddress,
 		ServiceId:   wsProxy.serviceId,
-		BlockHeight: wsProxy.client.GetLatestBlock().Height(),
+		BlockHeight: wsProxy.client.LatestBlock().Height(),
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?

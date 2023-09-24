@@ -55,7 +55,7 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  relayRequest.ApplicationAddress,
 		ServiceId:   httpProxy.serviceId,
-		BlockHeight: httpProxy.client.GetLatestBlock().Height(),
+		BlockHeight: httpProxy.client.LatestBlock().Height(),
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?
