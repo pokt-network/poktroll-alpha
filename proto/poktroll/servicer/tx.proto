@@ -29,19 +29,21 @@ message MsgUnstakeServicer {
 message MsgUnstakeServicerResponse {}
 
 message MsgClaim {
-  string creator = 1;
-  bytes  smtRootHash = 2;
+  string servicer_address = 1;
+  bytes  smst_root_hash = 2;
+  string session_id = 3;
 }
 
 message MsgClaimResponse {}
 
 message MsgProof {
-  string creator = 1;
-  bytes root = 2;
+  string servicer_address = 1;
+  bytes smst_root_hash = 2;
   bytes path = 3;
-  bytes valueHash = 4;
+  bytes value_hash = 4;
   uint64  sum = 5;
   bytes proof = 6;
+  string session_id = 7;
 }
 
 message MsgProofResponse {}

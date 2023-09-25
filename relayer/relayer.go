@@ -4,14 +4,13 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"log"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	"github.com/pokt-network/smt"
 
 	"poktroll/relayer/miner"
 	"poktroll/relayer/proxy"
-	sessiontracker "poktroll/relayer/session_tracker"
+	"poktroll/relayer/sessionmanager"
 	"poktroll/x/servicer/types"
 )
 
@@ -20,7 +19,7 @@ const WaitGroupContextKey = "relayer_cmd_wait_group"
 type Relayer struct {
 	proxy          *proxy.Proxy
 	miner          *miner.Miner
-	sessionTracker *sessiontracker.SessionTracker
+	sessionManager *sessionmanager.SessionManager
 	servicerClient types.ServicerClient
 }
 
@@ -38,13 +37,6 @@ func (relayer *Relayer) WithServicerClient(client types.ServicerClient) *Relayer
 	return relayer
 }
 
-func (relayer *Relayer) WithBlocksPerSession(ctx context.Context, blocksPerSession uint32) *Relayer {
-	sessionTracker := sessiontracker.NewSessionTracker(ctx, blocksPerSession, relayer.servicerClient.Blocks())
-	relayer.sessionTracker = sessionTracker
-
-	return relayer
-}
-
 // IMPROVE: we tried this pattern because it seemed to be conventional across
 // some cosmos-sdk code. In our use case, it turned out to be problematic. In
 // the presence of shared and/or nested dependencies, call order starts to
@@ -52,23 +44,31 @@ func (relayer *Relayer) WithBlocksPerSession(ctx context.Context, blocksPerSessi
 // CONSIDERATION: perhaps the `depinject` cosmos-sdk system or a builder
 // pattern would be more appropriate.
 // see: https://github.com/cosmos/cosmos-sdk/tree/main/depinject#depinject
-func (relayer *Relayer) WithKVStorePath(storePath string) *Relayer {
-	// IMPROVE: separate configuration from subcomponent construction
-	kvStore, err := smt.NewKVStore(storePath)
-
-	if err != nil {
-		panic(fmt.Errorf("failed to create KVStore %q: %w", storePath, err))
-	}
-
-	miner := miner.NewMiner(sha256.New(), kvStore, relayer.servicerClient)
-	miner.MineRelays(relayer.proxy.Relays(), relayer.sessionTracker.ClosedSessions())
+func (relayer *Relayer) WithKVStorePath(ctx context.Context, storePath string) *Relayer {
+	relayer.sessionManager = sessionmanager.NewSessionManager(ctx, storePath, relayer.servicerClient)
+	relayer.miner = miner.NewMiner(sha256.New(), relayer.servicerClient, relayer.sessionManager)
+	relayer.miner.MineRelays(ctx, relayer.proxy.Relays())
 
 	return relayer
 }
 
-func (relayer *Relayer) WithKey(keyring keyring.Keyring, keyName string) *Relayer {
+func (relayer *Relayer) WithKey(
+	ctx context.Context,
+	keyring keyring.Keyring,
+	keyName string,
+	address string,
+	clientCtx client.Context,
+	client types.ServicerClient,
+	serviceEndpoints map[string][]string,
+) *Relayer {
 	// IMPROVE: separate configuration from subcomponent construction
-	relayer.proxy = proxy.NewProxy(log.Default(), keyring, keyName)
+	var err error
+	relayer.proxy, err = proxy.NewProxy(ctx, keyring, keyName, address, clientCtx, client, serviceEndpoints)
+
+	// yet another reason to avoid this pattern: we have to check for errors
+	if err != nil {
+		panic(fmt.Errorf("failed constructing Proxy: %v", err))
+	}
 
 	return relayer
 }

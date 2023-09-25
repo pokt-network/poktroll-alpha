@@ -9,10 +9,10 @@ const TypeMsgClaim = "claim"
 
 var _ sdk.Msg = &MsgClaim{}
 
-func NewMsgClaim(creator string, smtRootHash []byte) *MsgClaim {
+func NewMsgClaim(servicer string, smtRootHash []byte) *MsgClaim {
 	return &MsgClaim{
-		Creator:     creator,
-		SmtRootHash: smtRootHash,
+		ServicerAddress: servicer,
+		SmstRootHash:    smtRootHash,
 	}
 }
 
@@ -25,7 +25,7 @@ func (msg *MsgClaim) Type() string {
 }
 
 func (msg *MsgClaim) GetSigners() []sdk.AccAddress {
-	creator, err := sdk.AccAddressFromBech32(msg.Creator)
+	creator, err := sdk.AccAddressFromBech32(msg.ServicerAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +38,7 @@ func (msg *MsgClaim) GetSignBytes() []byte {
 }
 
 func (msg *MsgClaim) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Creator)
+	_, err := sdk.AccAddressFromBech32(msg.ServicerAddress)
 	if err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}

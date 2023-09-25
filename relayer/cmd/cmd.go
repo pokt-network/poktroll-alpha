@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"poktroll/relayer/client"
 	"sync"
 
@@ -34,7 +36,7 @@ func RelayerCmd() *cobra.Command {
 	cmd.Flags().StringVar(&signingKeyName, "signing-key", "", "Name of the key to sign transactions")
 	cmd.Flags().StringVar(&wsURL, "ws-url", "ws://localhost:36657/websocket", "Websocket URL to poktrolld node; formatted as ws://<host>:<port>[/path]")
 	cmd.Flags().Uint32VarP(&blocksPerSession, "blocks-per-session", "b", 2, "Websocket URL to poktrolld node")
-	cmd.Flags().StringVar(&smtStorePath, "smt-store", "", "Path to the SMT KV store")
+	cmd.Flags().StringVar(&smtStorePath, "smt-store", "smt", "Path to the SMT KV store")
 
 	cmd.Flags().String(flags.FlagKeyringBackend, "", "Select keyring's backend (os|file|kwallet|pass|test)")
 	cmd.Flags().String(flags.FlagNode, "tcp://localhost:36657", "tcp://<host>:<port> to tendermint rpc interface for this chain")
@@ -62,19 +64,37 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		),
 	)
 
-	c := client.NewServicerClient().
+	// Factor out the key retrieval and address extraction.
+	key, err := clientFactory.Keybase().Key(signingKeyName)
+	if err != nil {
+		panic(fmt.Errorf("failed to get key with UID %q: %w", signingKeyName, err))
+	}
+	address, err := key.GetAddress()
+	if err != nil {
+		panic(fmt.Errorf("failed to get address for key with UID %q: %w", signingKeyName, err))
+	}
+
+	servicerClient := client.NewServicerClient().
 		WithTxFactory(clientFactory).
-		WithSigningKeyUID(signingKeyName).
+		WithSigningKey(signingKeyName, address.String()).
 		WithClientCtx(clientCtx).
-		WithWsURL(ctx, wsURL)
+		WithWsURL(ctx, wsURL).
+		// TECHDEBT: this should be a config field.
+		WithTxTimeoutHeightOffset(5)
 
 	// The order of the WithXXX methods matters for now.
 	// TODO: Refactor this to a builder pattern.
+
+	// INCOMPLETE: this should be populated from some relayer config.
+	serviceEndpoints := map[string][]string{
+		"svc1": {"ws://localhost:8548/websocket"},
+		"svc2": {"http://localhost:8547"},
+	}
+
 	relayer := relayer.NewRelayer().
-		WithKey(clientFactory.Keybase(), signingKeyName).
-		WithServicerClient(c).
-		WithBlocksPerSession(ctx, blocksPerSession).
-		WithKVStorePath(smtStorePath)
+		WithKey(ctx, clientFactory.Keybase(), signingKeyName, address.String(), clientCtx, servicerClient, serviceEndpoints).
+		WithServicerClient(servicerClient).
+		WithKVStorePath(ctx, filepath.Join(clientCtx.HomeDir, smtStorePath))
 
 	if err := relayer.Start(); err != nil {
 		cancelCtx()
@@ -82,7 +102,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 	}
 
 	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt, os.Kill)
+	signal.Notify(sigCh, os.Interrupt)
 	// Block until we receive an interrupt or kill signal (OS-agnostic)
 	<-sigCh
 

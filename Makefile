@@ -223,11 +223,11 @@ session_get_app1_svc1: ## Getting the session for app1 and svc1 and height1
 
 .PHONY: session_get_app2_svc2
 session_get_app2_svc2: ## Getting the session for app2 and svc2 and height1
-	APP=pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4 SVC=svc2 HEIGHT=$(SESSION_HEIGHT) make session_get
+	APP=pokt184zvylazwu4queyzpl0gyz9yf5yxm2kdhh9hpm SVC=svc2 HEIGHT=$(SESSION_HEIGHT) make session_get
 
 .PHONY: session_get_app3_svc3
 session_get_app3_svc3: ## Getting the session for app3 and svc3 and height1
-	APP=pokt1c0aal6vmfh094v7xuk3ynkfexep3txdpjk6xhz SVC=svc3 HEIGHT=$(SESSION_HEIGHT) make session_get
+	APP=pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex SVC=svc3 HEIGHT=$(SESSION_HEIGHT) make session_get
 
 .PHONY: localnet_up
 localnet_up: ## Starts localnet

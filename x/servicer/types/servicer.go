@@ -9,8 +9,15 @@ import (
 )
 
 type ServicerClient interface {
-	Blocks() utils.Observable[Block]
-	SubmitClaim(context.Context, []byte) error
+	// Blocks returns an observable which emits newly committed blocks.
+	Blocks() (blocksNotifee utils.Observable[Block])
+	// LatestBlock returns the latest block that has been committed.
+	LatestBlock() Block
+	// SubmitClaim sends a claim message with the given SMT root hash as the
+	// commitment.
+	SubmitClaim(ctx context.Context, smtRootHash []byte) error
+	// SubmitProof sends a proof message with the given parameters, to be validated
+	// on-chain in exchange for a reward.
 	SubmitProof(
 		ctx context.Context,
 		smtRootHash []byte,
