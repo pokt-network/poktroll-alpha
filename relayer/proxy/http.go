@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"log"
@@ -63,7 +62,7 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?
-	sessionResult, err := httpProxy.sessionQueryClient.GetSession(context.TODO(), query)
+	sessionResult, err := httpProxy.sessionQueryClient.GetSession(req.Context(), query)
 	if err != nil {
 		log.Printf("failed getting session: %v", err)
 		replyWithHTTPError(500, err, httpResponseWriter)
