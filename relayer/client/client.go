@@ -140,6 +140,8 @@ func (client *servicerClient) signAndBroadcastMessageTx(
 		panic(err)
 	}
 
+	// NB: the hex representation of the tx hash can has no canonical case but
+	// must be consistent.
 	txHash := strings.ToLower(txResponse.TxHash)
 	log.Printf("txResponse: %s\n", txResponseJSON)
 

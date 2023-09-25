@@ -5,7 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	tmtypes "github.com/cometbft/cometbft/types"
+	"log"
+	"strings"
+
+	abciTypes "github.com/cometbft/cometbft/abci/types"
+	cometTypes "github.com/cometbft/cometbft/types"
+
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
 )
@@ -19,7 +24,8 @@ var (
 // the block subscription. It implements the types.Block interface by loosely
 // wrapping cometbft's block type, into which messages are deserialized.
 type cometTxResponseWebsocketMsg struct {
-	Tx []byte `json:"tx"`
+	Tx     []byte          `json:"tx"`
+	Events abciTypes.Event `json:"events"`
 }
 
 // subscribeToOwnTxs subscribes to txs which were signed/sent by this client's
@@ -115,18 +121,18 @@ func (client *servicerClient) handleTxsFactory() messageHandler {
 		}
 
 		fmt.Printf("TX MSG:\n%s\n", string(msg))
-		txHash := fmt.Sprintf("%x", string(tmtypes.Tx(txMsg.Tx).Hash()))
+		txHash := strings.ToLower(
+			fmt.Sprintf("%x", string(
+				cometTypes.Tx(txMsg.Tx).Hash(),
+			)),
+		)
 
 		client.txsMutex.Lock()
 		defer client.txsMutex.Unlock()
 
 		txErrCh, ok := client.txsByHash[txHash]
 		if !ok {
-			panic("txErrCh not found")
-		}
-		if txErrCh == nil {
-			// INCOMPLETE: handle and/or invalidate this case.
-			fmt.Println("txErrCh is nil")
+			log.Println("error: received tx for which no txErrCh exists")
 			return nil
 		}
 		// TODO_THIS_COMMIT: check tx for errors, parse & send if present!!!
