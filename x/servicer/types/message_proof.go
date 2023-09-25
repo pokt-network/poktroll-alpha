@@ -10,7 +10,7 @@ const TypeMsgProof = "proof"
 var _ sdk.Msg = &MsgProof{}
 
 func NewMsgProof(
-	servicer string,
+	servicerAddress string,
 	smtRoot,
 	path,
 	valueHash []byte,
@@ -18,12 +18,12 @@ func NewMsgProof(
 	proofBz []byte,
 ) (*MsgProof, error) {
 	return &MsgProof{
-		Servicer:     servicer,
-		SmstRootHash: smtRoot,
-		Path:         path,
-		ValueHash:    valueHash,
-		Sum:          sum,
-		Proof:        proofBz,
+		ServicerAddress: servicerAddress,
+		SmstRootHash:    smtRoot,
+		Path:            path,
+		ValueHash:       valueHash,
+		Sum:             sum,
+		Proof:           proofBz,
 	}, nil
 }
 
@@ -36,7 +36,7 @@ func (msg *MsgProof) Type() string {
 }
 
 func (msg *MsgProof) GetSigners() []sdk.AccAddress {
-	creator, err := sdk.AccAddressFromBech32(msg.Servicer)
+	creator, err := sdk.AccAddressFromBech32(msg.ServicerAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -49,7 +49,7 @@ func (msg *MsgProof) GetSignBytes() []byte {
 }
 
 func (msg *MsgProof) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Servicer)
+	_, err := sdk.AccAddressFromBech32(msg.ServicerAddress)
 	if err != nil {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}

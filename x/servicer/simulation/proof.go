@@ -20,7 +20,7 @@ func SimulateMsgProof(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgProof{
-			Servicer: simAccount.Address.String(),
+			ServicerAddress: simAccount.Address.String(),
 		}
 
 		// TODO: Handling the Proof simulation

@@ -20,7 +20,7 @@ func SimulateMsgClaim(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgClaim{
-			Servicer: simAccount.Address.String(),
+			ServicerAddress: simAccount.Address.String(),
 		}
 
 		// TODO: Handling the Claim simulation

@@ -31,7 +31,7 @@ service Query {
   
   // Queries a list of Claims items.
   rpc Claims (QueryClaimsRequest) returns (QueryClaimsResponse) {
-    option (google.api.http).get = "/poktroll/servicer/claims/{servicerAddress}";
+    option (google.api.http).get = "/poktroll/servicer/claims/{servicer_address}";
   
   }
 }
@@ -63,7 +63,7 @@ message QueryAllServicersResponse {
 }
 
 message QueryClaimsRequest {
-  string servicerAddress = 1;
+  string servicer_address = 1;
   cosmos.base.query.v1beta1.PageRequest pagination = 2;
 }
 

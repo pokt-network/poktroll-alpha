@@ -25,12 +25,12 @@ func (client *servicerClient) SubmitProof(
 	}
 
 	msg := &types.MsgProof{
-		Servicer:     client.address,
-		SmstRootHash: smtRootHash,
-		Path:         closestKey,
-		ValueHash:    closestValueHash,
-		Sum:          closestSum,
-		Proof:        proofBz,
+		ServicerAddress: client.address,
+		SmstRootHash:    smtRootHash,
+		Path:            closestKey,
+		ValueHash:       closestValueHash,
+		Sum:             closestSum,
+		Proof:           proofBz,
 	}
 	_, err = client.signAndBroadcastMessageTx(ctx, msg)
 	if err != nil {
