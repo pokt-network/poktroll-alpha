@@ -74,7 +74,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		panic(fmt.Errorf("failed to get address for key with UID %q: %w", signingKeyName, err))
 	}
 
-	c := client.NewServicerClient().
+	servicerClient := client.NewServicerClient().
 		WithTxFactory(clientFactory).
 		WithSigningKey(signingKeyName, address.String()).
 		WithClientCtx(clientCtx).
@@ -91,8 +91,8 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 	}
 
 	relayer := relayer.NewRelayer().
-		WithKey(ctx, clientFactory.Keybase(), signingKeyName, address.String(), clientCtx, c, serviceEndpoints).
-		WithServicerClient(c).
+		WithKey(ctx, clientFactory.Keybase(), signingKeyName, address.String(), clientCtx, servicerClient, serviceEndpoints).
+		WithServicerClient(servicerClient).
 		WithKVStorePath(ctx, filepath.Join(clientCtx.HomeDir, smtStorePath))
 
 	if err := relayer.Start(); err != nil {
