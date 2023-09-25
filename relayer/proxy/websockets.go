@@ -7,37 +7,41 @@ import (
 
 	ws "github.com/gorilla/websocket"
 
+	serviceTypes "poktroll/x/service/types"
 	"poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
 )
 
 type wsProxy struct {
-	serviceAddr        string
-	sessionQueryClient sessionTypes.QueryClient
-	client             types.ServicerClient
-	relayNotifier      chan *RelayWithSession
-	signResponse       responseSigner
-	serviceId          string
-	upgrader           *ws.Upgrader
+	serviceId             *serviceTypes.ServiceId
+	serviceForwardingAddr string
+	sessionQueryClient    sessionTypes.QueryClient
+	client                types.ServicerClient
+	relayNotifier         chan *RelayWithSession
+	signResponse          responseSigner
+	upgrader              *ws.Upgrader
 }
 
 func NewWsProxy(
-	serviceAddr string,
+	serviceId *serviceTypes.ServiceId,
+	serviceForwardingAddr string,
 	sessionQueryClient sessionTypes.QueryClient,
 	client types.ServicerClient,
 	relayNotifier chan *RelayWithSession,
 	signResponse responseSigner,
-	serviceId string,
 ) *wsProxy {
 	return &wsProxy{
-		serviceAddr:        serviceAddr,
-		sessionQueryClient: sessionQueryClient,
-		client:             client,
-		relayNotifier:      relayNotifier,
-		signResponse:       signResponse,
-		serviceId:          serviceId,
-		upgrader:           &ws.Upgrader{},
+		serviceId:             serviceId,
+		serviceForwardingAddr: serviceForwardingAddr,
+		sessionQueryClient:    sessionQueryClient,
+		client:                client,
+		relayNotifier:         relayNotifier,
+		signResponse:          signResponse,
 	}
+}
+
+func (wsProxy *wsProxy) Start(advertisedEndpointUrl string) error {
+	return http.ListenAndServe(mustGetHostAddress(advertisedEndpointUrl), wsProxy)
 }
 
 // ServeHTTP implements the http.Handler interface; called by http.ListenAndServe().
@@ -57,7 +61,7 @@ func (wsProxy *wsProxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	// query for session info to validate http initial request prior upgrading the connection
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  relayRequest.ApplicationAddress,
-		ServiceId:   wsProxy.serviceId,
+		ServiceId:   wsProxy.serviceId.Id,
 		BlockHeight: wsProxy.client.LatestBlock().Height(),
 	}
 
@@ -85,7 +89,7 @@ func (wsProxy *wsProxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 
 	// establish a connection to the service
 	// OPTIMIZE: reuse the connection to the service
-	serviceConn, _, err := ws.DefaultDialer.Dial(wsProxy.serviceAddr, nil)
+	serviceConn, _, err := ws.DefaultDialer.Dial(wsProxy.serviceForwardingAddr, nil)
 	if err != nil {
 		log.Printf("failed dialing service: %v", err)
 		replyWithWsError(err, clientConn)
@@ -93,6 +97,7 @@ func (wsProxy *wsProxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	}
 
 	// TODO: closing one of the connections should close the other
+	// TODO: handle connection errors with errgoups
 	go wsProxy.handleWsClientMessages(clientConn, serviceConn)
 	go wsProxy.handleWsServiceMessages(clientConn, serviceConn, relayRequest.ApplicationAddress)
 }
@@ -142,7 +147,7 @@ func (wsProxy *wsProxy) handleWsRequestMessage(
 	// or better, only if the session changed
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  relayRequest.ApplicationAddress,
-		ServiceId:   wsProxy.serviceId,
+		ServiceId:   wsProxy.serviceId.Id,
 		BlockHeight: wsProxy.client.LatestBlock().Height(),
 	}
 
@@ -166,10 +171,10 @@ func (wsProxy *wsProxy) handleWsRequestMessage(
 	}
 
 	// account for request relaying work
-	wsProxy.relayNotifier <- &RelayWithSession{
-		Relay:   &types.Relay{Req: relayRequest, Res: nil},
-		Session: &sessionResult.Session,
-	}
+	//wsProxy.relayNotifier <- &RelayWithSession{
+	//	Relay:   &types.Relay{Req: relayRequest, Res: nil},
+	//	Session: &sessionResult.Session,
+	//}
 	return nil
 }
 
@@ -192,7 +197,7 @@ func (wsProxy *wsProxy) handleWsResponseMessage(
 	// or better, only if the session changed
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  appAddress,
-		ServiceId:   wsProxy.serviceId,
+		ServiceId:   wsProxy.serviceId.Id,
 		BlockHeight: wsProxy.client.LatestBlock().Height(),
 	}
 
@@ -230,6 +235,9 @@ func newWsRelayRequest(req []byte) (*types.RelayRequest, error) {
 	if err := relayRequest.Unmarshal(req); err != nil {
 		return nil, err
 	}
+
+	// HACK: the application address should be populated by the requesting client
+	relayRequest.ApplicationAddress = "pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4"
 	return relayRequest, nil
 }
 

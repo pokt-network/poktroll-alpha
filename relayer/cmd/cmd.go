@@ -83,9 +83,15 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 
 	// The order of the WithXXX methods matters for now.
 	// TODO: Refactor this to a builder pattern.
+
+	serviceEndpoints := map[string][]string{
+		"svc1": {"ws://localhost:8548/websocket"},
+		"svc2": {"http://localhost:8547"},
+	}
+
 	relayer := relayer.NewRelayer().
+		WithKey(ctx, clientFactory.Keybase(), signingKeyName, address.String(), clientCtx, c, serviceEndpoints).
 		WithServicerClient(c).
-		WithKey(ctx, clientFactory.Keybase(), signingKeyName, address.String(), clientCtx).
 		WithKVStorePath(ctx, smtStorePath)
 
 	if err := relayer.Start(); err != nil {

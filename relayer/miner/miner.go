@@ -44,7 +44,9 @@ func (m *Miner) MineRelays(ctx context.Context, relays utils.Observable[*proxy.R
 	go m.handleRelays(ctx)
 }
 
-
+// handleSessionEnd submits a claim for the ended session & starts a goroutine
+// which will submit the corresponding proof when the respective proof window
+// opens.
 func (m *Miner) handleSessions(ctx context.Context) {
 	ch := m.sessionManager.Sessions().Subscribe().Ch()
 	// this emits each time a batch of sessions is ready to be processed.
@@ -96,6 +98,8 @@ func (m *Miner) handleRelays(ctx context.Context) {
 	}
 }
 
+// handleSingleRelay validates, executes, & hashes the relay. If the relay's difficulty
+// is above the mining difficulty, it's inserted into SMST.
 func (m *Miner) handleSingleRelay(
 	ctx context.Context,
 	relayWithSession *proxy.RelayWithSession,
@@ -141,10 +145,5 @@ func (m *Miner) submitProof(ctx context.Context, session sessionmanager.SessionW
 	}
 
 	// SubmitProof ensures on-chain proof inclusion so we can safely prune the tree.
-	err = m.client.SubmitProof(ctx, claimRoot, path, valueHash, sum, proof)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return m.client.SubmitProof(ctx, claimRoot, path, valueHash, sum, proof)
 }

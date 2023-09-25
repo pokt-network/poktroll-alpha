@@ -3,6 +3,7 @@ package relayer
 import (
 	"context"
 	"crypto/sha256"
+	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -51,9 +52,23 @@ func (relayer *Relayer) WithKVStorePath(ctx context.Context, storePath string) *
 	return relayer
 }
 
-func (relayer *Relayer) WithKey(ctx context.Context, keyring keyring.Keyring, keyName string, address string, clientCtx client.Context) *Relayer {
+func (relayer *Relayer) WithKey(
+	ctx context.Context,
+	keyring keyring.Keyring,
+	keyName string,
+	address string,
+	clientCtx client.Context,
+	client types.ServicerClient,
+	serviceEndpoints map[string][]string,
+) *Relayer {
 	// IMPROVE: separate configuration from subcomponent construction
-	relayer.proxy = proxy.NewProxy(ctx, keyring, keyName, address, clientCtx, relayer.servicerClient)
+	var err error
+	relayer.proxy, err = proxy.NewProxy(ctx, keyring, keyName, address, clientCtx, client, serviceEndpoints)
+
+	// yet another reason to avoid this pattern: we have to check for errors
+	if err != nil {
+		panic(fmt.Errorf("failed constructing Proxy: %v", err))
+	}
 
 	return relayer
 }

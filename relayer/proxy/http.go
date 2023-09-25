@@ -1,43 +1,47 @@
 package proxy
 
 import (
-	"bufio"
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"log"
-	"net"
 	"net/http"
 
+	serviceTypes "poktroll/x/service/types"
 	"poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
 )
 
 type httpProxy struct {
-	serviceAddr        string
-	sessionQueryClient sessionTypes.QueryClient
-	client             types.ServicerClient
-	relayNotifier      chan *RelayWithSession
-	signResponse       responseSigner
-	serviceId          string
+	serviceId             *serviceTypes.ServiceId
+	serviceForwardingAddr string
+	sessionQueryClient    sessionTypes.QueryClient
+	client                types.ServicerClient
+	relayNotifier         chan *RelayWithSession
+	signResponse          responseSigner
 }
 
 func NewHttpProxy(
-	serviceAddr string,
+	serviceId *serviceTypes.ServiceId,
+	serviceForwardingAddr string,
 	sessionQueryClient sessionTypes.QueryClient,
 	client types.ServicerClient,
 	relayNotifier chan *RelayWithSession,
 	signResponse responseSigner,
-	serviceId string,
 ) *httpProxy {
 	return &httpProxy{
-		serviceAddr:        serviceAddr,
-		sessionQueryClient: sessionQueryClient,
-		client:             client,
-		relayNotifier:      relayNotifier,
-		signResponse:       signResponse,
-		serviceId:          serviceId,
+		serviceId:             serviceId,
+		serviceForwardingAddr: serviceForwardingAddr,
+		sessionQueryClient:    sessionQueryClient,
+		client:                client,
+		relayNotifier:         relayNotifier,
+		signResponse:          signResponse,
 	}
+}
+
+func (httpProxy *httpProxy) Start(advertisedEndpointUrl string) error {
+	return http.ListenAndServe(mustGetHostAddress(advertisedEndpointUrl), httpProxy)
 }
 
 // ServeHTTP implements the http.Handler interface; called by http.ListenAndServe().
@@ -54,7 +58,7 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  relayRequest.ApplicationAddress,
-		ServiceId:   httpProxy.serviceId,
+		ServiceId:   httpProxy.serviceId.Id,
 		BlockHeight: httpProxy.client.LatestBlock().Height(),
 	}
 
@@ -71,7 +75,19 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 		return
 	}
 
-	relayResponse, err := httpProxy.executeRelay(req, relayRequest.Payload)
+	url, err := parseURLWithScheme(httpProxy.serviceForwardingAddr)
+	if err != nil {
+		replyWithHTTPError(400, err, httpResponseWriter)
+	}
+
+	serviceRequest := &http.Request{
+		Method: req.Method,
+		Header: req.Header,
+		URL:    url,
+		Host:   url.Host,
+		Body:   io.NopCloser(bytes.NewBuffer(relayRequest.Payload)),
+	}
+	relayResponse, err := httpProxy.executeRelay(serviceRequest, relayRequest.Payload)
 	if err != nil {
 		log.Printf("failed executing relay: %v", err)
 		replyWithHTTPError(500, err, httpResponseWriter)
@@ -97,10 +113,6 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 func (httpProxy *httpProxy) executeRelay(req *http.Request, requestPayload []byte) (*types.RelayResponse, error) {
 	// Change the request host to the service address
 	// DISCUSS: create a new request instead of mutating the existing one?
-	req.Host = httpProxy.serviceAddr
-	req.URL.Host = httpProxy.serviceAddr
-	req.Body = io.NopCloser(bytes.NewBuffer(requestPayload))
-
 	serviceResponse, err := proxyHTTPServiceRequest(req)
 	if err != nil {
 		return nil, err
@@ -136,28 +148,14 @@ func newHTTPRelayRequest(req *http.Request) (*types.RelayRequest, error) {
 			return nil, err
 		}
 		relayRequest.Payload = requestBody
+		// HACK: the application address should be populated by the requesting client
+		relayRequest.ApplicationAddress = "pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4"
 	}
 	return relayRequest, nil
 }
 
 func proxyHTTPServiceRequest(req *http.Request) (*http.Response, error) {
-	// Connect to the service
-	remoteConnection, err := net.Dial("tcp", req.Host)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = remoteConnection.Close()
-	}()
-
-	// Send the request to the service
-	err = req.Write(remoteConnection)
-	if err != nil {
-		return nil, err
-	}
-
-	// Read the response from the service
-	return http.ReadResponse(bufio.NewReader(remoteConnection), req)
+	return http.DefaultClient.Do(req)
 }
 
 func newRelayResponse(serviceResponse *http.Response) (_ *types.RelayResponse, err error) {
@@ -201,7 +199,13 @@ func sendRelayResponse(relayResponse *types.RelayResponse, wr http.ResponseWrite
 // TODO: send appropriate error instead of the original error
 func replyWithHTTPError(statusCode int, err error, wr http.ResponseWriter) {
 	wr.WriteHeader(statusCode)
-	if _, replyError := wr.Write([]byte(err.Error())); replyError != nil {
+	clientError := err
+	if statusCode == 500 {
+		clientError = fmt.Errorf("internal server error")
+		log.Printf("internal server error: %v", err)
+	}
+
+	if _, replyError := wr.Write([]byte(clientError.Error())); replyError != nil {
 		log.Printf("failed sending error response: %v", replyError)
 	}
 }

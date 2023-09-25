@@ -2,9 +2,9 @@ package proxy
 
 import (
 	"context"
-	"errors"
-	"log"
-	"net/http"
+	"fmt"
+	"net/url"
+	"regexp"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -15,6 +15,8 @@ import (
 	sessionTypes "poktroll/x/session/types"
 )
 
+var urlSchemePresenceRegex = regexp.MustCompile(`^\w{0,25}://`)
+
 type responseSigner func(*svcTypes.RelayResponse) error
 
 type RelayWithSession struct {
@@ -23,7 +25,7 @@ type RelayWithSession struct {
 }
 
 type Proxy struct {
-	services            []*types.ServiceConfig
+	advertisedServices  []*types.ServiceConfig
 	keyring             keyring.Keyring
 	keyName             string
 	client              svcTypes.ServicerClient
@@ -31,6 +33,7 @@ type Proxy struct {
 	sessionQueryClient  sessionTypes.QueryClient
 	relayNotifier       chan *RelayWithSession
 	relayNotifee        utils.Observable[*RelayWithSession]
+	serviceEndpoints    map[string][]string
 }
 
 // IMPROVE: be consistent with component configuration & setup.
@@ -42,80 +45,74 @@ func NewProxy(
 	address string,
 	clientCtx client.Context,
 	client svcTypes.ServicerClient,
-) *Proxy {
+	serviceEndpoints map[string][]string,
+) (*Proxy, error) {
 	servicerQueryClient := svcTypes.NewQueryClient(clientCtx)
 	servicerInfo, err := servicerQueryClient.Servicers(ctx, &svcTypes.QueryGetServicersRequest{
 		Address: address,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	proxy := &Proxy{
-		services:            servicerInfo.Servicers.Services,
+		advertisedServices:  servicerInfo.Servicers.Services,
 		sessionQueryClient:  sessionTypes.NewQueryClient(clientCtx),
 		servicerQueryClient: servicerQueryClient,
 		keyring:             keyring,
 		keyName:             keyName,
 		client:              client,
+		serviceEndpoints:    serviceEndpoints,
 	}
 
 	proxy.relayNotifee, proxy.relayNotifier = utils.NewControlledObservable[*RelayWithSession](nil)
+	if err := proxy.listen(); err != nil {
+		return nil, err
+	}
 
-	go proxy.listen()
-
-	return proxy
+	return proxy, nil
 }
 
 func (proxy *Proxy) Relays() utils.Observable[*RelayWithSession] {
 	return proxy.relayNotifee
 }
 
-func (proxy *Proxy) listen() {
+func (proxy *Proxy) listen() error {
 	// create a proxy for each endpoint of each service
-	for _, service := range proxy.services {
-		for i, endpoint := range service.Endpoints {
-			switch endpoint.RpcType {
+	for _, advertisedService := range proxy.advertisedServices {
+		for i, advertisedEndpoint := range advertisedService.Endpoints {
+			switch advertisedEndpoint.RpcType {
 			case types.RPCType_JSON_RPC:
-				go func(serviceId, url string) {
-					// TODO: support https
-					// httpProxy should support both JSON-RPC and REST endpoints
-					httpProxy := NewHttpProxy(
-						// serviceAddr should be sourced from config files/params mapping to the service endpoint
-						"localhost:8546",
-						proxy.sessionQueryClient,
-						proxy.client,
-						proxy.relayNotifier,
-						proxy.signResponse,
-						serviceId,
-					)
-
-					if err := http.ListenAndServe(url, httpProxy); err != nil {
-						log.Fatal(err)
-					}
-				}(service.Id.Id, endpoint.Url)
+				// TODO: support https
+				// httpProxy should support both JSON-RPC and REST endpoints
+				httpProxy := NewHttpProxy(
+					advertisedService.Id,
+					proxy.serviceEndpoints[advertisedService.Id.Id][i],
+					proxy.sessionQueryClient,
+					proxy.client,
+					proxy.relayNotifier,
+					proxy.signResponse,
+				)
+				go httpProxy.Start(advertisedEndpoint.Url)
 			case types.RPCType_WEBSOCKET:
-				go func(serviceId, url string) {
-					// TODO: support wss
-					websocketProxy := NewWsProxy(
-						// serviceAddr should be sourced from config files/params mapping to the service endpoint
-						"localhost:8546",
-						proxy.sessionQueryClient,
-						proxy.client,
-						proxy.relayNotifier,
-						proxy.signResponse,
-						serviceId,
-					)
-
-					if err := http.ListenAndServe(url, websocketProxy); err != nil {
-						log.Fatal(err)
-					}
-				}(service.Id.Id, endpoint.Url)
+				// TODO: support wss
+				websocketProxy := NewWsProxy(
+					advertisedService.Id,
+					proxy.serviceEndpoints[advertisedService.Id.Id][i],
+					proxy.sessionQueryClient,
+					proxy.client,
+					proxy.relayNotifier,
+					proxy.signResponse,
+				)
+				go websocketProxy.Start(advertisedEndpoint.Url)
 			default:
-				log.Fatalf("unsupported rpc type: %v", endpoint.RpcType)
+				return fmt.Errorf("unsupported rpc type: %v", advertisedEndpoint.RpcType)
 			}
 		}
 	}
+
+	// TODO_CONSIDERATION: we may accumulate errors and return them here
+	return nil
 }
 
 func (proxy *Proxy) signResponse(relayResponse *svcTypes.RelayResponse) error {
@@ -132,9 +129,31 @@ func validateSessionRequest(session *sessionTypes.Session, relayRequest *svcType
 	// TODO: validate relayRequest signature
 
 	// a similar SessionId means it's been generated from the same params
-	if session.SessionId != relayRequest.SessionId {
-		return errors.New("invalid session id")
-	}
+	//if session.SessionId != relayRequest.SessionId {
+	//	return errors.New("invalid session id")
+	//}
 
 	return nil
+}
+
+// mustGetHostAddress strip the protocol from the url and path to get the host address
+func mustGetHostAddress(rawURL string) string {
+	parsedURL, err := url.Parse(rawURL)
+
+	// this should not error since th url is validated before being committed when staking
+	if err != nil {
+		panic(fmt.Errorf("invalid on-chain data: %s", err))
+	}
+
+	return fmt.Sprintf("%s:%s", parsedURL.Hostname(), parsedURL.Port())
+}
+
+// parseURLWithScheme ensures that endpoint URLs contain a scheme to avoid ambiguity when
+// parsing. (See: https://pkg.go.dev/net/url#Parse)
+func parseURLWithScheme(rawURL string) (*url.URL, error) {
+	if !urlSchemePresenceRegex.Match([]byte(rawURL)) {
+		return nil, fmt.Errorf("empty scheme in endpoint URL: %s", rawURL)
+	}
+
+	return url.Parse(rawURL)
 }
