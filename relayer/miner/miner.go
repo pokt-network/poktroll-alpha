@@ -72,17 +72,15 @@ func (m *Miner) handleSingleSession(ctx context.Context, session sessionmanager.
 		return
 	}
 
-	// TODO: implement wait logic here
-
 	// generate and submit proof
 	// past this point the proof is included on-chain and the session can be pruned.
-	if err := m.submitProof(ctx, session, claimRoot); err != nil {
+	if err := m.waitAndProve(ctx, session, claimRoot); err != nil {
 		log.Printf("failed to submit proof: %s", err)
 		return
 	}
 
 	// prune tree now that proof is submitted
-	if err := session.PruneTree(); err != nil {
+	if err := session.DeleteTree(); err != nil {
 		log.Printf("failed to prune tree: %s", err)
 		return
 	}
@@ -127,14 +125,8 @@ func (m *Miner) handleSingleRelay(
 	// something & conditionally insert into the smt.
 }
 
-func (m *Miner) submitProof(ctx context.Context, session sessionmanager.SessionWithTree, claimRoot []byte) error {
-	defer func() {
-		if r := recover(); r != nil {
-			// TODO_THIS_COMMIT: Remove this defer. This is a temporary change
-			// for convenience during development until this method stops
-			// panicing.
-		}
-	}()
+func (m *Miner) waitAndProve(ctx context.Context, session sessionmanager.SessionWithTree, claimRoot []byte) error {
+	// TODO: implement wait logic here
 
 	// at this point the miner already waited for a number of blocks
 	// use the latest block hash as the key to prove against.

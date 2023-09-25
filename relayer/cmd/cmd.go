@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"poktroll/relayer/client"
 	"sync"
 
@@ -35,7 +36,7 @@ func RelayerCmd() *cobra.Command {
 	cmd.Flags().StringVar(&signingKeyName, "signing-key", "", "Name of the key to sign transactions")
 	cmd.Flags().StringVar(&wsURL, "ws-url", "ws://localhost:36657/websocket", "Websocket URL to poktrolld node; formatted as ws://<host>:<port>[/path]")
 	cmd.Flags().Uint32VarP(&blocksPerSession, "blocks-per-session", "b", 2, "Websocket URL to poktrolld node")
-	cmd.Flags().StringVar(&smtStorePath, "smt-store", "", "Path to the SMT KV store")
+	cmd.Flags().StringVar(&smtStorePath, "smt-store", "smt", "Path to the SMT KV store")
 
 	cmd.Flags().String(flags.FlagKeyringBackend, "", "Select keyring's backend (os|file|kwallet|pass|test)")
 	cmd.Flags().String(flags.FlagNode, "tcp://localhost:36657", "tcp://<host>:<port> to tendermint rpc interface for this chain")
@@ -92,7 +93,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 	relayer := relayer.NewRelayer().
 		WithKey(ctx, clientFactory.Keybase(), signingKeyName, address.String(), clientCtx, c, serviceEndpoints).
 		WithServicerClient(c).
-		WithKVStorePath(ctx, smtStorePath)
+		WithKVStorePath(ctx, filepath.Join(clientCtx.HomeDir, smtStorePath))
 
 	if err := relayer.Start(); err != nil {
 		cancelCtx()

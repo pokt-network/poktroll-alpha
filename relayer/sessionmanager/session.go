@@ -13,7 +13,7 @@ import (
 type SessionWithTree interface {
 	SessionTree() *smt.SMST
 	CloseTree() ([]byte, error)
-	PruneTree() error
+	DeleteTree() error
 }
 
 var _ SessionWithTree = &sessionWithTree{}
@@ -64,16 +64,18 @@ func (s *sessionWithTree) CloseTree() (root []byte, err error) {
 	return claimedRoot, nil
 }
 
-func (s *sessionWithTree) PruneTree() error {
-	if err := s.treeStore.Stop(); err != nil {
-		return err
-	}
-
+func (s *sessionWithTree) DeleteTree() error {
+	// DISCUSS: why use treeStore.ClearAll() instead of os.RemoveAll?
+	// see: https://pkg.go.dev/os#RemoveAll
 	if err := s.treeStore.ClearAll(); err != nil {
 		return err
 	}
 
-	if err := os.Remove(s.storePath); err != nil {
+	if err := s.treeStore.Stop(); err != nil {
+		return err
+	}
+
+	if err := os.RemoveAll(s.storePath); err != nil {
 		return err
 	}
 

@@ -44,17 +44,16 @@ func (sm *SessionManager) Sessions() utils.Observable[map[string]SessionWithTree
 func (sm *SessionManager) EnsureSessionTree(sessionInfo *sessionTypes.Session) *smt.SMST {
 	// get session end so we can group sessions that end at the same height
 	// make sure we do not off by one
-	sessionEnd := sessionInfo.SessionBlockStartHeight + sessionInfo.NumBlocksPerSession
 	sessionId := sessionInfo.SessionId
 
 	// make sure to have a container for sessions that end at this height
-	if _, ok := sm.sessions[sessionEnd]; !ok {
-		sm.sessions[sessionEnd] = make(map[string]SessionWithTree)
+	if _, ok := sm.sessions[sessionInfo.GetSessionEndHeight()]; !ok {
+		sm.sessions[sessionInfo.GetSessionEndHeight()] = make(map[string]SessionWithTree)
 	}
 
 	// create session tree if it doesn't exist (first relay for this session)
 	// we need to get its store so we can close it later since we can't access it from the tree
-	if _, ok := sm.sessions[sessionEnd][sessionId]; !ok {
+	if _, ok := sm.sessions[sessionInfo.GetSessionEndHeight()][sessionId]; !ok {
 		storePath := filepath.Join(sm.storeDirectory, sessionId)
 		tree, store, err := sm.createTreeForSession(storePath)
 		if err != nil {
@@ -62,31 +61,16 @@ func (sm *SessionManager) EnsureSessionTree(sessionInfo *sessionTypes.Session) *
 			return nil
 		}
 
-		removeFromSessionsMap := func() {
-			delete(sm.sessions[sessionEnd], sessionId)
-
-			// delete sessionEnd map if it's empty
-			itemsCount := 0
-			for _, _ = range sm.sessions[sessionEnd] {
-				itemsCount++
-				break
-			}
-
-			if itemsCount == 0 {
-				delete(sm.sessions, sessionEnd)
-			}
-		}
-
-		sm.sessions[sessionEnd][sessionId] = &sessionWithTree{
+		sm.sessions[sessionInfo.GetSessionEndHeight()][sessionId] = &sessionWithTree{
 			sessionInfo:           sessionInfo,
 			tree:                  tree,
 			treeStore:             store,
 			storePath:             storePath,
-			removeFromSessionsMap: removeFromSessionsMap,
+			removeFromSessionsMap: sm.sessionCleanupFactory(sessionInfo),
 		}
 	}
 
-	return sm.sessions[sessionEnd][sessionId].SessionTree()
+	return sm.sessions[sessionInfo.GetSessionEndHeight()][sessionId].SessionTree()
 }
 
 func (sm *SessionManager) handleBlocks(ctx context.Context) {
@@ -98,9 +82,8 @@ func (sm *SessionManager) handleBlocks(ctx context.Context) {
 			return
 		default:
 		}
-		height := block.Height()
 		// if some sessions end by this block, process them
-		if sessions, ok := sm.sessions[height]; !ok {
+		if sessions, ok := sm.sessions[block.Height()]; ok {
 			sm.sessionsNotifier <- sessions
 		}
 	}
@@ -114,4 +97,15 @@ func (sm *SessionManager) createTreeForSession(storePath string) (*smt.SMST, smt
 
 	tree := smt.NewSparseMerkleSumTree(treeStore, sha256.New())
 	return tree, treeStore, nil
+}
+
+func (sm *SessionManager) sessionCleanupFactory(sessionInfo *sessionTypes.Session) func() {
+	return func() {
+		delete(sm.sessions[sessionInfo.GetSessionEndHeight()], sessionInfo.SessionId)
+
+		// delete sessionEnd map if it's empty
+		if len(sm.sessions[sessionInfo.GetSessionEndHeight()]) == 0 {
+			delete(sm.sessions, sessionInfo.GetSessionEndHeight())
+		}
+	}
 }
