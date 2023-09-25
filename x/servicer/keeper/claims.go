@@ -17,7 +17,8 @@ func (k Keeper) InsertClaim(ctx sdk.Context, claim *types.MsgClaim) error {
 		return err
 	}
 
-	store.Set(claim.SmtRootHash, claimBz)
+	claimKey := fmt.Sprintf("%s/%s", claim.Servicer, claim.SmtRootHash)
+	store.Set([]byte(claimKey), claimBz)
 
 	// TODO_CONSIDERATION: maybe add a `#String()` method to the claim message.
 	hexSmstRootHash := fmt.Sprintf("%x", claim.SmtRootHash)

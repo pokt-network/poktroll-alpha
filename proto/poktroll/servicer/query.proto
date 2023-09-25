@@ -7,26 +7,32 @@ import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "poktroll/servicer/params.proto";
 import "poktroll/servicer/servicers.proto";
+import "poktroll/servicer/tx.proto";
 
 option go_package = "poktroll/x/servicer/types";
 
 // Query defines the gRPC querier service.
 service Query {
-
+  
   // Parameters queries the parameters of the module.
   rpc Params (QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/poktroll/servicer/params";
-
+  
   }
-
+  
   // Queries a list of Servicers items.
   rpc Servicers    (QueryGetServicersRequest) returns (QueryGetServicersResponse) {
     option (google.api.http).get = "/poktroll/servicer/servicers/{address}";
-
+  
   }
   rpc ServicersAll (QueryAllServicersRequest) returns (QueryAllServicersResponse) {
     option (google.api.http).get = "/poktroll/servicer/servicers";
-
+  }
+  
+  // Queries a list of Claims items.
+  rpc Claims (QueryClaimsRequest) returns (QueryClaimsResponse) {
+    option (google.api.http).get = "/poktroll/servicer/claims/{servicerAddress}";
+  
   }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -34,7 +40,7 @@ message QueryParamsRequest {}
 
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
-
+  
   // params holds all the parameters of this module.
   Params params = 1 [(gogoproto.nullable) = false];
 }
@@ -54,5 +60,15 @@ message QueryAllServicersRequest {
 message QueryAllServicersResponse {
   repeated Servicers                              servicers  = 1 [(gogoproto.nullable) = false];
            cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryClaimsRequest {
+  string servicerAddress = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+message QueryClaimsResponse {
+  repeated MsgClaim claims = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
