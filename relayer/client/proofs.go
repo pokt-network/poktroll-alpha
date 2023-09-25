@@ -32,8 +32,7 @@ func (client *servicerClient) SubmitProof(
 		Sum:             closestSum,
 		Proof:           proofBz,
 	}
-	_, err = client.signAndBroadcastMessageTx(ctx, msg)
-	if err != nil {
+	if _, err = client.signAndBroadcastMessageTx(ctx, msg); err != nil {
 		return err
 	}
 	return nil

@@ -129,12 +129,12 @@ func (m *Miner) handleSingleRelay(
 	// ensure the session tree exists for this relay
 	smst := m.sessionManager.EnsureSessionTree(relayWithSession.Session)
 
+	// INCOMPLETE: still need to check the difficulty against
+	// something & conditionally insert into the smt.
 	if err := smst.Update(hash, relayBz, 1); err != nil {
 		log.Printf("failed to update smt: %s\n", err)
 		return
 	}
-	// INCOMPLETE: still need to check the difficulty against
-	// something & conditionally insert into the smt.
 }
 
 func (m *Miner) waitAndProve(ctx context.Context, session sessionmanager.SessionWithTree, claimRoot []byte) error {

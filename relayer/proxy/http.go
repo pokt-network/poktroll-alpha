@@ -128,6 +128,7 @@ func (httpProxy *httpProxy) executeRelay(req *http.Request, requestPayload []byt
 func newHTTPRelayRequest(req *http.Request) (*types.RelayRequest, error) {
 	requestHeaders := make(map[string]string)
 	for k, v := range req.Header {
+		// TECHDEBT: this will drop all but the first value of a header containing multiple values.
 		requestHeaders[k] = v[0]
 	}
 
@@ -144,9 +145,10 @@ func newHTTPRelayRequest(req *http.Request) (*types.RelayRequest, error) {
 			return nil, err
 		}
 		relayRequest.Payload = requestBody
-		// HACK: the application address should be populated by the requesting client
-		relayRequest.ApplicationAddress = "pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4"
 	}
+
+	// HACK: the application address should be populated by the requesting client
+	relayRequest.ApplicationAddress = "pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4"
 	return relayRequest, nil
 }
 
@@ -193,6 +195,7 @@ func sendRelayResponse(relayResponse *types.RelayResponse, wr http.ResponseWrite
 }
 
 // TODO: send appropriate error instead of the original error
+// CONSIDERATION: receive err message format string so we don't loose the context of the error.
 func replyWithHTTPError(statusCode int, err error, wr http.ResponseWriter) {
 	wr.WriteHeader(statusCode)
 	clientError := err

@@ -25,7 +25,7 @@ var (
 // wrapping cometbft's block type, into which messages are deserialized.
 type cometTxResponseWebsocketMsg struct {
 	Tx     []byte          `json:"tx"`
-	Events abciTypes.Event `json:"events"`
+	Events []abciTypes.Event `json:"events"`
 }
 
 // subscribeToOwnTxs subscribes to txs which were signed/sent by this client's
@@ -65,6 +65,7 @@ func (client *servicerClient) timeoutTxs(
 		default:
 		}
 
+		// HACK: move latest block assignment to a dedicated subscription / goroutine
 		// Update latest block
 		client.latestBlockMutex.Lock()
 		client.latestBlock = block

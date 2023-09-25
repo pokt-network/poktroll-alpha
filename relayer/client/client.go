@@ -97,6 +97,7 @@ func (client *servicerClient) signAndBroadcastMessageTx(
 	timeoutHeight := client.LatestBlock().Height() +
 		uint64(client.txTimeoutHeightOffset)
 
+	// TECHDEBT: this should be configurable
 	txBuilder.SetGasLimit(200000)
 	txBuilder.SetTimeoutHeight(timeoutHeight)
 

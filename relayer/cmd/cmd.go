@@ -85,6 +85,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 	// The order of the WithXXX methods matters for now.
 	// TODO: Refactor this to a builder pattern.
 
+	// INCOMPLETE: this should be populated from some relayer config.
 	serviceEndpoints := map[string][]string{
 		"svc1": {"ws://localhost:8548/websocket"},
 		"svc2": {"http://localhost:8547"},
