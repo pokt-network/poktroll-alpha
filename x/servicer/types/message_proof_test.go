@@ -18,13 +18,13 @@ func TestMsgProof_ValidateBasic(t *testing.T) {
 		{
 			name: "invalid address",
 			msg: MsgProof{
-				Servicer: "invalid_address",
+				ServicerAddress: "invalid_address",
 			},
 			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgProof{
-				Servicer: sample.AccAddress(),
+				ServicerAddress: sample.AccAddress(),
 			},
 		},
 	}
