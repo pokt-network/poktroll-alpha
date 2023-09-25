@@ -48,7 +48,13 @@ func (m *Miner) MineRelays(ctx context.Context, relays utils.Observable[*proxy.R
 // which will submit the corresponding proof when the respective proof window
 // opens.
 func (m *Miner) handleSessions(ctx context.Context) {
-	ch := m.sessionManager.Sessions().Subscribe().Ch()
+	subscription := m.sessionManager.Sessions().Subscribe()
+	go func() {
+		<-ctx.Done()
+		subscription.Unsubscribe()
+	}()
+
+	ch := subscription.Ch()
 	// this emits each time a batch of sessions is ready to be processed.
 	for closedSessions := range ch {
 		// process sessions in parallel.
@@ -89,7 +95,13 @@ func (m *Miner) handleSingleSession(ctx context.Context, session sessionmanager.
 // handleRelays blocks until a relay is received, then handles it in a new
 // goroutine.
 func (m *Miner) handleRelays(ctx context.Context) {
-	ch := m.relays.Subscribe().Ch()
+	subscription := m.relays.Subscribe()
+	go func() {
+		<-ctx.Done()
+		subscription.Unsubscribe()
+	}()
+
+	ch := subscription.Ch()
 	// process each relay in parallel
 	for relay := range ch {
 		go m.handleSingleRelay(ctx, relay)

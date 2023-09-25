@@ -74,8 +74,14 @@ func (sm *SessionManager) EnsureSessionTree(sessionInfo *sessionTypes.Session) *
 }
 
 func (sm *SessionManager) handleBlocks(ctx context.Context) {
+	subscription := sm.client.Blocks().Subscribe()
+	go func() {
+		<-ctx.Done()
+		subscription.Unsubscribe()
+	}()
+
 	// tick sessions along as new blocks are received
-	ch := sm.client.Blocks().Subscribe().Ch()
+	ch := subscription.Ch()
 	for block := range ch {
 		select {
 		case <-ctx.Done():
