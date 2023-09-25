@@ -9,9 +9,10 @@ import (
 
 func (k msgServer) Claim(goCtx context.Context, msg *types.MsgClaim) (*types.MsgClaimResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	//logger := k.Logger(ctx).With("method", "Claim")
 
-	// TODO: Handling the message
-	_ = ctx
-
+	if err := k.InsertClaim(ctx, msg); err != nil {
+		return nil, err
+	}
 	return &types.MsgClaimResponse{}, nil
 }

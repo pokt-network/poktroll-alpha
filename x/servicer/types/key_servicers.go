@@ -5,8 +5,10 @@ import "encoding/binary"
 var _ binary.ByteOrder
 
 const (
-	// ServicersKeyPrefix is the prefix to retrieve all Servicers
+	// ServicersKeyPrefix is the prefix to retrieve Servicers
 	ServicersKeyPrefix = "Servicers/value/"
+	// ClaimsKeyPrefix is the prefix to retrieve Claims
+	ClaimsKeyPrefix = "Claims/value/"
 )
 
 // ServicersKey returns the store key to retrieve a Servicers from the index fields
