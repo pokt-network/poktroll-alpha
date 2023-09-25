@@ -50,7 +50,6 @@ func (httpProxy *httpProxy) Start(advertisedEndpointUrl string) error {
 func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, req *http.Request) {
 	relayRequest, err := newHTTPRelayRequest(req)
 	if err != nil {
-		log.Printf("failed creating relay request: %v", err)
 		replyWithHTTPError(500, err, httpResponseWriter)
 		return
 	}
@@ -64,7 +63,6 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 	// INVESTIGATE: get the context instead of creating a new one?
 	sessionResult, err := httpProxy.sessionQueryClient.GetSession(req.Context(), query)
 	if err != nil {
-		log.Printf("failed getting session: %v", err)
 		replyWithHTTPError(500, err, httpResponseWriter)
 		return
 	}
@@ -88,7 +86,6 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 	}
 	relayResponse, err := httpProxy.executeRelay(serviceRequest, relayRequest.Payload)
 	if err != nil {
-		log.Printf("failed executing relay: %v", err)
 		replyWithHTTPError(500, err, httpResponseWriter)
 		return
 	}
