@@ -17,11 +17,11 @@ func (k Keeper) InsertClaim(ctx sdk.Context, claim *types.MsgClaim) error {
 		return err
 	}
 
-	claimKey := fmt.Sprintf("%s/%s", claim.Servicer, claim.SmtRootHash)
+	claimKey := fmt.Sprintf("%s/%s", claim.Servicer, claim.SmstRootHash)
 	store.Set([]byte(claimKey), claimBz)
 
 	// TODO_CONSIDERATION: maybe add a `#String()` method to the claim message.
-	hexSmstRootHash := fmt.Sprintf("%x", claim.SmtRootHash)
+	hexSmstRootHash := fmt.Sprintf("%x", claim.SmstRootHash)
 	event := sdk.NewEvent(
 		EventTypeClaim,
 		sdk.NewAttribute(AttributeKeySmtRootHash, hexSmstRootHash),

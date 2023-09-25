@@ -30,7 +30,7 @@ message MsgUnstakeServicerResponse {}
 
 message MsgClaim {
   string servicer = 1;
-  bytes  smtRootHash = 2;
+  bytes  smstRootHash = 2;
   string sessionId = 3;
 }
 
@@ -38,7 +38,7 @@ message MsgClaimResponse {}
 
 message MsgProof {
   string servicer = 1;
-  bytes smtRoot = 2;
+  bytes smstRootHash = 2;
   bytes path = 3;
   bytes valueHash = 4;
   uint64  sum = 5;

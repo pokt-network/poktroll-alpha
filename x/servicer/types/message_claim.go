@@ -11,8 +11,8 @@ var _ sdk.Msg = &MsgClaim{}
 
 func NewMsgClaim(servicer string, smtRootHash []byte) *MsgClaim {
 	return &MsgClaim{
-		Servicer:    servicer,
-		SmtRootHash: smtRootHash,
+		Servicer:     servicer,
+		SmstRootHash: smtRootHash,
 	}
 }
 

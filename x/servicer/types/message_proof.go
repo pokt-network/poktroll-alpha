@@ -18,12 +18,12 @@ func NewMsgProof(
 	proofBz []byte,
 ) (*MsgProof, error) {
 	return &MsgProof{
-		Servicer:  servicer,
-		SmtRoot:   smtRoot,
-		Path:      path,
-		ValueHash: valueHash,
-		Sum:       sum,
-		Proof:     proofBz,
+		Servicer:     servicer,
+		SmstRootHash: smtRoot,
+		Path:         path,
+		ValueHash:    valueHash,
+		Sum:          sum,
+		Proof:        proofBz,
 	}, nil
 }
 
