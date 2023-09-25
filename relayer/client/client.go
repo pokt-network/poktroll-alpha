@@ -8,7 +8,6 @@ import (
 	"strings"
 	"sync"
 
-	cometTypes "github.com/cometbft/cometbft/types"
 	cosmosClient "github.com/cosmos/cosmos-sdk/client"
 	txClient "github.com/cosmos/cosmos-sdk/client/tx"
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
@@ -78,11 +77,6 @@ type servicerClient struct {
 
 func NewServicerClient() *servicerClient {
 	return &servicerClient{
-		latestBlock: &cometBlockWebsocketMsg{Block: cometTypes.Block{
-			Header: cometTypes.Header{
-				Height: 5000000,
-			},
-		}},
 		txsByHash:          make(map[string]chan error),
 		txsByHashByTimeout: make(map[uint64]map[string]chan error),
 	}

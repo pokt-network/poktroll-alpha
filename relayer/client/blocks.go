@@ -40,6 +40,12 @@ func (client *servicerClient) Blocks() utils.Observable[types.Block] {
 func (client *servicerClient) LatestBlock() types.Block {
 	client.latestBlockMutex.RLock()
 	defer client.latestBlockMutex.RUnlock()
+	// block until we have a block to return
+	if client.latestBlock == nil {
+		subscription := client.Blocks().Subscribe()
+		<-subscription.Ch()
+		subscription.Unsubscribe()
+	}
 	return client.latestBlock
 }
 
