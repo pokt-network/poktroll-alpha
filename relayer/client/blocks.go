@@ -28,7 +28,7 @@ func (blockEvent *cometBlockWebsocketMsg) Height() uint64 {
 }
 
 func (blockEvent *cometBlockWebsocketMsg) Hash() []byte {
-	return blockEvent.Block.LastCommitHash.Bytes()
+	return blockEvent.Block.LastBlockID.Hash.Bytes()
 }
 
 // BlocksNotifee implements the respective method on the ServicerClient interface.
