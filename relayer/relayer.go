@@ -14,8 +14,6 @@ import (
 	"poktroll/x/servicer/types"
 )
 
-const WaitGroupContextKey = "relayer_cmd_wait_group"
-
 type Relayer struct {
 	proxy          *proxy.Proxy
 	miner          *miner.Miner

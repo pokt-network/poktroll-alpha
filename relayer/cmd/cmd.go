@@ -59,7 +59,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 	ctx, cancelCtx := context.WithCancel(
 		context.WithValue(
 			cmd.Context(),
-			relayer.WaitGroupContextKey,
+			client.WaitGroupContextKey,
 			wg,
 		),
 	)

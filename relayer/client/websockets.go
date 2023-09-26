@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"poktroll/relayer"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -13,7 +12,7 @@ import (
 // listen blocks on reading messages from a websocket connection, it is intended
 // to be called from within a go routine.
 func (client *servicerClient) listen(ctx context.Context, conn *websocket.Conn, msgHandler messageHandler) {
-	wg, haveWaitGroup := ctx.Value(relayer.WaitGroupContextKey).(*sync.WaitGroup)
+	wg, haveWaitGroup := ctx.Value(WaitGroupContextKey).(*sync.WaitGroup)
 	if haveWaitGroup {
 		// Increment the relayer wait group to track this goroutine
 		wg.Add(1)
