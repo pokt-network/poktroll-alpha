@@ -17,6 +17,8 @@ func (k msgServer) Claim(goCtx context.Context, claim *types.MsgClaim) (*types.M
 	// option on `MsgClaim` protobuf type.
 	// (see: https://github.com/cosmos/cosmos-sdk/blob/main/proto/cosmos/bank/v1beta1/bank.proto#L34C1-L35C1)
 
+	// TODO_THIS_COMMIT: verify that the session in question is closed.
+
 	if err := k.InsertClaim(ctx, claim); err != nil {
 		return nil, err
 	}
