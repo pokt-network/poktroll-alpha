@@ -62,11 +62,11 @@ func (sm *SessionManager) EnsureSessionTree(sessionInfo *sessionTypes.Session) *
 		}
 
 		sm.sessions[sessionInfo.GetSessionEndHeight()][sessionId] = &sessionWithTree{
-			sessionInfo:           sessionInfo,
-			tree:                  tree,
-			treeStore:             store,
-			storePath:             storePath,
-			removeFromSessionsMap: sm.sessionCleanupFactory(sessionInfo),
+			sessionInfo: sessionInfo,
+			tree:        tree,
+			treeStore:   store,
+			storePath:   storePath,
+			onDelete:    sm.sessionCleanupFactory(sessionInfo),
 		}
 	}
 

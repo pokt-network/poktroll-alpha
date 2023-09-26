@@ -19,13 +19,13 @@ type SessionWithTree interface {
 var _ SessionWithTree = &sessionWithTree{}
 
 type sessionWithTree struct {
-	sessionInfo           *types.Session
-	tree                  *smt.SMST
-	treeStore             smt.KVStore
-	claimedRoot           []byte
-	closed                bool
-	storePath             string
-	removeFromSessionsMap func()
+	sessionInfo *types.Session
+	tree        *smt.SMST
+	treeStore   smt.KVStore
+	claimedRoot []byte
+	closed      bool
+	storePath   string
+	onDelete    func()
 }
 
 func (s *sessionWithTree) SessionTree() *smt.SMST {
@@ -79,8 +79,7 @@ func (s *sessionWithTree) DeleteTree() error {
 		return err
 	}
 
-	// remove from sessions map
-	s.removeFromSessionsMap()
+	s.onDelete()
 
 	return nil
 }
