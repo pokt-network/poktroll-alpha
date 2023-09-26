@@ -17,7 +17,7 @@ func (k Keeper) InsertClaim(ctx sdk.Context, claim *types.MsgClaim) error {
 		return err
 	}
 
-	claimKey := fmt.Sprintf("%s/%s", claim.ServicerAddress, claim.SmstRootHash)
+	claimKey := fmt.Sprintf("%s", claim.SessionId)
 	store.Set([]byte(claimKey), claimBz)
 	return nil
 }

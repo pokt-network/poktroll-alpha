@@ -2,8 +2,6 @@ package keeper
 
 import (
 	"context"
-	"strings"
-
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
@@ -29,7 +27,7 @@ func (k Keeper) Claims(goCtx context.Context, req *types.QueryClaimsRequest) (*t
 			return false, err
 		}
 
-		if strings.HasPrefix(string(key), req.ServicerAddress) {
+		if claim.ServicerAddress == req.ServicerAddress {
 			if accumulate {
 				claims = append(claims, claim)
 			}
