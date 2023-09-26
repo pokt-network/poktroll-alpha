@@ -229,6 +229,29 @@ session_get_app2_svc2: ## Getting the session for app2 and svc2 and height1
 session_get_app3_svc3: ## Getting the session for app3 and svc3 and height1
 	APP=pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex SVC=svc3 HEIGHT=$(SESSION_HEIGHT) make session_get
 
+.PHONY: relayer_start
+relayer_start: ## Start the relayer
+	poktrolld relayer \
+	--node $(POKTROLLD_NODE) \
+	--signing-key servicer1 \
+	--keyring-backend test
+
+.PHONY: claims_query
+claims_query: ## Query the poktroll node for claims data
+	poktrolld query servicer claims $(poktrolld keys show servicer1 -a --keyring-backend test)
+
+.PHONY: anvil_start
+anvil_start: ## Start the anvil
+	anvil -p 8547 -b 5
+
+.PHONY: cast_relay
+cast_relay: ## Cast a relay
+	cast block
+
+.PHONY: ws_subscribe
+ws_subscribe: ## Subscribe to the websocket for new blocks
+	wscat --connect ws://localhost:8546
+
 .PHONY: localnet_up
 localnet_up: ## Starts localnet
 	tilt up
