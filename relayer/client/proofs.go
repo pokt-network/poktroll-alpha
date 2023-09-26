@@ -29,7 +29,7 @@ func (client *servicerClient) SubmitProof(
 		SmstRootHash:    smtRootHash,
 		Path:            closestKey,
 		ValueHash:       closestValueHash,
-		Sum:             closestSum,
+		SmstSum:         closestSum,
 		Proof:           proofBz,
 	}
 	if _, err = client.signAndBroadcastMessageTx(ctx, msg); err != nil {

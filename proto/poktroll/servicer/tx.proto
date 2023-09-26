@@ -41,7 +41,7 @@ message MsgProof {
   bytes smst_root_hash = 2;
   bytes path = 3;
   bytes value_hash = 4;
-  uint64  sum = 5;
+  uint64  smst_sum = 5;
   bytes proof = 6;
   string session_id = 7;
 }

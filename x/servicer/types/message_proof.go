@@ -11,18 +11,18 @@ var _ sdk.Msg = &MsgProof{}
 
 func NewMsgProof(
 	servicerAddress string,
-	smtRoot,
+	smstRoot,
 	path,
 	valueHash []byte,
-	sum uint64,
+	smstSum uint64,
 	proofBz []byte,
 ) (*MsgProof, error) {
 	return &MsgProof{
 		ServicerAddress: servicerAddress,
-		SmstRootHash:    smtRoot,
+		SmstRootHash:    smstRoot,
 		Path:            path,
 		ValueHash:       valueHash,
-		Sum:             sum,
+		SmstSum:         smstSum,
 		Proof:           proofBz,
 	}, nil
 }
