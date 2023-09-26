@@ -1,7 +1,7 @@
 load('ext://restart_process', 'docker_build_with_restart')
 
 # A list of directories where changes trigger a hot-reload of the sequencer
-hot_reload_dirs = ['app', 'cmd', 'tools', 'x']
+hot_reload_dirs = ['app', 'cmd', 'tools', 'x', 'localnet']
 
 # Run celestia node
 k8s_yaml('localnet/kubernetes/celestia-rollkit.yaml')
@@ -29,9 +29,12 @@ k8s_yaml(generate_config_map_yaml("poktrolld-keys", read_files_from_directory("l
 k8s_yaml(generate_config_map_yaml("poktrolld-configs", read_files_from_directory("localnet/poktrolld/config/"))) # poktrolld/configs
 
 # Build sequencer
-local_resource('hot-reload: generate protobufs', 'ignite generate proto-go -y', deps=['proto'], labels=["hot-reloading"])
-local_resource('hot-reload: poktrolld', 'GOOS=linux ignite chain build --skip-proto --output=./bin --debug -v', deps=hot_reload_dirs, labels=["hot-reloading"], resource_deps=['hot-reload: generate protobufs'])
-local_resource('hot-reload: poktrolld - local cli', 'ignite chain build --skip-proto --debug -v', deps=hot_reload_dirs, labels=["hot-reloading"], resource_deps=['hot-reload: generate protobufs'])
+local_resource('generate namespace id', 'openssl rand -hex 10 > tmp/namespace-id && cat tmp/namespace-id', deps=hot_reload_dirs, labels=["hot-reloading"], ignore=['tmp'])
+local_resource('hot-reload: generate protobufs', 'ignite generate proto-go -y', deps=['proto'], labels=["hot-reloading"], ignore=['tmp'])
+local_resource('hot-reload: poktrolld', 'GOOS=linux ignite chain build --skip-proto --output=./bin --debug -v', deps=hot_reload_dirs, labels=["hot-reloading"], ignore=['tmp'], resource_deps=['hot-reload: generate protobufs'])
+local_resource('hot-reload: poktrolld - local cli', 'ignite chain build --skip-proto --debug -v', deps=hot_reload_dirs, labels=["hot-reloading"], ignore=['tmp'], resource_deps=['hot-reload: generate protobufs'])
+
+namespace_id = str(read_file('tmp/namespace-id')).strip()
 
 # Build an image with a sequencer
 docker_build_with_restart(
@@ -41,13 +44,17 @@ docker_build_with_restart(
 RUN apt-get -q update && apt-get install -qyy curl jq
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 COPY bin/poktrolld /usr/local/bin/poktrolld
+COPY tmp/namespace-id /tmp/namespace-id
 WORKDIR /
 """,
     only=["./bin/poktrolld"],
     entrypoint=[
         "/bin/sh", "/scripts/poktroll.sh"
     ],
-    live_update=[sync("bin/poktrolld", "/usr/local/bin/poktrolld")],
+    live_update=[
+        sync("tmp/namespace-id", "/tmp/namespace-id"),
+        sync("bin/poktrolld", "/usr/local/bin/poktrolld")
+    ],
 )
 
 # Run poktrolld

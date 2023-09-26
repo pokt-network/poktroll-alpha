@@ -7,52 +7,42 @@ data:
   poktroll.sh: |-
     #!/bin/sh
 
-    if [ ! -d "/root/.poktroll/data/" ]; then
-      echo "AUTH_TOKEN is: $AUTH_TOKEN"
-      VALIDATOR_NAME=validator1
-      CHAIN_ID=poktroll
-      KEY_NAME=poktroll-key
-      KEY_2_NAME=poktroll-key-2
-      TOKEN_AMOUNT="10000000000000000000000000stake"
-      STAKING_AMOUNT="1000000000stake"
+    # if /tmp/namespace-id exists, NAMESPACE_ID should be set to that value, otherwise generate
+    # a random namespace ID
 
-      # create a random Namespace ID for your rollup to post blocks to
+    if [ -f /tmp/namespace-id ]; then
+      NAMESPACE_ID=$(cat /tmp/namespace-id)
+      echo "Using NAMESPACE_ID from /tmp/namespace-id: $NAMESPACE_ID"
+    else
       NAMESPACE_ID=$(openssl rand -hex 10)
-
-      # query the DA Layer start height, in this case we are querying
-      # our local devnet at port 26657, the RPC. The RPC endpoint is
-      # to allow users to interact with Celestia's nodes by querying
-      # the node's state and broadcasting transactions on the Celestia
-      # network. The default port is 26657.
-      DA_BLOCK_HEIGHT=$(curl http://celestia-rollkit:26657/block | jq -r '.result.block.header.height')
-
-      echo -e "Your NAMESPACE_ID is $NAMESPACE_ID \n\n Your DA_BLOCK_HEIGHT is $DA_BLOCK_HEIGHT"
-
-      # reset any existing genesis/chain data
-      poktrolld tendermint unsafe-reset-all
-
-      ls -la /root/.poktroll/config-src/
-      mkdir -p /root/.poktroll/config/
-      cp -r -L /root/.poktroll/config-src/* /root/.poktroll/config/
-      ls -la /root/.poktroll/config/
-
-      # initialize the validator with the chain ID you set
-      # poktrolld init $VALIDATOR_NAME --chain-id $CHAIN_ID
-
-      # add keys for key 1 and key 2 to keyring-backend test
-      # poktrolld keys add $KEY_NAME --keyring-backend test
-      # poktrolld keys add $KEY_2_NAME --keyring-backend test
-
-      # add these as genesis accounts
-      # poktrolld add-genesis-account $KEY_NAME $TOKEN_AMOUNT --keyring-backend test
-      # poktrolld add-genesis-account $KEY_2_NAME $TOKEN_AMOUNT --keyring-backend test
-
-      # set the staking amounts in the genesis transaction
-      # poktrolld gentx $KEY_NAME $STAKING_AMOUNT --chain-id $CHAIN_ID --keyring-backend test
-
-      # collect genesis transactions
-      # poktrolld collect-gentxs
     fi
+
+    echo "AUTH_TOKEN is: $AUTH_TOKEN"
+    VALIDATOR_NAME=validator1
+    CHAIN_ID=poktroll
+    KEY_NAME=poktroll-key
+    KEY_2_NAME=poktroll-key-2
+    TOKEN_AMOUNT="10000000000000000000000000stake"
+    STAKING_AMOUNT="1000000000stake"
+
+    # create a random Namespace ID for your rollup to post blocks to
+
+    # query the DA Layer start height, in this case we are querying
+    # our local devnet at port 26657, the RPC. The RPC endpoint is
+    # to allow users to interact with Celestia's nodes by querying
+    # the node's state and broadcasting transactions on the Celestia
+    # network. The default port is 26657.
+    DA_BLOCK_HEIGHT=$(curl http://celestia-rollkit:26657/block | jq -r '.result.block.header.height')
+
+    echo -e "Your NAMESPACE_ID is $NAMESPACE_ID \n\n Your DA_BLOCK_HEIGHT is $DA_BLOCK_HEIGHT"
+
+    # reset any existing genesis/chain data
+    poktrolld tendermint unsafe-reset-all
+
+    ls -la /root/.poktroll/config-src/
+    mkdir -p /root/.poktroll/config/
+    cp -r -L /root/.poktroll/config-src/* /root/.poktroll/config/
+    ls -la /root/.poktroll/config/
 
     # start the node
     # You can attach to this process with delve (dlv) for debugging purpose with `dlv attach $(pgrep poktrolld) --listen :40004 --headless --api-version=2 --accept-multiclient` - run inside the container!
