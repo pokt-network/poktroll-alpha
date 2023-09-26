@@ -19,18 +19,5 @@ func (k Keeper) InsertClaim(ctx sdk.Context, claim *types.MsgClaim) error {
 
 	claimKey := fmt.Sprintf("%s/%s", claim.ServicerAddress, claim.SmstRootHash)
 	store.Set([]byte(claimKey), claimBz)
-
-	// TODO_CONSIDERATION: maybe add a `#String()` method to the claim message.
-	hexSmstRootHash := fmt.Sprintf("%x", claim.SmstRootHash)
-	event := sdk.NewEvent(
-		EventTypeClaim,
-		sdk.NewAttribute(AttributeKeySmtRootHash, hexSmstRootHash),
-	)
-
-	// HACK/IMPROVE: using "legacy" errors to save time; replace with custom error
-	// protobuf types. See: https://docs.cosmos.network/v0.47/core/events.
-	//
-	// emit claim event
-	ctx.EventManager().EmitEvent(event)
 	return nil
 }

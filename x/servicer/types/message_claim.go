@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -43,4 +44,15 @@ func (msg *MsgClaim) ValidateBasic() error {
 		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid creator address (%s)", err)
 	}
 	return nil
+}
+
+func (msg *MsgClaim) NewClaimEvent() *EventClaim {
+	return &EventClaim{
+		ServicerAddress: msg.ServicerAddress,
+		SmstRootHash:    msg.SmstRootHash,
+	}
+}
+
+func (msg *MsgClaim) hexRootHash() string {
+	return fmt.Sprintf("%x", msg.SmstRootHash)
 }
