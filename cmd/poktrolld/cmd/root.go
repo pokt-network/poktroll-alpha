@@ -121,6 +121,7 @@ func initRootCmd(
 		),
 		genutilcli.ValidateGenesisCmd(app.ModuleBasics),
 		AddGenesisAccountCmd(app.DefaultNodeHome),
+                 // Adding the relayer cobra command via a command factory function
 		relayer.RelayerCmd(),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
