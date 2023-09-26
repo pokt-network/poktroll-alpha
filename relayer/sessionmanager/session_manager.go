@@ -74,7 +74,7 @@ func (sm *SessionManager) EnsureSessionTree(sessionInfo *sessionTypes.Session) *
 }
 
 func (sm *SessionManager) handleBlocks(ctx context.Context) {
-	subscription := sm.client.Blocks().Subscribe()
+	subscription := sm.client.BlocksNotifee().Subscribe()
 	go func() {
 		<-ctx.Done()
 		subscription.Unsubscribe()

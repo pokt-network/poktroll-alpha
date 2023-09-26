@@ -10,8 +10,8 @@ import (
 )
 
 type ServicerClient interface {
-	// Blocks returns an observable which emits newly committed blocks.
-	Blocks() (blocksNotifee utils.Observable[types.Block])
+	// BlocksNotifee returns an observable which emits newly committed blocks.
+	BlocksNotifee() (blocksNotifee utils.Observable[types.Block])
 	// LatestBlock returns the latest block that has been committed.
 	LatestBlock() types.Block
 	// SubmitClaim sends a claim message with the given SMT root hash as the

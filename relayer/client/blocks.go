@@ -31,8 +31,8 @@ func (blockEvent *cometBlockWebsocketMsg) Hash() []byte {
 	return blockEvent.Block.LastCommitHash.Bytes()
 }
 
-// Blocks implements the respective method on the ServicerClient interface.
-func (client *servicerClient) Blocks() utils.Observable[types.Block] {
+// BlocksNotifee implements the respective method on the ServicerClient interface.
+func (client *servicerClient) BlocksNotifee() utils.Observable[types.Block] {
 	return client.blocksNotifee
 }
 
@@ -42,7 +42,7 @@ func (client *servicerClient) LatestBlock() types.Block {
 	defer client.latestBlockMutex.RUnlock()
 	// block until we have a block to return
 	if client.latestBlock == nil {
-		subscription := client.Blocks().Subscribe()
+		subscription := client.BlocksNotifee().Subscribe()
 		<-subscription.Ch()
 		subscription.Unsubscribe()
 	}
