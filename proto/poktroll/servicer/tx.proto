@@ -31,7 +31,10 @@ message MsgUnstakeServicerResponse {}
 message MsgClaim {
   string servicer_address = 1;
   bytes  smst_root_hash = 2;
+  // IMPROVE: move session_id into a new session header field
   string session_id = 3;
+  // TECHDEBT: expiration_height is not used
+  int64 expiration_height = 4;
 }
 
 message MsgClaimResponse {}
