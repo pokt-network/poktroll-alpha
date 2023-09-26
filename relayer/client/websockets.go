@@ -3,10 +3,11 @@ package client
 import (
 	"context"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
 	"poktroll/relayer"
 	"sync"
+
+	"github.com/gorilla/websocket"
 )
 
 // listen blocks on reading messages from a websocket connection, it is intended

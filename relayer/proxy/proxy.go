@@ -11,16 +11,16 @@ import (
 
 	"poktroll/utils"
 	"poktroll/x/service/types"
-	svcTypes "poktroll/x/servicer/types"
+	servicerTypes "poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
 )
 
 var urlSchemePresenceRegex = regexp.MustCompile(`^\w{0,25}://`)
 
-type responseSigner func(*svcTypes.RelayResponse) error
+type responseSigner func(*servicerTypes.RelayResponse) error
 
 type RelayWithSession struct {
-	Relay   *svcTypes.Relay
+	Relay   *servicerTypes.Relay
 	Session *sessionTypes.Session
 }
 
@@ -28,8 +28,8 @@ type Proxy struct {
 	advertisedServices  []*types.ServiceConfig
 	keyring             keyring.Keyring
 	keyName             string
-	client              svcTypes.ServicerClient
-	servicerQueryClient svcTypes.QueryClient
+	client              servicerTypes.ServicerClient
+	servicerQueryClient servicerTypes.QueryClient
 	sessionQueryClient  sessionTypes.QueryClient
 	relayNotifier       chan *RelayWithSession
 	relayNotifee        utils.Observable[*RelayWithSession]
@@ -44,11 +44,11 @@ func NewProxy(
 	keyName string,
 	address string,
 	clientCtx client.Context,
-	client svcTypes.ServicerClient,
+	client servicerTypes.ServicerClient,
 	serviceEndpoints map[string][]string,
 ) (*Proxy, error) {
-	servicerQueryClient := svcTypes.NewQueryClient(clientCtx)
-	servicerInfo, err := servicerQueryClient.Servicers(ctx, &svcTypes.QueryGetServicersRequest{
+	servicerQueryClient := servicerTypes.NewQueryClient(clientCtx)
+	servicerInfo, err := servicerQueryClient.Servicers(ctx, &servicerTypes.QueryGetServicersRequest{
 		Address: address,
 	})
 	if err != nil {
@@ -115,7 +115,7 @@ func (proxy *Proxy) listen() error {
 	return nil
 }
 
-func (proxy *Proxy) signResponse(relayResponse *svcTypes.RelayResponse) error {
+func (proxy *Proxy) signResponse(relayResponse *servicerTypes.RelayResponse) error {
 	relayResBz, err := relayResponse.Marshal()
 	if err != nil {
 		return err
@@ -125,7 +125,7 @@ func (proxy *Proxy) signResponse(relayResponse *svcTypes.RelayResponse) error {
 	return nil
 }
 
-func validateSessionRequest(session *sessionTypes.Session, relayRequest *svcTypes.RelayRequest) error {
+func validateSessionRequest(session *sessionTypes.Session, relayRequest *servicerTypes.RelayRequest) error {
 	// TODO: validate relayRequest signature
 
 	// a similar SessionId means it's been generated from the same params

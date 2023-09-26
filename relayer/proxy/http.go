@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	serviceTypes "poktroll/x/service/types"
-	"poktroll/x/servicer/types"
+	servicerTypes "poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
 )
 
@@ -96,7 +96,7 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 	}
 
 	relayWithSession := &RelayWithSession{
-		Relay: &types.Relay{
+		Relay: &servicerTypes.Relay{
 			Req: relayRequest,
 			Res: relayResponse,
 		},
@@ -106,7 +106,7 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 	httpProxy.relayNotifier <- relayWithSession
 }
 
-func (httpProxy *httpProxy) executeRelay(req *http.Request, requestPayload []byte) (*types.RelayResponse, error) {
+func (httpProxy *httpProxy) executeRelay(req *http.Request, requestPayload []byte) (*servicerTypes.RelayResponse, error) {
 	// Change the request host to the service address
 	// DISCUSS: create a new request instead of mutating the existing one?
 	serviceResponse, err := proxyHTTPServiceRequest(req)
@@ -125,14 +125,14 @@ func (httpProxy *httpProxy) executeRelay(req *http.Request, requestPayload []byt
 	return relayResponse, nil
 }
 
-func newHTTPRelayRequest(req *http.Request) (*types.RelayRequest, error) {
+func newHTTPRelayRequest(req *http.Request) (*servicerTypes.RelayRequest, error) {
 	requestHeaders := make(map[string]string)
 	for k, v := range req.Header {
 		// TECHDEBT: this will drop all but the first value of a header containing multiple values.
 		requestHeaders[k] = v[0]
 	}
 
-	relayRequest := &types.RelayRequest{
+	relayRequest := &servicerTypes.RelayRequest{
 		Method:  req.Method,
 		Url:     req.URL.String(),
 		Headers: requestHeaders,
@@ -156,8 +156,8 @@ func proxyHTTPServiceRequest(req *http.Request) (*http.Response, error) {
 	return http.DefaultClient.Do(req)
 }
 
-func newRelayResponse(serviceResponse *http.Response) (_ *types.RelayResponse, err error) {
-	relayResponse := &types.RelayResponse{
+func newRelayResponse(serviceResponse *http.Response) (_ *servicerTypes.RelayResponse, err error) {
+	relayResponse := &servicerTypes.RelayResponse{
 		Headers:    make(map[string]string),
 		StatusCode: int32(serviceResponse.StatusCode),
 	}
@@ -178,7 +178,7 @@ func newRelayResponse(serviceResponse *http.Response) (_ *types.RelayResponse, e
 	return relayResponse, nil
 }
 
-func sendRelayResponse(relayResponse *types.RelayResponse, wr http.ResponseWriter) error {
+func sendRelayResponse(relayResponse *servicerTypes.RelayResponse, wr http.ResponseWriter) error {
 	// Set HTTP statuscode to match the service response's
 	wr.WriteHeader(int(relayResponse.StatusCode))
 

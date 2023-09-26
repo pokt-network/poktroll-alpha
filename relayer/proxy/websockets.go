@@ -8,7 +8,7 @@ import (
 	ws "github.com/gorilla/websocket"
 
 	serviceTypes "poktroll/x/service/types"
-	"poktroll/x/servicer/types"
+	servicerTypes "poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
 )
 
@@ -172,7 +172,7 @@ func (wsProxy *wsProxy) handleWsRequestMessage(
 
 	// account for request relaying work
 	//wsProxy.relayNotifier <- &RelayWithSession{
-	//	Relay:   &types.Relay{Req: relayRequest, Res: nil},
+	//	Relay:   &servicerTypes.Relay{Req: relayRequest, Res: nil},
 	//	Session: &sessionResult.Session,
 	//}
 	return nil
@@ -223,15 +223,15 @@ func (wsProxy *wsProxy) handleWsResponseMessage(
 
 	// account for reply relaying work
 	wsProxy.relayNotifier <- &RelayWithSession{
-		Relay:   &types.Relay{Req: nil, Res: relayResponse},
+		Relay:   &servicerTypes.Relay{Req: nil, Res: relayResponse},
 		Session: &sessionResult.Session,
 	}
 
 	return nil
 }
 
-func newWsRelayRequest(req []byte) (*types.RelayRequest, error) {
-	relayRequest := &types.RelayRequest{}
+func newWsRelayRequest(req []byte) (*servicerTypes.RelayRequest, error) {
+	relayRequest := &servicerTypes.RelayRequest{}
 	if err := relayRequest.Unmarshal(req); err != nil {
 		return nil, err
 	}
@@ -241,8 +241,8 @@ func newWsRelayRequest(req []byte) (*types.RelayRequest, error) {
 	return relayRequest, nil
 }
 
-func newWsRelayResponse(req []byte) (*types.RelayResponse, error) {
-	relayResponse := &types.RelayResponse{}
+func newWsRelayResponse(req []byte) (*servicerTypes.RelayResponse, error) {
+	relayResponse := &servicerTypes.RelayResponse{}
 	if err := relayResponse.Unmarshal(req); err != nil {
 		return nil, err
 	}
