@@ -49,6 +49,7 @@ func (httpProxy *httpProxy) Start(advertisedEndpointUrl string) error {
 // the body to a new io.ReadCloser containing the relay request payload, and then
 // sending it to the service.
 func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	relayRequest, err := newHTTPRelayRequest(req)
 	if err != nil {
 		replyWithHTTPError(500, err, httpResponseWriter)
@@ -62,7 +63,7 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?
-	sessionResult, err := httpProxy.sessionQueryClient.GetSession(req.Context(), query)
+	sessionResult, err := httpProxy.sessionQueryClient.GetSession(ctx, query)
 	if err != nil {
 		replyWithHTTPError(500, err, httpResponseWriter)
 		return

@@ -85,7 +85,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 
 	// INCOMPLETE: this should be populated from some relayer config.
 	serviceEndpoints := map[string][]string{
-		"svc1": {"ws://localhost:8548/websocket"},
+		"svc1": {"ws://localhost:8547/"},
 		"svc2": {"http://localhost:8547"},
 	}
 
