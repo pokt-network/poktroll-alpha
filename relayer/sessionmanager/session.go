@@ -11,6 +11,7 @@ import (
 )
 
 type SessionWithTree interface {
+	GetSessionId() string
 	SessionTree() *smt.SMST
 	CloseTree() ([]byte, error)
 	DeleteTree() error
@@ -42,6 +43,10 @@ func (s *sessionWithTree) SessionTree() *smt.SMST {
 	}
 
 	return s.tree
+}
+
+func (s *sessionWithTree) GetSessionId() string {
+	return s.sessionInfo.SessionId
 }
 
 // get the root of the no longer updatable tree
