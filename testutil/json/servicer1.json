@@ -11,7 +11,7 @@
       },
       "endpoints": [
         {
-          "url": "ws://localhost:8546/websocket",
+          "url": "ws://localhost:8546/",
           "rpc_type": 2,
           "rpc_type_enum": "WEBSOCKET",
           "metadata": {

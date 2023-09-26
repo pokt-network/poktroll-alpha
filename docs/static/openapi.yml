@@ -47484,6 +47484,11 @@ paths:
                       format: byte
                     session_id:
                       type: string
+                      title: 'IMPROVE: move session_id into a new session header field'
+                    expiration_height:
+                      type: string
+                      format: int64
+                      title: 'TECHDEBT: expiration_height is not used'
               pagination:
                 type: object
                 properties:
@@ -78401,6 +78406,11 @@ definitions:
         format: byte
       session_id:
         type: string
+        title: 'IMPROVE: move session_id into a new session header field'
+      expiration_height:
+        type: string
+        format: int64
+        title: 'TECHDEBT: expiration_height is not used'
   poktroll.servicer.MsgClaimResponse:
     type: object
   poktroll.servicer.MsgProofResponse:
@@ -78570,6 +78580,11 @@ definitions:
               format: byte
             session_id:
               type: string
+              title: 'IMPROVE: move session_id into a new session header field'
+            expiration_height:
+              type: string
+              format: int64
+              title: 'TECHDEBT: expiration_height is not used'
       pagination:
         type: object
         properties:

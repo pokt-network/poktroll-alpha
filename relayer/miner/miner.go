@@ -4,6 +4,7 @@ import (
 	"context"
 	"hash"
 	"log"
+	"sync"
 
 	"poktroll/relayer/client"
 	"poktroll/relayer/proxy"
@@ -16,6 +17,7 @@ type Miner struct {
 	sessionManager *sessionmanager.SessionManager
 	client         client.ServicerClient
 	hasher         hash.Hash
+	smstLock       sync.Mutex
 }
 
 // IMPROVE: be consistent with component configuration & setup.
@@ -29,6 +31,7 @@ func NewMiner(
 		hasher:         hasher,
 		client:         client,
 		sessionManager: sessionManager,
+		smstLock:       sync.Mutex{},
 	}
 
 	return m
@@ -65,6 +68,8 @@ func (m *Miner) handleSessions(ctx context.Context) {
 }
 
 func (m *Miner) handleSingleSession(ctx context.Context, session sessionmanager.SessionWithTree) {
+	session.Lock()
+	defer session.Unlock()
 	// this session should no longer be updated
 	claimRoot, err := session.CloseTree()
 	if err != nil {
@@ -119,6 +124,9 @@ func (m *Miner) handleSingleRelay(
 		log.Printf("failed to marshal relay: %s\n", err)
 		return
 	}
+
+	m.smstLock.Lock()
+	defer m.smstLock.Unlock()
 
 	// Is it correct that we need to hash the key while smst.Update() could do it
 	// since smst has a reference to the hasher

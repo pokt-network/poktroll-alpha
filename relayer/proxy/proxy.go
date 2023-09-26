@@ -67,7 +67,7 @@ func NewProxy(
 	}
 
 	proxy.relayNotifee, proxy.relayNotifier = utils.NewControlledObservable[*RelayWithSession](nil)
-	if err := proxy.listen(); err != nil {
+	if err := proxy.listen(ctx); err != nil {
 		return nil, err
 	}
 
@@ -78,7 +78,7 @@ func (proxy *Proxy) Relays() utils.Observable[*RelayWithSession] {
 	return proxy.relayNotifee
 }
 
-func (proxy *Proxy) listen() error {
+func (proxy *Proxy) listen(ctx context.Context) error {
 	// create a proxy for each endpoint of each service
 	for _, advertisedService := range proxy.advertisedServices {
 		for i, advertisedEndpoint := range advertisedService.Endpoints {
@@ -105,7 +105,7 @@ func (proxy *Proxy) listen() error {
 					proxy.relayNotifier,
 					proxy.signResponse,
 				)
-				go websocketProxy.Start(advertisedEndpoint.Url)
+				go websocketProxy.Start(ctx, advertisedEndpoint.Url)
 			default:
 				return fmt.Errorf("unsupported rpc type: %v", advertisedEndpoint.RpcType)
 			}

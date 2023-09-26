@@ -14,6 +14,7 @@ import (
 )
 
 type wsProxy struct {
+	ctx                   context.Context
 	serviceId             *serviceTypes.ServiceId
 	serviceForwardingAddr string
 	sessionQueryClient    sessionTypes.QueryClient
@@ -38,10 +39,12 @@ func NewWsProxy(
 		client:                client,
 		relayNotifier:         relayNotifier,
 		signResponse:          signResponse,
+		upgrader:              &ws.Upgrader{},
 	}
 }
 
-func (wsProxy *wsProxy) Start(advertisedEndpointUrl string) error {
+func (wsProxy *wsProxy) Start(ctx context.Context, advertisedEndpointUrl string) error {
+	wsProxy.ctx = ctx
 	return http.ListenAndServe(mustGetHostAddress(advertisedEndpointUrl), wsProxy)
 }
 
@@ -67,7 +70,7 @@ func (wsProxy *wsProxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?
-	sessionResult, err := wsProxy.sessionQueryClient.GetSession(context.TODO(), query)
+	sessionResult, err := wsProxy.sessionQueryClient.GetSession(wsProxy.ctx, query)
 	if err != nil {
 		log.Printf("failed getting session info: %v", err)
 		replyWithHTTPError(500, err, wr)
@@ -97,43 +100,56 @@ func (wsProxy *wsProxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	go func() {
+		<-wsProxy.ctx.Done()
+		_ = serviceConn.Close()
+		_ = clientConn.Close()
+	}()
+
 	// TODO: closing one of the connections should close the other
 	// TODO: handle connection errors with errgoups
-	go wsProxy.handleWsClientMessages(clientConn, serviceConn)
-	go wsProxy.handleWsServiceMessages(clientConn, serviceConn, relayRequest.ApplicationAddress)
+	go wsProxy.handleWsClientMessages(wsProxy.ctx, clientConn, serviceConn)
+	go wsProxy.handleWsServiceMessages(wsProxy.ctx, clientConn, serviceConn, relayRequest.ApplicationAddress)
 }
 
-func (wsProxy *wsProxy) handleWsClientMessages(clientConn, serviceConn *ws.Conn) error {
-	defer clientConn.Close()
+func (wsProxy *wsProxy) handleWsClientMessages(ctx context.Context, clientConn, serviceConn *ws.Conn) {
 	for {
 		messageType, messageBz, err := clientConn.ReadMessage()
 		if err != nil {
+			if ws.IsUnexpectedCloseError(err) {
+				return
+			}
 			log.Printf("failed reading message: %v", err)
-			return replyWithWsError(err, clientConn)
+			replyWithWsError(err, clientConn)
+			return
 		}
-		if err := wsProxy.handleWsRequestMessage(serviceConn, clientConn, messageBz, messageType); err != nil {
+
+		if err := wsProxy.handleWsRequestMessage(ctx, serviceConn, clientConn, messageBz, messageType); err != nil {
 			log.Printf("failed handling request message: %v", err)
-			return err
 		}
 	}
 }
 
-func (wsProxy *wsProxy) handleWsServiceMessages(clientConn, serviceConn *ws.Conn, appAddress string) error {
-	defer serviceConn.Close()
+func (wsProxy *wsProxy) handleWsServiceMessages(ctx context.Context, clientConn, serviceConn *ws.Conn, appAddress string) {
 	for {
 		messageType, messageBz, err := serviceConn.ReadMessage()
 		if err != nil {
+			if ws.IsUnexpectedCloseError(err) {
+				return
+			}
 			log.Printf("failed reading message: %v", err)
-			return replyWithWsError(err, clientConn)
+			replyWithWsError(err, clientConn)
+			return
 		}
-		if err := wsProxy.handleWsResponseMessage(clientConn, serviceConn, messageBz, messageType, appAddress); err != nil {
+
+		if err := wsProxy.handleWsResponseMessage(ctx, clientConn, serviceConn, messageBz, messageType, appAddress); err != nil {
 			log.Printf("failed handling response message: %v", err)
-			return err
 		}
 	}
 }
 
 func (wsProxy *wsProxy) handleWsRequestMessage(
+	ctx context.Context,
 	serviceConn *ws.Conn,
 	clientConn *ws.Conn,
 	req []byte,
@@ -153,7 +169,7 @@ func (wsProxy *wsProxy) handleWsRequestMessage(
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?
-	sessionResult, err := wsProxy.sessionQueryClient.GetSession(context.TODO(), query)
+	sessionResult, err := wsProxy.sessionQueryClient.GetSession(ctx, query)
 	if err != nil {
 		return replyWithWsError(err, clientConn)
 	}
@@ -172,14 +188,15 @@ func (wsProxy *wsProxy) handleWsRequestMessage(
 	}
 
 	// account for request relaying work
-	//wsProxy.relayNotifier <- &RelayWithSession{
-	//	Relay:   &servicerTypes.Relay{Req: relayRequest, Res: nil},
-	//	Session: &sessionResult.Session,
-	//}
+	wsProxy.relayNotifier <- &RelayWithSession{
+		Relay:   &servicerTypes.Relay{Req: relayRequest, Res: nil},
+		Session: &sessionResult.Session,
+	}
 	return nil
 }
 
 func (wsProxy *wsProxy) handleWsResponseMessage(
+	ctx context.Context,
 	clientConn *ws.Conn,
 	servicerCon *ws.Conn,
 	response []byte,
@@ -203,7 +220,7 @@ func (wsProxy *wsProxy) handleWsResponseMessage(
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?
-	sessionResult, err := wsProxy.sessionQueryClient.GetSession(context.TODO(), query)
+	sessionResult, err := wsProxy.sessionQueryClient.GetSession(ctx, query)
 	if err != nil {
 		return replyWithWsError(err, clientConn)
 	}
@@ -212,13 +229,7 @@ func (wsProxy *wsProxy) handleWsResponseMessage(
 		return replyWithWsError(err, clientConn)
 	}
 
-	// serialized relay signed response and send it to the client
-	relayResponseBz, err := relayResponse.Marshal()
-	if err != nil {
-		return replyWithWsError(err, clientConn)
-	}
-
-	if clientConn.WriteMessage(messageType, relayResponseBz) != nil {
+	if err := clientConn.WriteMessage(messageType, response); err != nil {
 		return replyWithWsError(err, clientConn)
 	}
 
@@ -232,9 +243,8 @@ func (wsProxy *wsProxy) handleWsResponseMessage(
 }
 
 func newWsRelayRequest(req []byte) (*servicerTypes.RelayRequest, error) {
-	relayRequest := &servicerTypes.RelayRequest{}
-	if err := relayRequest.Unmarshal(req); err != nil {
-		return nil, err
+	relayRequest := &servicerTypes.RelayRequest{
+		Payload: req,
 	}
 
 	// HACK: the application address should be populated by the requesting client
@@ -243,9 +253,8 @@ func newWsRelayRequest(req []byte) (*servicerTypes.RelayRequest, error) {
 }
 
 func newWsRelayResponse(req []byte) (*servicerTypes.RelayResponse, error) {
-	relayResponse := &servicerTypes.RelayResponse{}
-	if err := relayResponse.Unmarshal(req); err != nil {
-		return nil, err
+	relayResponse := &servicerTypes.RelayResponse{
+		Payload: req,
 	}
 	return relayResponse, nil
 }
