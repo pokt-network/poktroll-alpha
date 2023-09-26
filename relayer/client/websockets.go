@@ -18,6 +18,8 @@ func (client *servicerClient) listen(ctx context.Context, conn *websocket.Conn, 
 		wg.Add(1)
 	}
 
+	// read and handle messages from the websocket. This loop will exit when the
+	// websocket connection is closed and/or returns an error.
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
@@ -53,6 +55,8 @@ type messageHandler func(ctx context.Context, msg []byte) error
 // (see: https://github.com/cosmos/cosmos-sdk/blob/main/client/rpc/tx.go#L114)
 // subscribeWithQuery subscribes to chain event messages matching the given query,
 // via a websocket connection.
+// (see: https://pkg.go.dev/github.com/cometbft/cometbft/types#pkg-constants)
+// (see: https://docs.cosmos.network/v0.47/core/events#subscribing-to-events)
 func (client *servicerClient) subscribeWithQuery(ctx context.Context, query string, msgHandler messageHandler) {
 	conn, _, err := websocket.DefaultDialer.Dial(client.wsURL, nil)
 	if err != nil {

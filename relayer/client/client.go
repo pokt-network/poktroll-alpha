@@ -19,6 +19,7 @@ import (
 
 var (
 	_ ServicerClient = &servicerClient{}
+	// TECHDEBT: consolidate into a(n) errors file(s)/package
 	// errEmptyAddress is used when address hasn't been configured but is required.
 	errEmptyAddress = fmt.Errorf("client address is empty")
 )
