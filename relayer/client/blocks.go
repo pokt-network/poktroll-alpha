@@ -52,6 +52,8 @@ func (client *servicerClient) LatestBlock() types.Block {
 // subscribeToBlocks subscribes to committed blocks using a single websocket
 // connection.
 func (client *servicerClient) subscribeToBlocks(ctx context.Context) utils.Observable[types.Block] {
+	// NB: cometbft event subscription query
+	// (see: https://docs.cosmos.network/v0.47/core/events#subscribing-to-events)
 	query := "tm.event='NewBlock'"
 
 	blocksNotifee, blocksNotifier := utils.NewControlledObservable[types.Block](nil)

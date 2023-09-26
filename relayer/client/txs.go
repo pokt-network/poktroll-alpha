@@ -24,7 +24,7 @@ var (
 // the block subscription. It implements the types.Block interface by loosely
 // wrapping cometbft's block type, into which messages are deserialized.
 type cometTxResponseWebsocketMsg struct {
-	Tx     []byte          `json:"tx"`
+	Tx     []byte            `json:"tx"`
 	Events []abciTypes.Event `json:"events"`
 }
 
@@ -34,6 +34,8 @@ func (client *servicerClient) subscribeToOwnTxs(
 	ctx context.Context,
 	blocksNotifee utils.Observable[types.Block],
 ) {
+	// NB: cometbft event subscription query
+	// (see: https://docs.cosmos.network/v0.47/core/events#subscribing-to-events)
 	query := fmt.Sprintf("tm.event='Tx' AND message.sender='%s'", client.address)
 
 	// TODO_CONSIDERATION: using an observable for received tx messages & a filter
