@@ -8,6 +8,7 @@ import (
 // SubmitClaim implements the respective method on the ServicerClient interface.
 func (client *servicerClient) SubmitClaim(
 	ctx context.Context,
+	sessionId string,
 	smtRootHash []byte,
 ) error {
 	if client.address == "" {
@@ -17,6 +18,7 @@ func (client *servicerClient) SubmitClaim(
 	msg := &types.MsgClaim{
 		ServicerAddress: client.address,
 		SmstRootHash:    smtRootHash,
+		SessionId:       sessionId,
 	}
 	txErrCh, err := client.signAndBroadcastMessageTx(ctx, msg)
 	if err != nil {

@@ -16,7 +16,7 @@ type ServicerClient interface {
 	LatestBlock() types.Block
 	// SubmitClaim sends a claim message with the given SMT root hash as the
 	// commitment.
-	SubmitClaim(ctx context.Context, smtRootHash []byte) error
+	SubmitClaim(ctx context.Context, sessionId string, smtRootHash []byte) error
 	// SubmitProof sends a proof message with the given parameters, to be validated
 	// on-chain in exchange for a reward.
 	SubmitProof(

@@ -73,7 +73,7 @@ func (m *Miner) handleSingleSession(ctx context.Context, session sessionmanager.
 	}
 
 	// SubmitClaim ensures on-chain claim inclusion
-	if err := m.client.SubmitClaim(ctx, claimRoot); err != nil {
+	if err := m.client.SubmitClaim(ctx, session.GetSessionId(), claimRoot); err != nil {
 		log.Printf("failed to submit claim: %s", err)
 		return
 	}
