@@ -53,5 +53,7 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 
 	logger.Debug("proof verified")
 
+	// INCOMPLETE: store proof.
+
 	return &types.MsgProofResponse{}, nil
 }
