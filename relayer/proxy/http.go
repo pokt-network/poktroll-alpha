@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	"poktroll/relayer/client"
 	serviceTypes "poktroll/x/service/types"
 	servicerTypes "poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
@@ -16,7 +17,7 @@ type httpProxy struct {
 	serviceId             *serviceTypes.ServiceId
 	serviceForwardingAddr string
 	sessionQueryClient    sessionTypes.QueryClient
-	client                types.ServicerClient
+	client                client.ServicerClient
 	relayNotifier         chan *RelayWithSession
 	signResponse          responseSigner
 }
@@ -25,7 +26,7 @@ func NewHttpProxy(
 	serviceId *serviceTypes.ServiceId,
 	serviceForwardingAddr string,
 	sessionQueryClient sessionTypes.QueryClient,
-	client types.ServicerClient,
+	client client.ServicerClient,
 	relayNotifier chan *RelayWithSession,
 	signResponse responseSigner,
 ) *httpProxy {

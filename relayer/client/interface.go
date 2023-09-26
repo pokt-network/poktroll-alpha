@@ -1,4 +1,4 @@
-package types
+package client
 
 import (
 	"context"
@@ -6,13 +6,14 @@ import (
 	"github.com/pokt-network/smt"
 
 	"poktroll/utils"
+	"poktroll/x/servicer/types"
 )
 
 type ServicerClient interface {
 	// Blocks returns an observable which emits newly committed blocks.
-	Blocks() (blocksNotifee utils.Observable[Block])
+	Blocks() (blocksNotifee utils.Observable[types.Block])
 	// LatestBlock returns the latest block that has been committed.
-	LatestBlock() Block
+	LatestBlock() types.Block
 	// SubmitClaim sends a claim message with the given SMT root hash as the
 	// commitment.
 	SubmitClaim(ctx context.Context, smtRootHash []byte) error

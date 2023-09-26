@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	_ types.ServicerClient = &servicerClient{}
+	_ ServicerClient = &servicerClient{}
 	// errEmptyAddress is used when address hasn't been configured but is required.
 	errEmptyAddress = fmt.Errorf("client address is empty")
 )

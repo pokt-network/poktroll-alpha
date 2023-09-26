@@ -6,9 +6,10 @@ import (
 	"net/url"
 	"regexp"
 
-	"github.com/cosmos/cosmos-sdk/client"
+	cosmosClient "github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 
+	"poktroll/relayer/client"
 	"poktroll/utils"
 	"poktroll/x/service/types"
 	servicerTypes "poktroll/x/servicer/types"
@@ -28,7 +29,7 @@ type Proxy struct {
 	advertisedServices  []*types.ServiceConfig
 	keyring             keyring.Keyring
 	keyName             string
-	client              servicerTypes.ServicerClient
+	client              client.ServicerClient
 	servicerQueryClient servicerTypes.QueryClient
 	sessionQueryClient  sessionTypes.QueryClient
 	relayNotifier       chan *RelayWithSession
@@ -43,8 +44,8 @@ func NewProxy(
 	keyring keyring.Keyring,
 	keyName string,
 	address string,
-	clientCtx client.Context,
-	client servicerTypes.ServicerClient,
+	clientCtx cosmosClient.Context,
+	client client.ServicerClient,
 	serviceEndpoints map[string][]string,
 ) (*Proxy, error) {
 	servicerQueryClient := servicerTypes.NewQueryClient(clientCtx)

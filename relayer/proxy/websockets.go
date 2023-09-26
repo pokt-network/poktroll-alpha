@@ -7,6 +7,7 @@ import (
 
 	ws "github.com/gorilla/websocket"
 
+	"poktroll/relayer/client"
 	serviceTypes "poktroll/x/service/types"
 	servicerTypes "poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
@@ -16,7 +17,7 @@ type wsProxy struct {
 	serviceId             *serviceTypes.ServiceId
 	serviceForwardingAddr string
 	sessionQueryClient    sessionTypes.QueryClient
-	client                types.ServicerClient
+	client                client.ServicerClient
 	relayNotifier         chan *RelayWithSession
 	signResponse          responseSigner
 	upgrader              *ws.Upgrader
@@ -26,7 +27,7 @@ func NewWsProxy(
 	serviceId *serviceTypes.ServiceId,
 	serviceForwardingAddr string,
 	sessionQueryClient sessionTypes.QueryClient,
-	client types.ServicerClient,
+	client client.ServicerClient,
 	relayNotifier chan *RelayWithSession,
 	signResponse responseSigner,
 ) *wsProxy {

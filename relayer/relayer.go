@@ -5,20 +5,20 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/client"
+	cosmosClient "github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 
+	"poktroll/relayer/client"
 	"poktroll/relayer/miner"
 	"poktroll/relayer/proxy"
 	"poktroll/relayer/sessionmanager"
-	"poktroll/x/servicer/types"
 )
 
 type Relayer struct {
 	proxy          *proxy.Proxy
 	miner          *miner.Miner
 	sessionManager *sessionmanager.SessionManager
-	servicerClient types.ServicerClient
+	servicerClient client.ServicerClient
 }
 
 func NewRelayer() *Relayer {
@@ -29,7 +29,7 @@ func (relayer *Relayer) Start() error {
 	return nil
 }
 
-func (relayer *Relayer) WithServicerClient(client types.ServicerClient) *Relayer {
+func (relayer *Relayer) WithServicerClient(client client.ServicerClient) *Relayer {
 	relayer.servicerClient = client
 
 	return relayer
@@ -55,8 +55,8 @@ func (relayer *Relayer) WithKey(
 	keyring keyring.Keyring,
 	keyName string,
 	address string,
-	clientCtx client.Context,
-	client types.ServicerClient,
+	clientCtx cosmosClient.Context,
+	client client.ServicerClient,
 	serviceEndpoints map[string][]string,
 ) *Relayer {
 	// IMPROVE: separate configuration from subcomponent construction

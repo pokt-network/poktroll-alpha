@@ -5,16 +5,16 @@ import (
 	"hash"
 	"log"
 
+	"poktroll/relayer/client"
 	"poktroll/relayer/proxy"
 	"poktroll/relayer/sessionmanager"
 	"poktroll/utils"
-	"poktroll/x/servicer/types"
 )
 
 type Miner struct {
 	relays         utils.Observable[*proxy.RelayWithSession]
 	sessionManager *sessionmanager.SessionManager
-	client         types.ServicerClient
+	client         client.ServicerClient
 	hasher         hash.Hash
 }
 
@@ -22,7 +22,7 @@ type Miner struct {
 // (We got burned by the `WithXXX` pattern and just did this for now).
 func NewMiner(
 	hasher hash.Hash,
-	client types.ServicerClient,
+	client client.ServicerClient,
 	sessionManager *sessionmanager.SessionManager,
 ) *Miner {
 	m := &Miner{

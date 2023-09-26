@@ -8,8 +8,8 @@ import (
 
 	"github.com/pokt-network/smt"
 
+	"poktroll/relayer/client"
 	"poktroll/utils"
-	"poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
 )
 
@@ -21,11 +21,11 @@ type SessionManager struct {
 	sessions         map[uint64]map[string]SessionWithTree
 	sessionsNotifier chan map[string]SessionWithTree // channel emitting map[sessionId]SessionWithTree
 	sessionsNotifee  utils.Observable[map[string]SessionWithTree]
-	client           types.ServicerClient
+	client           client.ServicerClient
 	storeDirectory   string // directory that will contain session tree stores
 }
 
-func NewSessionManager(ctx context.Context, storeDirectory string, client types.ServicerClient) *SessionManager {
+func NewSessionManager(ctx context.Context, storeDirectory string, client client.ServicerClient) *SessionManager {
 	sessions := make(map[uint64]map[string]SessionWithTree)
 	sm := &SessionManager{client: client, storeDirectory: storeDirectory, sessions: sessions}
 	sm.sessionsNotifee, sm.sessionsNotifier = utils.NewControlledObservable[map[string]SessionWithTree](nil)
