@@ -9,12 +9,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// listen blocks on reading messages from a websocket connection, it is intended
-// to be called from within a go routine.
+// listen blocks on reading messages from a websocket connection.
+// IMPORTANT: it is intended to be called from within a go routine.
 func (client *servicerClient) listen(ctx context.Context, conn *websocket.Conn, msgHandler messageHandler) {
 	wg, haveWaitGroup := ctx.Value(WaitGroupContextKey).(*sync.WaitGroup)
 	if haveWaitGroup {
 		// Increment the relayer wait group to track this goroutine
+		// TODO_CLEANUP: Given that we call this a relayer, we should rename `servicerClient` to `relayerClient`
 		wg.Add(1)
 	}
 
@@ -49,7 +50,7 @@ func (client *servicerClient) listen(ctx context.Context, conn *websocket.Conn, 
 type messageHandler func(ctx context.Context, msg []byte) error
 
 // TODO_CONSIDERATION: the cosmos-sdk CLI code seems to use a cometbft RPC client
-// which includes a `#Subscribe()` method for a simlar prupose. Perhaps we could
+// which includes a `#Subscribe()` method for a similar purpose. Perhaps we could
 // replace this custom websocket client with that.
 // (see: https://github.com/cometbft/cometbft/blob/main/rpc/client/http/http.go#L110)
 // (see: https://github.com/cosmos/cosmos-sdk/blob/main/client/rpc/tx.go#L114)
@@ -63,6 +64,7 @@ func (client *servicerClient) subscribeWithQuery(ctx context.Context, query stri
 		panic(fmt.Errorf("failed to connect to websocket: %w", err))
 	}
 
+	// TODO_DISCUSS: Should we replace `requestId` with just 
 	requestId := client.getNextRequestId()
 	conn.WriteJSON(map[string]interface{}{
 		"jsonrpc": "2.0",
