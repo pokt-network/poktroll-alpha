@@ -227,6 +227,7 @@ make relayer_start
 make anvil_start
 
 # Console 4
+make cast_relay
 
 ```
 
