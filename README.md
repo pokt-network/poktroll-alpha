@@ -29,7 +29,7 @@ This is an alpha version of trying to build Pocket on top of RollKit.
 
 ### TLDR
 
-- Install Docker Desktop
+- Install Docker Desktop, kind, ignite, tilt, protobuf
 - `kind create cluster`
 - `make localnet_up`
 - press space
