@@ -11,21 +11,7 @@
       },
       "endpoints": [
         {
-          "rpc_type": 1,
-          "rpc_type_enum": "GRPC",
-          "metadata": {
-            "version": "1.0.0",
-            "region": "US-East"
-          },
-          "configs": [
-            {
-              "key": 1,
-              "key_enum": "TIMEOUT",
-              "value": "30s"
-            }
-          ]
-        },
-        {
+          "url": "ws://localhost:8546/",
           "rpc_type": 2,
           "rpc_type_enum": "WEBSOCKET",
           "metadata": {
@@ -50,6 +36,7 @@
       },
       "endpoints": [
         {
+          "url": "http://localhost:8545",
           "rpc_type": 3,
           "rpc_type_enum": "JSON_RPC",
           "metadata": {

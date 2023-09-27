@@ -1,18 +1,41 @@
 version: 1
 accounts:
-  - name: alice
+  - name: faucet
+    mnemonic: "baby advance work soap slow exclude blur humble lucky rough teach wide chuckle captain rack laundry butter main very cannon donate armor dress follow"
     coins:
-      - 20000token
-      - 200000000stake
-  - name: bob
+      - 999999999999999999stake
+  - name: validator1
+    mnemonic: "creek path rule retire evolve vehicle bargain champion roof whisper prize endorse unknown anchor fashion energy club sauce elder parent cotton old affair visa"
     coins:
-      - 10000token
+      - 900000000stake
+  - name: app1
+    mnemonic: "mention spy involve verb exercise fiction catalog order agent envelope mystery text defy sing royal fringe return face alpha knife wonder vocal virus drum"
+    coins:
       - 100000000stake
+  - name: app2
+    mnemonic: "material little labor strong search device trick amateur action crouch invite glide provide elite mango now paper sense found hamster neglect work install bulk"
+    coins:
+      - 200000000stake
+  - name: app3
+    mnemonic: "involve clean slab term real human green immune valid swing protect talk silent unique cart few ice era right thunder again drop among bounce"
+    coins:
+      - 300000000stake
+  - name: servicer1
+    mnemonic: "cool industry busy tumble funny relax error state height like board wing goat emerge visual idle never unveil announce hill primary okay spatial frog"
+    coins:
+      - 110000000stake
+  - name: servicer2
+    mnemonic: "peanut hen enroll meat legal have error input bulk later correct denial onion fossil wing excuse elephant object apology switch claim rare decide surface"
+    coins:
+      - 220000000stake
+  - name: servicer3
+    mnemonic: "client city senior tenant source soda spread buffalo shaft amused bar carbon keen off feel coral easily announce metal orphan sustain maple expand loop"
+    coins:
+      - 330000000stake
 faucet:
-  name: bob
+  name: faucet
   coins:
-    - 5token
-    - 100000stake
+    - 10000stake
 client:
   typescript:
     path: ts-client
@@ -21,5 +44,10 @@ client:
   openapi:
     path: docs/static/openapi.yml
 validators:
-  - name: alice
-    bonded: 100000000stake
+  - name: validator1
+    bonded: 900000000stake
+    config:
+      moniker: "validator1"
+# We can persist arbitrary genesis values via 1 to 1 mapping to genesis.json
+genesis:
+  # genesis_time: "2023-09-20T07:37:07.239355799Z"

@@ -41,6 +41,7 @@ import (
 
 	"poktroll/app"
 	appparams "poktroll/app/params"
+	relayer "poktroll/relayer/cmd"
 )
 
 // NewRootCmd creates a new root command for a Cosmos SDK application
@@ -120,6 +121,8 @@ func initRootCmd(
 		),
 		genutilcli.ValidateGenesisCmd(app.ModuleBasics),
 		AddGenesisAccountCmd(app.DefaultNodeHome),
+                 // Adding the relayer cobra command via a command factory function
+		relayer.RelayerCmd(),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
 		config.Cmd(),

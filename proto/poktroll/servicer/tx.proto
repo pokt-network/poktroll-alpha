@@ -9,12 +9,13 @@ option go_package = "poktroll/x/servicer/types";
 
 // Msg defines the Msg service.
 service Msg {
-  rpc StakeServicer   (MsgStakeServicer  ) returns (MsgStakeServicerResponse  );
+  rpc StakeServicer   (MsgStakeServicer) returns (MsgStakeServicerResponse);
   rpc UnstakeServicer (MsgUnstakeServicer) returns (MsgUnstakeServicerResponse);
+  rpc Claim           (MsgClaim) returns (MsgClaimResponse);
+  rpc Proof           (MsgProof) returns (MsgProofResponse);
 }
-
 message MsgStakeServicer {
-  string address = 1;
+  string                   address = 1;
   cosmos.base.v1beta1.Coin stakeAmount = 2;
   repeated service.ServiceConfig services = 3;
 }
@@ -26,4 +27,28 @@ message MsgUnstakeServicer {
 }
 
 message MsgUnstakeServicerResponse {}
+
+message MsgClaim {
+  string servicer_address = 1;
+  bytes  smst_root_hash = 2;
+  // IMPROVE: move session_id into a new session_header field
+  string session_id = 3;
+  // TECHDEBT: expiration_height is not used right now and could be computed from on-chain data
+  int64 expiration_height = 4;
+}
+
+message MsgClaimResponse {}
+
+message MsgProof {
+  string servicer_address = 1;
+  bytes smst_root_hash = 2;
+  bytes path = 3;
+  bytes value_hash = 4;
+  uint64 smst_sum = 5;
+  bytes proof = 6;
+  // IMPROVE: move session_id into a new session_header field
+  string session_id = 7;
+}
+
+message MsgProofResponse {}
 

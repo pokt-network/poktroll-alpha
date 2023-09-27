@@ -219,15 +219,40 @@ session_get: ## Queries the poktroll node for session data
 
 .PHONY: session_get_app1_svc1
 session_get_app1_svc1: ## Getting the session for app1 and svc1 and height1
-	APP=pokt1aj5m44gpvdmqcr3q0fm24vtff8g8j78004wn43 SVC=svc1 HEIGHT=$(SESSION_HEIGHT) make session_get
+	APP=pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4 SVC=svc1 HEIGHT=$(SESSION_HEIGHT) make session_get
 
 .PHONY: session_get_app2_svc2
 session_get_app2_svc2: ## Getting the session for app2 and svc2 and height1
-	APP=pokt1c0aal6vmfh094v7xuk3ynkfexep3txdpjk6xhz SVC=svc2 HEIGHT=$(SESSION_HEIGHT) make session_get
+	APP=pokt184zvylazwu4queyzpl0gyz9yf5yxm2kdhh9hpm SVC=svc2 HEIGHT=$(SESSION_HEIGHT) make session_get
 
 .PHONY: session_get_app3_svc3
 session_get_app3_svc3: ## Getting the session for app3 and svc3 and height1
-	APP=pokt1c0aal6vmfh094v7xuk3ynkfexep3txdpjk6xhz SVC=svc3 HEIGHT=$(SESSION_HEIGHT) make session_get
+	APP=pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex SVC=svc3 HEIGHT=$(SESSION_HEIGHT) make session_get
+
+.PHONY: relayer_start
+relayer_start: ## Start the relayer
+	poktrolld relayer \
+	--node $(POKTROLLD_NODE) \
+	--signing-key servicer1 \
+	--keyring-backend test
+
+.PHONY: claims_query
+claims_query: ## Query the poktroll node for claims data
+	SERVICER_ADDR=$(shell poktrolld keys show servicer1 -a --keyring-backend test); \
+	poktrolld query servicer claims $$SERVICER_ADDR
+
+.PHONY: anvil_start
+anvil_start: ## Start the anvil
+	anvil -p 8547 -b 5
+
+.PHONY: cast_relay
+cast_relay: ## Cast a relay
+	cast block
+
+.PHONY: ws_subscribe
+ws_subscribe: ## Subscribe to the websocket for new blocks
+	echo "Copy paste the following: {"id":1,"jsonrpc":"2.0","method":"eth_subscribe","params":["newHeads"]}"
+	wscat --connect ws://localhost:8546
 
 .PHONY: localnet_up
 localnet_up: ## Starts localnet
@@ -313,3 +338,12 @@ ignite_regenerate: ## Regenerate the ignite boilerplate
 .PHONY: ignite_acc_list
 ignite_acc_list: ## List all the accounts in the ignite boilerplate
 	ignite account list  --keyring-dir $(POKTROLLD_HOME) --keyring-backend test
+
+.PHONY: localnet_regenesis
+localnet_regenesis:
+	# NOTE: intentionally not using --home <dir> flag to avoid overwriting the test keyring
+	ignite chain init --skip-proto
+	rm -rf $(POKTROLLD_HOME)/keyring-test
+	cp -r ${HOME}/.poktroll/keyring-test $(POKTROLLD_HOME)
+	cp ${HOME}/.poktroll/config/*_key.json $(POKTROLLD_HOME)/config/
+	cp ${HOME}/.poktroll/config/genesis.json ./localnet/
