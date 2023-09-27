@@ -57,16 +57,16 @@ func (client *servicerClient) subscribeToBlocks(ctx context.Context) utils.Obser
 	query := "tm.event='NewBlock'"
 
 	blocksNotifee, blocksNotifier := utils.NewControlledObservable[types.Block](nil)
-	msgHandler := handleBlocksFactory(blocksNotifier)
+	msgHandler := blocksFactoryHandler(blocksNotifier)
 	client.subscribeWithQuery(ctx, query, msgHandler)
 
 	return blocksNotifee
 }
 
-// handleBlocksFactory returns a websocket message handler function which attempts
+// blocksFactoryHandler returns a websocket message handler function which attempts
 // to deserialize a block event message & send it over the blocksNotifier channel
 // which will cause it to be emitted by the corresponding blocksNotifee observable.
-func handleBlocksFactory(blocksNotifier chan types.Block) messageHandler {
+func blocksFactoryHandler(blocksNotifier chan types.Block) messageHandler {
 	return func(ctx context.Context, msg []byte) error {
 		blockMsg, err := newCometBlockMsg(msg)
 		expectedErr := fmt.Errorf(errNotBlockMsg, string(msg))
