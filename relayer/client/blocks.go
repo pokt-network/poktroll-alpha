@@ -72,6 +72,7 @@ func blocksFactoryHandler(blocksNotifier chan types.Block) messageHandler {
 		expectedErr := fmt.Errorf(errNotBlockMsg, string(msg))
 		switch {
 		case err == nil:
+			fallthrough
 		case err.Error() == expectedErr.Error():
 			return nil
 		case err != nil:
@@ -92,7 +93,7 @@ func newCometBlockMsg(blockMsgBz []byte) (types.Block, error) {
 		return nil, err
 	}
 
-	// If msg does not match the expected format then block will be its zero value.
+	// If msg does not match the expected format then the block's height has a zero value.
 	if blockMsg.Block.Header.Height == 0 {
 		return nil, fmt.Errorf(errNotBlockMsg, string(blockMsgBz))
 	}

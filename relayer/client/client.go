@@ -17,6 +17,8 @@ import (
 	"poktroll/x/servicer/types"
 )
 
+// TODO_RENAME: Should this file be renamed from `client.go` to `servicer.go` or should `servicerClient` be renamed to `relayerClient`?
+
 var (
 	_ ServicerClient = &servicerClient{}
 	// TECHDEBT: consolidate into a(n) errors file(s)/package
@@ -27,8 +29,9 @@ var (
 type servicerClient struct {
 	// nextRequestId is a *unique* ID intended to be monotonically incremented
 	// and used to uniquely identify distinct RPC requests.
+	// TODO_CONSIDERATION: Consider changing `nextRequestId` to a random entropy field
 	nextRequestId uint64
-	// address is the on-chain account address of this client (relayer / servicer).
+	// address is the on-chain account address of this relayer client (portal / servicer).
 	address string
 	// txFactory is a cosmos-sdk tx factory which encapsulates everything
 	// necessary to sign transactions given a client context.
@@ -38,6 +41,7 @@ type servicerClient struct {
 	clientCtx cosmosClient.Context
 
 	blocksNotifee utils.Observable[types.Block]
+
 	// TODO_CONSIDERATION: using an observable for received tx messages & a filter
 	// for `#signAndBroadcastTx()` callers to react to the specific tx in question
 	// instead of using shared memory across goroutines (`txByHash`) would likely
@@ -47,24 +51,24 @@ type servicerClient struct {
 	//
 	//txsNotifee    utils.Observable[*cosmosTypes.TxResponse]
 
-	// txsMutex protectx txsByHash and txsByHashByTimeout maps
+	// txsMutex protects txsByHash and txsByHashByTimeout maps
 	txsMutex sync.Mutex
-	// txsByHash maps tx hash to a channel which will receive an error or nil,
+	// txsByHash maps tx_hash->channel which will receive an error or nil,
 	// and close, when the tx with the given hash is committed.
 	txsByHash map[string]chan error
-	// txsByHashByTimeout maps timeout (block) height to a map of txsByHash. It
+	// txsByHashByTimeout maps timeout_at_block_height->map_of_txsByHash. It
 	// is used to ensure that tx error channels receive and close in the event
 	// that they have not already by the given timeout height.
 	txsByHashByTimeout map[uint64]map[string]chan error
 
-	// latestBlockMutex protext latestBlock.
+	// latestBlockMutex protects latestBlock.
 	latestBlockMutex sync.RWMutex
 	// latestBlock is the latest block that has been committed.
 	latestBlock types.Block
 
 	// Configuration
 	// =============
-	// keyName is the name of the key as per the CLI keyring/keybase.
+	// keyName is the name of the key as per the CLI keybase (aka cosmos keyrig).
 	// See: `poktrolld keys list --help`.
 	keyName string
 	// wsURL is the URL of the websocket endpoint to connect to for RPC
@@ -78,6 +82,7 @@ type servicerClient struct {
 
 func NewServicerClient() *servicerClient {
 	return &servicerClient{
+		// TODO_IMPROVE: Create a type for `txsByHash` and use that in `txsByHashByTimeout` for readability
 		txsByHash:          make(map[string]chan error),
 		txsByHashByTimeout: make(map[uint64]map[string]chan error),
 	}
@@ -135,11 +140,11 @@ func (client *servicerClient) signAndBroadcastMessageTx(
 	if err != nil {
 		panic(err)
 	}
+	log.Printf("txResponse: %s\n", txResponseJSON)
 
 	// NB: the hex representation of the tx hash can has no canonical case but
 	// must be consistent.
 	txHash := strings.ToLower(txResponse.TxHash)
-	log.Printf("txResponse: %s\n", txResponseJSON)
 
 	return client.updateTxs(ctx, txHash, timeoutHeight)
 }
@@ -167,6 +172,7 @@ func (client *servicerClient) updateTxs(
 		txErrCh = make(chan error, 1)
 		txsByHash[txHash] = txErrCh
 	}
+
 	// Initialize txsByHash map if necessary.
 	if _, ok := client.txsByHash[txHash]; !ok {
 		// NB: both maps hold a reference to the same channel so that we can check
@@ -174,7 +180,7 @@ func (client *servicerClient) updateTxs(
 		client.txsByHash[txHash] = txErrCh
 	}
 
-	// TODO_THIS_COMMIT: check txResponse for error in logs, parse & send on
+	// TODO_TECHDEBT: check txResponse for error in logs, parse & send on
 	// txErrCh if tx failed!!!
 	return txErrCh, nil
 }

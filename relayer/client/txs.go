@@ -43,7 +43,7 @@ func (client *servicerClient) subscribeToOwnTxs(
 	// buffered channels to avoid blocking channel sender.
 	//
 	//txsNotifee, txsNotifier := utils.NewControlledObservable[*cosmosTypes.TxResponse](nil)
-	msgHandler := client.handleTxsFactory()
+	msgHandler := client.txsFactoryHandler()
 	client.subscribeWithQuery(ctx, query, msgHandler)
 
 	//return txsNotifee
@@ -52,11 +52,14 @@ func (client *servicerClient) subscribeToOwnTxs(
 	return
 }
 
+// Closes the error channels for expect transactions from the latest block when it times out.
+// IMPORTANT: THis is intended to be run as a goroutine!
 func (client *servicerClient) timeoutTxs(
 	ctx context.Context,
 	blocksNotifee utils.Observable[types.Block],
 ) {
 	ch := blocksNotifee.Subscribe().Ch()
+	// TODO: Add a comment
 	for block := range ch {
 		select {
 		case <-ctx.Done():
@@ -64,7 +67,7 @@ func (client *servicerClient) timeoutTxs(
 		default:
 		}
 
-		// HACK: move latest block assignment to a dedicated subscription / goroutine
+		// TODO_TECHDEBT: move latest block assignment to a dedicated subscription / goroutine
 		// Update latest block
 		client.latestBlockMutex.Lock()
 		client.latestBlock = block
@@ -105,10 +108,10 @@ func (client *servicerClient) timeoutTxs(
 	}
 }
 
-// handleTxsFactory returns a websocket message handler function which attempts
+// txsFactoryHandler returns a websocket message handler function which attempts
 // to deserialize a tx event message, find its corresponding txErrCh, send an
 // error if present, & close it.
-func (client *servicerClient) handleTxsFactory() messageHandler {
+func (client *servicerClient) txsFactoryHandler() messageHandler {
 	return func(ctx context.Context, msg []byte) error {
 		txMsg, err := client.newCometTxResponseMsg(msg)
 		expectedErr := fmt.Errorf(errNotTxMsg, string(msg))
