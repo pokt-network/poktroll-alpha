@@ -49,7 +49,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	// CONSIDERATION: there may be a more conventional, idomatic, and/or convenient
+	// CONSIDERATION: there may be a more conventional, idiomatic, and/or convenient
 	// way to track and cleanup goroutines. In the wait group solution, goroutines get a
 	// reference to it via the context value and are expected to call `wg.Add(n)` and
 	// `wg.Done()` appropriately.
@@ -62,7 +62,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		),
 	)
 
-	// Factor out the key retrieval and address extraction.
+	// TODO_REFACTOR: Factor out the key retrieval and address extraction.
 	key, err := clientFactory.Keybase().Key(signingKeyName)
 	if err != nil {
 		panic(fmt.Errorf("failed to get key with UID %q: %w", signingKeyName, err))
@@ -80,15 +80,14 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		// TECHDEBT: this should be a config field.
 		WithTxTimeoutHeightOffset(5)
 
-	// The order of the WithXXX methods matters for now.
-	// TODO: Refactor this to a builder pattern.
-
 	// INCOMPLETE: this should be populated from some relayer config.
 	serviceEndpoints := map[string][]string{
 		"svc1": {"ws://localhost:8547/"},
 		"svc2": {"http://localhost:8547"},
 	}
 
+	// The order of the WithXXX methods matters for now.
+	// TODO: Refactor this to a builder pattern.
 	relayer := relayer.NewRelayer().
 		WithKey(ctx, clientFactory.Keybase(), signingKeyName, address.String(), clientCtx, servicerClient, serviceEndpoints).
 		WithServicerClient(servicerClient).
