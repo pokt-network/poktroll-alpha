@@ -1,7 +1,29 @@
 syntax = "proto3";
+
 package poktroll.portal;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "poktroll/service/service.proto";
 
 option go_package = "poktroll/x/portal/types";
 
 // Msg defines the Msg service.
-service Msg {}
+service Msg {
+  rpc StakePortal   (MsgStakePortal  ) returns (MsgStakePortalResponse  );
+  rpc UnstakePortal (MsgUnstakePortal) returns (MsgUnstakePortalResponse);
+}
+
+message MsgStakePortal {
+  string address = 1;
+  cosmos.base.v1beta1.Coin stakeAmount = 2;
+  repeated service.ServiceConfig services = 3;
+}
+
+message MsgStakePortalResponse {}
+
+message MsgUnstakePortal {
+  string address = 1;
+}
+
+message MsgUnstakePortalResponse {}
+
