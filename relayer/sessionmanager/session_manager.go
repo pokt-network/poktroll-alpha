@@ -13,22 +13,28 @@ import (
 	sessionTypes "poktroll/x/session/types"
 )
 
+type sessionTreeMap map[string]SessionWithTree
+
 type SessionManager struct {
 	// map[sessionEndHeight]map[sessionId]SessionWithTree
 	// sessionEndHeight groups sessions that end at the same height
 	// supports the case where ALL sessions end at the same height
 	// supports different sessions ending (e.g. per service)
-	sessions         map[uint64]map[string]SessionWithTree
-	sessionsNotifier chan map[string]SessionWithTree // channel emitting map[sessionId]SessionWithTree
-	sessionsNotifee  utils.Observable[map[string]SessionWithTree]
+	sessions         map[uint64]sessionTreeMap
+	sessionsNotifier chan sessionTreeMap // channel emitting map[sessionId]SessionWithTree
+	sessionsNotifee  utils.Observable[sessionTreeMap]
 	client           client.ServicerClient
 	storeDirectory   string // directory that will contain session tree stores
 }
 
-func NewSessionManager(ctx context.Context, storeDirectory string, client client.ServicerClient) *SessionManager {
-	sessions := make(map[uint64]map[string]SessionWithTree)
+func NewSessionManager(
+	ctx context.Context,
+	storeDirectory string,
+	client client.ServicerClient,
+) *SessionManager {
+	sessions := make(map[uint64]sessionTreeMap)
 	sm := &SessionManager{client: client, storeDirectory: storeDirectory, sessions: sessions}
-	sm.sessionsNotifee, sm.sessionsNotifier = utils.NewControlledObservable[map[string]SessionWithTree](nil)
+	sm.sessionsNotifee, sm.sessionsNotifier = utils.NewControlledObservable[sessionTreeMap](nil)
 
 	go sm.handleBlocks(ctx)
 
@@ -36,7 +42,7 @@ func NewSessionManager(ctx context.Context, storeDirectory string, client client
 }
 
 // emits all sessions that have ended
-func (sm *SessionManager) Sessions() utils.Observable[map[string]SessionWithTree] {
+func (sm *SessionManager) Sessions() utils.Observable[sessionTreeMap] {
 	return sm.sessionsNotifee
 }
 
@@ -48,7 +54,7 @@ func (sm *SessionManager) EnsureSessionTree(sessionInfo *sessionTypes.Session) *
 
 	// make sure to have a container for sessions that end at this height
 	if _, ok := sm.sessions[sessionInfo.GetSessionEndHeight()]; !ok {
-		sm.sessions[sessionInfo.GetSessionEndHeight()] = make(map[string]SessionWithTree)
+		sm.sessions[sessionInfo.GetSessionEndHeight()] = make(sessionTreeMap)
 	}
 
 	// create session tree if it doesn't exist (first relay for this session)

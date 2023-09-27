@@ -60,7 +60,7 @@ func (k msgServer) StakeServicer(goCtx context.Context, msg *types.MsgStakeServi
 		// Update the services (just an override operation)
 		for _, serviceConfig := range msg.Services {
 			if err := serviceConfig.ValidateEndpoints(); err != nil {
-				// TODO_THIS_COMMIT: improve error
+				logger.Error(fmt.Sprintf("invalid service config %v", serviceConfig))
 				return nil, err
 			}
 		}

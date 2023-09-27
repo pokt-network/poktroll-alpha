@@ -11,6 +11,8 @@ import (
 	"poktroll/x/session/types"
 )
 
+var _ SessionWithTree = &sessionWithTree{}
+
 type SessionWithTree interface {
 	GetSessionId() string
 	SessionTree() *smt.SMST
@@ -18,17 +20,15 @@ type SessionWithTree interface {
 	DeleteTree() error
 }
 
-var _ SessionWithTree = &sessionWithTree{}
-
 type sessionWithTree struct {
-	sessionInfo  *types.Session
-	tree         *smt.SMST
-	treeStore    smt.KVStore
-	claimedRoot  []byte
-	closed       bool
-	storePath    string
-	onDelete     func()
-	sessionMutex *sync.Mutex
+	sessionInfo    *types.Session
+	tree           *smt.SMST
+	treeStore      smt.KVStore
+	claimedSMTRoot []byte
+	isClosed       bool   // TODO_COMMENT: What does this mean? E.g. can no more relays be added to it?
+	storePath      string // TODO_CONSIDERATION: Can this not be part of treeStore?
+	onDelete       func() // TODO_CONSIDERATION: onDeleteFn?
+	sessionMutex   *sync.Mutex
 }
 
 func NewSessionWithTree(
@@ -44,13 +44,13 @@ func NewSessionWithTree(
 		treeStore:   treeStore,
 		storePath:   storePath,
 		onDelete:    onDelete,
-		closed:      false,
+		isClosed:    false,
 	}
 }
 
 func (s *sessionWithTree) SessionTree() *smt.SMST {
 	// if the tree is closed, we need to re-open it from disk
-	if s.closed {
+	if s.isClosed {
 		store, err := smt.NewKVStore(s.storePath)
 		if err != nil {
 			log.Println("error creating store for session", err)
@@ -58,7 +58,7 @@ func (s *sessionWithTree) SessionTree() *smt.SMST {
 		}
 
 		s.treeStore = store
-		s.tree = smt.ImportSparseMerkleSumTree(s.treeStore, sha256.New(), s.claimedRoot)
+		s.tree = smt.ImportSparseMerkleSumTree(s.treeStore, sha256.New(), s.claimedSMTRoot)
 	}
 
 	return s.tree
@@ -73,7 +73,7 @@ func (s *sessionWithTree) CloseTree() (root []byte, err error) {
 	claimedRoot := s.tree.Root()
 
 	// we need the claimed root so we can re-open the tree from disk for proof submission
-	s.claimedRoot = claimedRoot
+	s.claimedSMTRoot = claimedRoot
 
 	if err := s.tree.Commit(); err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (s *sessionWithTree) CloseTree() (root []byte, err error) {
 	}
 
 	// mark tree/kvstore as closed
-	s.closed = true
+	s.isClosed = true
 	return claimedRoot, nil
 }
 

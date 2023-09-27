@@ -15,6 +15,7 @@ var (
 	urlSchemePresenceRegex = regexp.MustCompile(`^\w{0,25}://`)
 )
 
+// TODO_INCOMPLETE: Discuss what / how much validation we want to do here.
 func (m *ServiceConfig) ValidateEndpoints() error {
 	for _, endpoint := range m.Endpoints {
 		// Ensure that endpoint URLs contain a scheme to avoid ambiguity when

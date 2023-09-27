@@ -13,17 +13,19 @@ import (
 	sessionTypes "poktroll/x/session/types"
 )
 
-// TODO_COMMENT: For this and other important foudnational structs, we really need to comment this.
+// TODO: Look at the V1 repo so we can easily 
+
+// TODO_COMMENT: For this and other important foundational structs, we really need to comment the type and
+// the fields inside of it.
 type httpProxy struct {
 	// TODO: Replace with sessionHeader
-	serviceId             *serviceTypes.ServiceId
+	serviceId *serviceTypes.ServiceId
 	// TODO: replace with servicerAddress?
 	serviceForwardingAddr string
-
-	sessionQueryClient    sessionTypes.QueryClient
-	client                client.ServicerClient
-	relayNotifier         chan *RelayWithSession
-	signResponseFn          responseSigner
+	sessionQueryClient sessionTypes.QueryClient
+	client             client.ServicerClient
+	relayNotifier      chan *RelayWithSession
+	signResponseFn     responseSigner
 }
 
 func NewHttpProxy(
@@ -40,7 +42,7 @@ func NewHttpProxy(
 		sessionQueryClient:    sessionQueryClient,
 		client:                client,
 		relayNotifier:         relayNotifier,
-		signResponseFn:          signResponse,
+		signResponseFn:        signResponse,
 	}
 }
 

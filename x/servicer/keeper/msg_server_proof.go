@@ -13,6 +13,7 @@ import (
 
 var errInvalidPathFmt = "invalid path: %x, expected: %x"
 
+// TODO_INCOMPLETE: Just some placeholder implementation for the proof on the server side for now.
 func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.MsgProofResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	logger := k.Logger(ctx).With("method", "Proof")
