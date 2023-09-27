@@ -16,21 +16,19 @@ type SessionWithTree interface {
 	SessionTree() *smt.SMST
 	CloseTree() ([]byte, error)
 	DeleteTree() error
-	Lock()
-	Unlock()
 }
 
 var _ SessionWithTree = &sessionWithTree{}
 
 type sessionWithTree struct {
-	sessionInfo *types.Session
-	tree        *smt.SMST
-	treeStore   smt.KVStore
-	claimedRoot []byte
-	closed      bool
-	storePath   string
-	onDelete    func()
-	sessionMu   *sync.Mutex
+	sessionInfo  *types.Session
+	tree         *smt.SMST
+	treeStore    smt.KVStore
+	claimedRoot  []byte
+	closed       bool
+	storePath    string
+	onDelete     func()
+	sessionMutex *sync.Mutex
 }
 
 func NewSessionWithTree(
@@ -47,7 +45,6 @@ func NewSessionWithTree(
 		storePath:   storePath,
 		onDelete:    onDelete,
 		closed:      false,
-		sessionMu:   &sync.Mutex{},
 	}
 }
 
@@ -109,12 +106,4 @@ func (s *sessionWithTree) DeleteTree() error {
 	s.onDelete()
 
 	return nil
-}
-
-func (s *sessionWithTree) Lock() {
-	s.sessionMu.Lock()
-}
-
-func (s *sessionWithTree) Unlock() {
-	s.sessionMu.Unlock()
 }
