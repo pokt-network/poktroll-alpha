@@ -6,23 +6,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"poktroll/utils"
+	"poktroll/x/servicer/types"
 	"strings"
 
 	abciTypes "github.com/cometbft/cometbft/abci/types"
 	cometTypes "github.com/cometbft/cometbft/types"
-
-	"poktroll/utils"
-	"poktroll/x/servicer/types"
 )
 
 var (
-	_           types.Block = &cometBlockWebsocketMsg{}
-	errNotTxMsg             = "expected tx websocket msg; got: %s"
+	errNotTxMsg = "expected tx websocket msg; got: %s"
 )
 
-// cometBlockWebsocketMsg is used to deserialize incoming websocket messages from
-// the block subscription. It implements the types.Block interface by loosely
-// wrapping cometbft's block type, into which messages are deserialized.
+// cometTxResponseWebsocketMsg is used to deserialize incoming websocket messages from
+// the tx subscription.
 type cometTxResponseWebsocketMsg struct {
 	Tx     []byte            `json:"tx"`
 	Events []abciTypes.Event `json:"events"`

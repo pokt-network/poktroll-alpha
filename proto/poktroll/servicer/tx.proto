@@ -31,9 +31,9 @@ message MsgUnstakeServicerResponse {}
 message MsgClaim {
   string servicer_address = 1;
   bytes  smst_root_hash = 2;
-  // IMPROVE: move session_id into a new session header field
+  // IMPROVE: move session_id into a new session_header field
   string session_id = 3;
-  // TECHDEBT: expiration_height is not used
+  // TECHDEBT: expiration_height is not used right now and could be computed from on-chain data
   int64 expiration_height = 4;
 }
 
@@ -44,8 +44,9 @@ message MsgProof {
   bytes smst_root_hash = 2;
   bytes path = 3;
   bytes value_hash = 4;
-  uint64  smst_sum = 5;
+  uint64 smst_sum = 5;
   bytes proof = 6;
+  // IMPROVE: move session_id into a new session_header field
   string session_id = 7;
 }
 
