@@ -72,7 +72,6 @@ func blocksFactoryHandler(blocksNotifier chan types.Block) messageHandler {
 		expectedErr := fmt.Errorf(errNotBlockMsg, string(msg))
 		switch {
 		case err == nil:
-			fallthrough
 		case err.Error() == expectedErr.Error():
 			return nil
 		case err != nil:
