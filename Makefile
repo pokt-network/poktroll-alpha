@@ -238,7 +238,8 @@ relayer_start: ## Start the relayer
 
 .PHONY: claims_query
 claims_query: ## Query the poktroll node for claims data
-	poktrolld query servicer claims $(poktrolld keys show servicer1 -a --keyring-backend test)
+	SERVICER_ADDR=$(shell poktrolld keys show servicer1 -a --keyring-backend test); \
+	poktrolld query servicer claims $$SERVICER_ADDR
 
 .PHONY: anvil_start
 anvil_start: ## Start the anvil
@@ -250,6 +251,7 @@ cast_relay: ## Cast a relay
 
 .PHONY: ws_subscribe
 ws_subscribe: ## Subscribe to the websocket for new blocks
+	echo "Copy paste the following: {"id":1,"jsonrpc":"2.0","method":"eth_subscribe","params":["newHeads"]}"
 	wscat --connect ws://localhost:8546
 
 .PHONY: localnet_up
