@@ -9,6 +9,7 @@ import (
 
 func (client *servicerClient) SubmitProof(
 	ctx context.Context,
+	sessionId string,
 	smtRootHash []byte,
 	closestKey []byte,
 	closestValueHash []byte,
@@ -25,6 +26,7 @@ func (client *servicerClient) SubmitProof(
 	}
 
 	msg := &types.MsgProof{
+		SessionId:       sessionId,
 		ServicerAddress: client.address,
 		SmstRootHash:    smtRootHash,
 		Path:            closestKey,
