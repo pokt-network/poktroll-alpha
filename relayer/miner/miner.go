@@ -174,5 +174,13 @@ func (m *Miner) waitAndProve(ctx context.Context, session sessionmanager.Session
 	}
 
 	// SubmitProof ensures on-chain proof inclusion so we can safely prune the tree.
-	return m.client.SubmitProof(ctx, claimRoot, path, valueHash, sum, proof)
+	return m.client.SubmitProof(
+		ctx,
+		session.GetSessionId(),
+		claimRoot,
+		path,
+		valueHash,
+		sum,
+		proof,
+	)
 }
