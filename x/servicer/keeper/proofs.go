@@ -22,3 +22,19 @@ func (k Keeper) InsertProof(ctx sdk.Context, proof *types.MsgProof) error {
 	store.Set([]byte(ProofKey), proofBz)
 	return nil
 }
+
+func (k Keeper) GetProof(ctx sdk.Context, sessionId string) (*types.MsgProof, error) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ProofsKeyPrefix))
+	ProofKey := fmt.Sprintf("%s", sessionId)
+	ProofBz := store.Get([]byte(ProofKey))
+
+	if ProofBz == nil {
+		return nil, fmt.Errorf("Proof not found for sessionId: %s", sessionId)
+	}
+
+	var Proof types.MsgProof
+	if err := Proof.Unmarshal(ProofBz); err != nil {
+		return nil, err
+	}
+	return &Proof, nil
+}
