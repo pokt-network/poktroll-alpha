@@ -212,6 +212,7 @@ var (
 		// DEBUG(olshansky): Follow up with celestia team as to why this doesn't show up in `poktrolld  query auth module-acco`
 		applicationmoduletypes.ModuleName: {authtypes.Burner, authtypes.Staking},
 		servicermoduletypes.ModuleName:    {authtypes.Minter, authtypes.Burner, authtypes.Staking},
+		portalmoduletypes.ModuleName:      {authtypes.Burner, authtypes.Staking},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
@@ -572,6 +573,7 @@ func New(
 		keys[portalmoduletypes.StoreKey],
 		keys[portalmoduletypes.MemStoreKey],
 		app.GetSubspace(portalmoduletypes.ModuleName),
+
 		app.BankKeeper,
 	)
 	portalModule := portalmodule.NewAppModule(appCodec, app.PortalKeeper, app.AccountKeeper, app.BankKeeper)
