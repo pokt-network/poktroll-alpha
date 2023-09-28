@@ -339,11 +339,11 @@ ignite_regenerate: ## Regenerate the ignite boilerplate
 ignite_acc_list: ## List all the accounts in the ignite boilerplate
 	ignite account list  --keyring-dir $(POKTROLLD_HOME) --keyring-backend test
 
-# .PHONY: localnet_regenesis
-# localnet_regenesis:
-# 	# NOTE: intentionally not using --home <dir> flag to avoid overwriting the test keyring
-# 	ignite chain init --skip-proto
-# 	rm -rf $(POKTROLLD_HOME)/keyring-test
-# 	cp -r ${HOME}/.poktroll/keyring-test $(POKTROLLD_HOME)
-# 	cp ${HOME}/.poktroll/config/*_key.json $(POKTROLLD_HOME)/config/
-# 	cp ${HOME}/.poktroll/config/genesis.json ./localnet/
+.PHONY: localnet_regenesis
+localnet_regenesis:
+	# NOTE: intentionally not using --home <dir> flag to avoid overwriting the test keyring
+	ignite chain init --skip-proto
+	rm -rf $(POKTROLLD_HOME)/keyring-test
+	cp -r ${HOME}/.poktroll/keyring-test $(POKTROLLD_HOME)
+	cp ${HOME}/.poktroll/config/*_key.json $(POKTROLLD_HOME)/config/
+	cp ${HOME}/.poktroll/config/genesis.json ./localnet/
