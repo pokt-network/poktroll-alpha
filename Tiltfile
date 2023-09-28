@@ -51,9 +51,11 @@ WORKDIR /
 )
 
 # Run poktrolld
-k8s_yaml(['localnet/kubernetes/poktrolld.yaml', 'localnet/kubernetes/poktrolld-servicer.yaml'])
+k8s_yaml(['localnet/kubernetes/poktrolld.yaml', 'localnet/kubernetes/poktrolld-relayer.yaml', 'localnet/kubernetes/anvil.yaml'])
 
 # Configure tilt resources for nodes
 # TODO(@okdas): add port forwarding to be able to query the endpoints on localhost
 k8s_resource('celestia-rollkit', labels=["blockchains"], port_forwards=['26657', '26658', '26659'])
 k8s_resource('poktrolld', labels=["blockchains"], resource_deps=['celestia-rollkit'], port_forwards=['36657', '40004'])
+k8s_resource('poktrolld-relayer', labels=["blockchains"], resource_deps=['poktrolld'], port_forwards=['8545', '8546', '40005:40004'])
+k8s_resource('anvil', labels=["blockchains"], port_forwards=['8547'])
