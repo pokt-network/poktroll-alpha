@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"fmt"
@@ -36,7 +37,15 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	//	return nil, err
 	//}
 
-	// INCOMPLETE: lookup the corresponding claim and verify that it matches.
+	// lookup the corresponding claim and verify that it matches.
+	claim, err := k.GetClaim(ctx, msg.SessionId)
+	if err != nil {
+		return nil, err
+	}
+
+	if !bytes.Equal(claim.SmstRootHash, msg.SmstRootHash) {
+		return nil, fmt.Errorf("smst root hash mismatch, expected: %x; got: %x", claim.SmstRootHash, msg.SmstRootHash)
+	}
 
 	if valid := smt.VerifySumProof(
 		proof,

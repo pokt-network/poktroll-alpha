@@ -2,8 +2,10 @@ package keeper
 
 import (
 	"fmt"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"poktroll/x/servicer/types"
 )
 
@@ -20,4 +22,20 @@ func (k Keeper) InsertClaim(ctx sdk.Context, claim *types.MsgClaim) error {
 	claimKey := fmt.Sprintf("%s", claim.SessionId)
 	store.Set([]byte(claimKey), claimBz)
 	return nil
+}
+
+func (k Keeper) GetClaim(ctx sdk.Context, sessionId string) (*types.MsgClaim, error) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ClaimsKeyPrefix))
+	claimKey := fmt.Sprintf("%s", sessionId)
+	claimBz := store.Get([]byte(claimKey))
+
+	if claimBz == nil {
+		return nil, fmt.Errorf("claim not found for sessionId: %s", sessionId)
+	}
+
+	var claim types.MsgClaim
+	if err := claim.Unmarshal(claimBz); err != nil {
+		return nil, err
+	}
+	return &claim, nil
 }
