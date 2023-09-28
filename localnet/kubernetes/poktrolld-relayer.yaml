@@ -14,11 +14,11 @@ data:
 
     # sleep 99999
 
-    # Start the node
+    # You can attach to this process with delve (dlv) for debugging purpose with `dlv attach $(pgrep poktrolld) --listen :40005 --headless --api-version=2 --accept-multiclient` - run inside the container!
     poktrolld relayer --node tcp://poktrolld:36657 --ws-url ws://poktrolld:36657/websocket --signing-key servicer1 --keyring-backend test
 
     # OR debug the node (uncomment this line but comment previous line)
-    # dlv exec /usr/local/bin/poktrolld relayer --node tcp://poktrolld:36657 --ws-url ws://poktrolld:36657/websocket --signing-key servicer1 --keyring-backend test
+    # dlv exec --listen :40005 /usr/local/bin/poktrolld relayer --node tcp://poktrolld:36657 --ws-url ws://poktrolld:36657/websocket --signing-key servicer1 --keyring-backend test
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -51,7 +51,7 @@ spec:
           ports:
             - containerPort: 8545
             - containerPort: 8546
-            - containerPort: 40004
+            - containerPort: 40005
           command: ["/bin/sh"]
           args: ["/scripts/poktroll.sh"]
           volumeMounts:
