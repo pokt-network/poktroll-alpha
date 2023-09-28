@@ -31,7 +31,7 @@ k8s_yaml(generate_config_map_yaml("poktrolld-configs", read_files_from_directory
 # Build sequencer
 local_resource('hot-reload: generate protobufs', 'ignite generate proto-go -y', deps=['proto'], labels=["hot-reloading"])
 local_resource('hot-reload: poktrolld', 'GOOS=linux ignite chain build --skip-proto --output=./bin --debug -v', deps=hot_reload_dirs, labels=["hot-reloading"], resource_deps=['hot-reload: generate protobufs'])
-local_resource('hot-reload: poktrolld - local cli', 'ignite chain build --skip-proto --debug -v', deps=hot_reload_dirs, labels=["hot-reloading"], resource_deps=['hot-reload: generate protobufs'])
+local_resource('hot-reload: poktrolld - local cli', 'ignite chain build --skip-proto --debug -v -o $(go env GOPATH)/bin', deps=hot_reload_dirs, labels=["hot-reloading"], resource_deps=['hot-reload: generate protobufs'])
 
 # Build an image with a sequencer
 docker_build_with_restart(
@@ -51,9 +51,11 @@ WORKDIR /
 )
 
 # Run poktrolld
-k8s_yaml('localnet/kubernetes/poktrolld.yaml')
+k8s_yaml(['localnet/kubernetes/poktrolld.yaml', 'localnet/kubernetes/poktrolld-relayer.yaml', 'localnet/kubernetes/anvil.yaml'])
 
 # Configure tilt resources for nodes
 # TODO(@okdas): add port forwarding to be able to query the endpoints on localhost
 k8s_resource('celestia-rollkit', labels=["blockchains"], port_forwards=['26657', '26658', '26659'])
 k8s_resource('poktrolld', labels=["blockchains"], resource_deps=['celestia-rollkit'], port_forwards=['36657', '40004'])
+k8s_resource('poktrolld-relayer', labels=["blockchains"], resource_deps=['poktrolld'], port_forwards=['8545', '8546', '40005'])
+k8s_resource('anvil', labels=["blockchains"], port_forwards=['8547'])

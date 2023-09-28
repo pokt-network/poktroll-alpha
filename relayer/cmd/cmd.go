@@ -82,8 +82,8 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 
 	// INCOMPLETE: this should be populated from some relayer config.
 	serviceEndpoints := map[string][]string{
-		"svc1": {"ws://localhost:8547/"},
-		"svc2": {"http://localhost:8547"},
+		"svc1": {"ws://anvil:8547/"},
+		"svc2": {"http://anvil:8547"},
 	}
 
 	// The order of the WithXXX methods matters for now.
