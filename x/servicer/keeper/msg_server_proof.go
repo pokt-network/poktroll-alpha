@@ -56,8 +56,11 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		msg.SmstSum,
 		smt.NoPrehashSpec(sha256.New(), true),
 	); !valid {
-		errInvalidProof := fmt.Errorf("invalid proof")
+		errInvalidProof := fmt.Errorf("failed to validate proof")
+
+		// TECHDEBT: remove this error logs; they're intended for development use only.
 		logger.Error(errInvalidProof.Error())
+
 		return nil, errInvalidProof
 	}
 
