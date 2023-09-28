@@ -1,24 +1,3 @@
-# ---
-# apiVersion: v1
-# kind: ConfigMap
-# metadata:
-#   name: poktrolld-relayer-scripts
-# data:
-#   poktroll.sh: |-
-#     #!/bin/sh
-
-#     ls -la /root/.poktroll/config-src/
-#     mkdir -p /root/.poktroll/config/
-#     cp -r -L /root/.poktroll/config-src/* /root/.poktroll/config/
-#     ls -la /root/.poktroll/config/
-
-#     # sleep 99999
-
-#     # Start the node
-#     poktrolld relayer --node tcp://poktrolld:36657 --ws-url ws://poktrolld:36657/websocket --signing-key servicer1 --keyring-backend test
-
-#     # OR debug the node (uncomment this line but comment previous line)
-#     # dlv exec /usr/local/bin/poktrolld relayer --node tcp://poktrolld:36657 --ws-url ws://poktrolld:36657/websocket --signing-key servicer1 --keyring-backend test
 ---
 apiVersion: apps/v1
 kind: Deployment
