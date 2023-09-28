@@ -61,9 +61,12 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		return nil, errInvalidProof
 	}
 
-	logger.Debug("proof verified")
+	if err := k.InsertProof(ctx, msg); err != nil {
+		// TECHDEBT: remove this error logs; they're intended for development use only.
+		logger.Error("failed to insert proof")
 
-	// INCOMPLETE: store proof.
+		return nil, err
+	}
 
 	return &types.MsgProofResponse{}, nil
 }
