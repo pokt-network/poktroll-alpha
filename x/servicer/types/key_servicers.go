@@ -9,6 +9,7 @@ const (
 	ServicersKeyPrefix = "Servicers/value/"
 	// ClaimsKeyPrefix is the prefix to retrieve Claims
 	ClaimsKeyPrefix = "Claims/value/"
+	ProofsKeyPrefix = "Proofs/value/"
 )
 
 // ServicersKey returns the store key to retrieve a Servicers from the index fields
