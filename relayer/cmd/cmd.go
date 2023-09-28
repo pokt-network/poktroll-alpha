@@ -17,9 +17,12 @@ import (
 	"poktroll/relayer"
 )
 
-var signingKeyName string
-var wsURL string
-var smtStorePath string
+var (
+	signingKeyName string
+	smtStorePath   string
+	sequencerNode  string
+	pocketNode     string
+)
 
 func RelayerCmd() *cobra.Command {
 	cmd := &cobra.Command{
@@ -29,22 +32,36 @@ func RelayerCmd() *cobra.Command {
 		RunE:  runRelayer,
 	}
 
+	cmd.Flags().String(flags.FlagKeyringBackend, "", "Select keyring's backend (os|file|kwallet|pass|test)")
+
 	// TECHDEBT: integrate these flags with the client context (i.e. flags, config, viper, etc.)
 	// This is simpler to do with server-side configs (see rootCmd#PersistentPreRunE).
 	// Will require more effort than currently justifiable.
 	cmd.Flags().StringVar(&signingKeyName, "signing-key", "", "Name of the key to sign transactions")
-	cmd.Flags().StringVar(&wsURL, "ws-url", "ws://localhost:36657/websocket", "Websocket URL to poktrolld node; formatted as ws://<host>:<port>[/path]")
 	cmd.Flags().StringVar(&smtStorePath, "smt-store", "smt", "Path to the SMT KV store")
-
-	cmd.Flags().String(flags.FlagKeyringBackend, "", "Select keyring's backend (os|file|kwallet|pass|test)")
-	cmd.Flags().String(flags.FlagNode, "tcp://localhost:36657", "tcp://<host>:<port> to tendermint rpc interface for this chain")
+	// Communication flags
+	cmd.Flags().StringVar(&sequencerNode, "sequencer-node", "explicitly omitting default", "<host>:<port> to sequencer/validator node to submit txs")
+	cmd.Flags().StringVar(&pocketNode, "pocket-node", "explicitly omitting default", "<host>:<port> to full/light pocket node for reading data and listening for on-chain events")
+	cmd.Flags().String(flags.FlagNode, "explicitly omitting default", "registering the default cosmos node flag; needed to initialize the tx and query contexts correctly")
 
 	return cmd
 }
 
 func runRelayer(cmd *cobra.Command, _ []string) error {
-	clientCtx := cosmosclient.GetClientContextFromCmd(cmd)
+	// Set --node flag to the sequencer-node for the tx client context
+	cmd.Flags().Set(flags.FlagNode, fmt.Sprintf("tcp://%s", sequencerNode))
+	clientCtx, err := cosmosclient.GetClientTxContext(cmd)
+	if err != nil {
+		return err
+	}
 	clientFactory, err := tx.NewFactoryCLI(clientCtx, cmd.Flags())
+	if err != nil {
+		return err
+	}
+
+	// Set --node flag to the pocket-node for the tx client context
+	cmd.Flags().Set(flags.FlagNode, fmt.Sprintf("tcp://%s", pocketNode))
+	clientCtx, err = cosmosclient.GetClientQueryContext(cmd)
 	if err != nil {
 		return err
 	}
@@ -76,7 +93,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		WithTxFactory(clientFactory).
 		WithSigningKey(signingKeyName, address.String()).
 		WithClientCtx(clientCtx).
-		WithWsURL(ctx, wsURL).
+		WithWsURL(ctx, fmt.Sprintf("ws://%s/websocket", pocketNode)).
 		// TECHDEBT: this should be a config field.
 		WithTxTimeoutHeightOffset(5)
 

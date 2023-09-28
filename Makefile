@@ -1,7 +1,12 @@
 .SILENT:
 
-POKTROLLD_HOME := ./localnet/poktrolld
+# poktrolld is the binary, the validator/sequencer and the full pocket node as well
 POKTROLLD_NODE := tcp://127.0.0.1:36657
+POKTROLLD_HOME := ./localnet/poktrolld
+
+POCKET_NODE = 127.0.0.1:36657
+SEQUENCER_NODE = 127.0.0.1:36657
+
 SESSION_HEIGHT ?= 1 # Default height when retrieving session data
 
 .PHONY: prompt_user
@@ -268,8 +273,9 @@ session_get_app3_svc3: ## Getting the session for app3 and svc3 and height1
 .PHONY: relayer_start
 relayer_start: ## Start the relayer
 	poktrolld relayer \
-	--node $(POKTROLLD_NODE) \
 	--signing-key servicer1 \
+	--sequencer-node $(SEQUENCER_NODE) \
+	--pocket-node $(POCKET_NODE) \
 	--keyring-backend test
 
 .PHONY: claims_query
