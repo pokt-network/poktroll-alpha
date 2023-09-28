@@ -12,10 +12,15 @@ const TypeMsgStakePortal = "stake_portal"
 
 var _ sdk.Msg = &MsgStakePortal{}
 
-func NewMsgStakePortal(address string, stakeAmount types.Coin) *MsgStakePortal {
+func NewMsgStakePortal(
+	address string,
+	stakeAmount types.Coin,
+	serviceIds []string,
+) *MsgStakePortal {
 	return &MsgStakePortal{
 		Address:     address,
 		StakeAmount: &stakeAmount,
+		ServiceIds:  serviceIds,
 	}
 }
 
@@ -63,7 +68,7 @@ func (msg *MsgStakePortal) ValidateBasic() error {
 	}
 
 	// Validate the services
-	if len(msg.Services) == 0 {
+	if len(msg.ServiceIds) == 0 {
 		return ErrNoServicesToStake
 	}
 

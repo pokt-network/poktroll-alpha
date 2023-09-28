@@ -47464,90 +47464,11 @@ paths:
                         type: object
                         properties:
                           id:
-                            type: object
-                            properties:
-                              id:
-                                type: string
-                                title: unique identifier for the service
-                              name:
-                                type: string
-                                title: human-readable name for the service
-                          endpoints:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                url:
-                                  type: string
-                                  title: The URL of the endpoint
-                                rpc_type:
-                                  title: The type of the RPC
-                                  type: string
-                                  enum:
-                                    - UNKNOWN_RPC
-                                    - GRPC
-                                    - WEBSOCKET
-                                    - JSON_RPC
-                                  default: UNKNOWN_RPC
-                                  description: >-
-                                    Enum to define various RPC types
-
-                                    DISCUSS: Enums are nice but in the `.json`
-                                    files (e.g. see servicer1.json), we have to
-                                    represent it as an int, which defeats half
-                                    the purpose of using enums.
-
-                                     - JSON_RPC: Add new RPC types here as needed
-                                metadata:
-                                  title: Additional metadata about the endpoint
-                                  type: object
-                                  properties:
-                                    entries:
-                                      type: object
-                                      additionalProperties:
-                                        type: string
-                                      title: >-
-                                        map<string, google.protobuf.Any>
-                                        metadata = 3; // metadata to allow for
-                                        future extensibility
-                                configs:
-                                  type: array
-                                  items:
-                                    type: object
-                                    properties:
-                                      key:
-                                        type: string
-                                        enum:
-                                          - UNKNOWN_CONFIG
-                                          - TIMEOUT
-                                        default: UNKNOWN_CONFIG
-                                        description: >-
-                                          Enum to define configuration options for
-                                          the endpoint
-
-                                          DISCUSS: Enums are nice but in the
-                                          `.json` files (e.g. see servicer1.json),
-                                          we have to represent it as an int, which
-                                          defeats half the purpose of using enums.
-
-                                           - TIMEOUT: Add new config options here as needed
-                                      value:
-                                        type: string
-                                    title: >-
-                                      NB: proto maps cannot be keyed be enums,
-                                      so we create a key-value wrapper instead
-                                  title: Configuration options for the endpoint
-                          metadata:
-                            title: metadata to allow for future extensibility
-                            type: object
-                            properties:
-                              entries:
-                                type: object
-                                additionalProperties:
-                                  type: string
-                                title: >-
-                                  map<string, google.protobuf.Any> metadata = 3;
-                                  // metadata to allow for future extensibility
+                            type: string
+                            title: unique identifier for the service
+                          name:
+                            type: string
+                            title: human-readable name for the service
               pagination:
                 type: object
                 properties:
@@ -47855,90 +47776,11 @@ paths:
                       type: object
                       properties:
                         id:
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                              title: unique identifier for the service
-                            name:
-                              type: string
-                              title: human-readable name for the service
-                        endpoints:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              url:
-                                type: string
-                                title: The URL of the endpoint
-                              rpc_type:
-                                title: The type of the RPC
-                                type: string
-                                enum:
-                                  - UNKNOWN_RPC
-                                  - GRPC
-                                  - WEBSOCKET
-                                  - JSON_RPC
-                                default: UNKNOWN_RPC
-                                description: >-
-                                  Enum to define various RPC types
-
-                                  DISCUSS: Enums are nice but in the `.json`
-                                  files (e.g. see servicer1.json), we have to
-                                  represent it as an int, which defeats half the
-                                  purpose of using enums.
-
-                                   - JSON_RPC: Add new RPC types here as needed
-                              metadata:
-                                title: Additional metadata about the endpoint
-                                type: object
-                                properties:
-                                  entries:
-                                    type: object
-                                    additionalProperties:
-                                      type: string
-                                    title: >-
-                                      map<string, google.protobuf.Any> metadata
-                                      = 3; // metadata to allow for future
-                                      extensibility
-                              configs:
-                                type: array
-                                items:
-                                  type: object
-                                  properties:
-                                    key:
-                                      type: string
-                                      enum:
-                                        - UNKNOWN_CONFIG
-                                        - TIMEOUT
-                                      default: UNKNOWN_CONFIG
-                                      description: >-
-                                        Enum to define configuration options for
-                                        the endpoint
-
-                                        DISCUSS: Enums are nice but in the
-                                        `.json` files (e.g. see servicer1.json),
-                                        we have to represent it as an int, which
-                                        defeats half the purpose of using enums.
-
-                                         - TIMEOUT: Add new config options here as needed
-                                    value:
-                                      type: string
-                                  title: >-
-                                    NB: proto maps cannot be keyed be enums, so
-                                    we create a key-value wrapper instead
-                                title: Configuration options for the endpoint
-                        metadata:
-                          title: metadata to allow for future extensibility
-                          type: object
-                          properties:
-                            entries:
-                              type: object
-                              additionalProperties:
-                                type: string
-                              title: >-
-                                map<string, google.protobuf.Any> metadata = 3;
-                                // metadata to allow for future extensibility
+                          type: string
+                          title: unique identifier for the service
+                        name:
+                          type: string
+                          title: human-readable name for the service
         default:
           description: An unexpected error response.
           schema:
@@ -79075,88 +78917,11 @@ definitions:
           type: object
           properties:
             id:
-              type: object
-              properties:
-                id:
-                  type: string
-                  title: unique identifier for the service
-                name:
-                  type: string
-                  title: human-readable name for the service
-            endpoints:
-              type: array
-              items:
-                type: object
-                properties:
-                  url:
-                    type: string
-                    title: The URL of the endpoint
-                  rpc_type:
-                    title: The type of the RPC
-                    type: string
-                    enum:
-                      - UNKNOWN_RPC
-                      - GRPC
-                      - WEBSOCKET
-                      - JSON_RPC
-                    default: UNKNOWN_RPC
-                    description: >-
-                      Enum to define various RPC types
-
-                      DISCUSS: Enums are nice but in the `.json` files (e.g. see
-                      servicer1.json), we have to represent it as an int, which
-                      defeats half the purpose of using enums.
-
-                       - JSON_RPC: Add new RPC types here as needed
-                  metadata:
-                    title: Additional metadata about the endpoint
-                    type: object
-                    properties:
-                      entries:
-                        type: object
-                        additionalProperties:
-                          type: string
-                        title: >-
-                          map<string, google.protobuf.Any> metadata = 3; //
-                          metadata to allow for future extensibility
-                  configs:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        key:
-                          type: string
-                          enum:
-                            - UNKNOWN_CONFIG
-                            - TIMEOUT
-                          default: UNKNOWN_CONFIG
-                          description: >-
-                            Enum to define configuration options for the
-                            endpoint
-
-                            DISCUSS: Enums are nice but in the `.json` files
-                            (e.g. see servicer1.json), we have to represent it
-                            as an int, which defeats half the purpose of using
-                            enums.
-
-                             - TIMEOUT: Add new config options here as needed
-                        value:
-                          type: string
-                      title: >-
-                        NB: proto maps cannot be keyed be enums, so we create a
-                        key-value wrapper instead
-                    title: Configuration options for the endpoint
-            metadata:
-              title: metadata to allow for future extensibility
-              type: object
-              properties:
-                entries:
-                  type: object
-                  additionalProperties:
-                    type: string
-                  title: >-
-                    map<string, google.protobuf.Any> metadata = 3; // metadata
-                    to allow for future extensibility
+              type: string
+              title: unique identifier for the service
+            name:
+              type: string
+              title: human-readable name for the service
   poktroll.portal.QueryAllPortalsResponse:
     type: object
     properties:
@@ -79188,89 +78953,11 @@ definitions:
                 type: object
                 properties:
                   id:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        title: unique identifier for the service
-                      name:
-                        type: string
-                        title: human-readable name for the service
-                  endpoints:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        url:
-                          type: string
-                          title: The URL of the endpoint
-                        rpc_type:
-                          title: The type of the RPC
-                          type: string
-                          enum:
-                            - UNKNOWN_RPC
-                            - GRPC
-                            - WEBSOCKET
-                            - JSON_RPC
-                          default: UNKNOWN_RPC
-                          description: >-
-                            Enum to define various RPC types
-
-                            DISCUSS: Enums are nice but in the `.json` files
-                            (e.g. see servicer1.json), we have to represent it
-                            as an int, which defeats half the purpose of using
-                            enums.
-
-                             - JSON_RPC: Add new RPC types here as needed
-                        metadata:
-                          title: Additional metadata about the endpoint
-                          type: object
-                          properties:
-                            entries:
-                              type: object
-                              additionalProperties:
-                                type: string
-                              title: >-
-                                map<string, google.protobuf.Any> metadata = 3;
-                                // metadata to allow for future extensibility
-                        configs:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              key:
-                                type: string
-                                enum:
-                                  - UNKNOWN_CONFIG
-                                  - TIMEOUT
-                                default: UNKNOWN_CONFIG
-                                description: >-
-                                  Enum to define configuration options for the
-                                  endpoint
-
-                                  DISCUSS: Enums are nice but in the `.json`
-                                  files (e.g. see servicer1.json), we have to
-                                  represent it as an int, which defeats half the
-                                  purpose of using enums.
-
-                                   - TIMEOUT: Add new config options here as needed
-                              value:
-                                type: string
-                            title: >-
-                              NB: proto maps cannot be keyed be enums, so we
-                              create a key-value wrapper instead
-                          title: Configuration options for the endpoint
-                  metadata:
-                    title: metadata to allow for future extensibility
-                    type: object
-                    properties:
-                      entries:
-                        type: object
-                        additionalProperties:
-                          type: string
-                        title: >-
-                          map<string, google.protobuf.Any> metadata = 3; //
-                          metadata to allow for future extensibility
+                    type: string
+                    title: unique identifier for the service
+                  name:
+                    type: string
+                    title: human-readable name for the service
       pagination:
         type: object
         properties:
@@ -79326,89 +79013,22 @@ definitions:
               type: object
               properties:
                 id:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      title: unique identifier for the service
-                    name:
-                      type: string
-                      title: human-readable name for the service
-                endpoints:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      url:
-                        type: string
-                        title: The URL of the endpoint
-                      rpc_type:
-                        title: The type of the RPC
-                        type: string
-                        enum:
-                          - UNKNOWN_RPC
-                          - GRPC
-                          - WEBSOCKET
-                          - JSON_RPC
-                        default: UNKNOWN_RPC
-                        description: >-
-                          Enum to define various RPC types
-
-                          DISCUSS: Enums are nice but in the `.json` files (e.g.
-                          see servicer1.json), we have to represent it as an
-                          int, which defeats half the purpose of using enums.
-
-                           - JSON_RPC: Add new RPC types here as needed
-                      metadata:
-                        title: Additional metadata about the endpoint
-                        type: object
-                        properties:
-                          entries:
-                            type: object
-                            additionalProperties:
-                              type: string
-                            title: >-
-                              map<string, google.protobuf.Any> metadata = 3; //
-                              metadata to allow for future extensibility
-                      configs:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            key:
-                              type: string
-                              enum:
-                                - UNKNOWN_CONFIG
-                                - TIMEOUT
-                              default: UNKNOWN_CONFIG
-                              description: >-
-                                Enum to define configuration options for the
-                                endpoint
-
-                                DISCUSS: Enums are nice but in the `.json` files
-                                (e.g. see servicer1.json), we have to represent
-                                it as an int, which defeats half the purpose of
-                                using enums.
-
-                                 - TIMEOUT: Add new config options here as needed
-                            value:
-                              type: string
-                          title: >-
-                            NB: proto maps cannot be keyed be enums, so we
-                            create a key-value wrapper instead
-                        title: Configuration options for the endpoint
-                metadata:
-                  title: metadata to allow for future extensibility
-                  type: object
-                  properties:
-                    entries:
-                      type: object
-                      additionalProperties:
-                        type: string
-                      title: >-
-                        map<string, google.protobuf.Any> metadata = 3; //
-                        metadata to allow for future extensibility
+                  type: string
+                  title: unique identifier for the service
+                name:
+                  type: string
+                  title: human-readable name for the service
   poktroll.portal.QueryParamsResponse:
+    type: object
+    properties:
+      params:
+        description: params holds all the parameters of this module.
+        type: object
+    description: QueryParamsResponse is response type for the Query/Params RPC method.
+  poktroll.service.Params:
+    type: object
+    description: Params defines the parameters for the module.
+  poktroll.service.QueryParamsResponse:
     type: object
     properties:
       params:
@@ -79620,16 +79240,6 @@ definitions:
             title: >-
               map<string, google.protobuf.Any> metadata = 3; // metadata to
               allow for future extensibility
-  poktroll.service.Params:
-    type: object
-    description: Params defines the parameters for the module.
-  poktroll.service.QueryParamsResponse:
-    type: object
-    properties:
-      params:
-        description: params holds all the parameters of this module.
-        type: object
-    description: QueryParamsResponse is response type for the Query/Params RPC method.
   poktroll.servicer.MsgClaim:
     type: object
     properties:

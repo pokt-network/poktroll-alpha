@@ -572,6 +572,7 @@ func New(
 		keys[portalmoduletypes.StoreKey],
 		keys[portalmoduletypes.MemStoreKey],
 		app.GetSubspace(portalmoduletypes.ModuleName),
+		app.BankKeeper,
 	)
 	portalModule := portalmodule.NewAppModule(appCodec, app.PortalKeeper, app.AccountKeeper, app.BankKeeper)
 

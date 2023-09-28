@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	svcTypes "poktroll/x/service/types"
 
 	"poktroll/x/portal/types"
 
@@ -39,7 +40,7 @@ func (k msgServer) StakePortal(goCtx context.Context, msg *types.MsgStakePortal)
 		portal = types.Portal{
 			Address:  msg.Address,
 			Stake:    msg.StakeAmount,
-			Services: msg.Services,
+			Services: serviceIdsToService(msg.ServiceIds),
 		}
 
 		// Determine the number of coins to send from the portal address to the portal module account
@@ -58,7 +59,7 @@ func (k msgServer) StakePortal(goCtx context.Context, msg *types.MsgStakePortal)
 		portal.Stake = &newPortalStake
 
 		// Update the services (just an override operation)
-		portal.Services = msg.Services
+		portal.Services = serviceIdsToService(msg.ServiceIds)
 	}
 
 	// Send coins to the portal module account
@@ -75,4 +76,16 @@ func (k msgServer) StakePortal(goCtx context.Context, msg *types.MsgStakePortal)
 
 	// QED
 	return &types.MsgStakePortalResponse{}, nil
+}
+
+// TODO: Move into a utils package for resuse between apps and portals
+func serviceIdsToService(serviceIds []string) []*svcTypes.ServiceId {
+	services := make([]*svcTypes.ServiceId, len(serviceIds))
+	for i, serviceId := range serviceIds {
+		services[i] = &svcTypes.ServiceId{
+			Id:   serviceId,
+			Name: "TODO_HYDRATE_ME",
+		}
+	}
+	return services
 }

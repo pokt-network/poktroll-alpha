@@ -1,9 +1,9 @@
 package cli
 
 import (
-	"encoding/json"
-	"os"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strconv"
+	"strings"
 
 	"poktroll/x/portal/types"
 
@@ -19,26 +19,29 @@ func CmdStakePortal() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stake-portal",
 		Short: "Broadcast message stake-portal",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			stakeAmountString := args[0]
+			serviceIdsCommaSeparated := args[1]
+
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
-			pathToAppConfig := args[0]
-			contents, err := os.ReadFile(pathToAppConfig)
+			stakeAmount, err := sdk.ParseCoinNormalized(stakeAmountString)
 			if err != nil {
 				return err
 			}
-			var stakeMsg types.MsgStakePortal
-			if err := json.Unmarshal(contents, &stakeMsg); err != nil {
+			msg := types.NewMsgStakePortal(
+				clientCtx.GetFromAddress().String(),
+				stakeAmount,
+				strings.Split(serviceIdsCommaSeparated, ","),
+			)
+			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
-			stakeMsg.Address = clientCtx.GetFromAddress().String()
-			if err := stakeMsg.ValidateBasic(); err != nil {
-				return err
-			}
-			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), &stakeMsg)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
 

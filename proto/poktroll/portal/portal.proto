@@ -10,5 +10,5 @@ import "cosmos/base/v1beta1/coin.proto";
 message Portal {
   string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin stake = 2;
-  repeated service.ServiceConfig services = 3;
+  repeated service.ServiceId services = 3;
 }
