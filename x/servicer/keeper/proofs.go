@@ -18,7 +18,7 @@ func (k Keeper) InsertProof(ctx sdk.Context, proof *types.MsgProof) error {
 		return err
 	}
 
-	ProofKey := fmt.Sprintf("%s", proof.SessionId)
+	ProofKey := fmt.Sprintf("%s", proof.GetSession().GetSessionId())
 	store.Set([]byte(ProofKey), proofBz)
 	return nil
 }

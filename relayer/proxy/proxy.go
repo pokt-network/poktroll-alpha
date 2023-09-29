@@ -14,6 +14,7 @@ import (
 	"poktroll/x/service/types"
 	servicerTypes "poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
+	sharedtypes "poktroll/x/shared/types"
 )
 
 var urlSchemePresenceRegex = regexp.MustCompile(`^\w{0,25}://`)
@@ -22,7 +23,7 @@ type responseSigner func(*servicerTypes.RelayResponse) error
 
 type RelayWithSession struct {
 	Relay   *servicerTypes.Relay
-	Session *sessionTypes.Session
+	Session *sharedtypes.Session
 }
 
 type Proxy struct {
@@ -126,7 +127,7 @@ func (proxy *Proxy) signResponse(relayResponse *servicerTypes.RelayResponse) err
 	return nil
 }
 
-func validateSessionRequest(session *sessionTypes.Session, relayRequest *servicerTypes.RelayRequest) error {
+func validateSessionRequest(session *sharedtypes.Session, relayRequest *servicerTypes.RelayRequest) error {
 	// TODO: validate relayRequest signature
 
 	// a similar SessionId means it's been generated from the same params

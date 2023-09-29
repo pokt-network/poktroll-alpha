@@ -4,6 +4,7 @@ package poktroll.servicer;
 
 import "cosmos/base/v1beta1/coin.proto";
 import "poktroll/service/service.proto";
+import "poktroll/shared/session.proto";
 
 option go_package = "poktroll/x/servicer/types";
 
@@ -49,7 +50,7 @@ message MsgProof {
   uint64 smst_sum = 5;
   bytes proof = 6;
   // IMPROVE: move session_id into a new session_header field
-  string session_id = 7;
+  poktroll.shared.Session session = 7;
 }
 
 message MsgProofResponse {}

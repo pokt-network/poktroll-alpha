@@ -4,24 +4,23 @@ import (
 	"crypto/sha256"
 	"log"
 	"os"
+	sharedtypes "poktroll/x/shared/types"
 	"sync"
 
 	"github.com/pokt-network/smt"
-
-	"poktroll/x/session/types"
 )
 
 var _ SessionWithTree = &sessionWithTree{}
 
 type SessionWithTree interface {
-	GetSessionId() string
+	GetSession() *sharedtypes.Session
 	SessionTree() *smt.SMST
 	CloseTree() ([]byte, error)
 	DeleteTree() error
 }
 
 type sessionWithTree struct {
-	sessionInfo    *types.Session
+	sessionInfo    *sharedtypes.Session
 	tree           *smt.SMST
 	treeStore      smt.KVStore
 	claimedSMTRoot []byte
@@ -32,7 +31,7 @@ type sessionWithTree struct {
 }
 
 func NewSessionWithTree(
-	sessionInfo *types.Session,
+	sessionInfo *sharedtypes.Session,
 	tree *smt.SMST,
 	treeStore smt.KVStore,
 	storePath string,
@@ -64,8 +63,8 @@ func (s *sessionWithTree) SessionTree() *smt.SMST {
 	return s.tree
 }
 
-func (s *sessionWithTree) GetSessionId() string {
-	return s.sessionInfo.SessionId
+func (s *sessionWithTree) GetSession() *sharedtypes.Session {
+	return s.sessionInfo
 }
 
 // get the root of the no longer updatable tree

@@ -1,11 +1,11 @@
 syntax = "proto3";
-package poktroll.session;
+package poktroll.shared;
 
-import "poktroll/servicer/servicers.proto";
+import "poktroll/shared/servicers.proto";
 import "poktroll/application/application.proto";
 import "poktroll/service/service.proto";
 
-option go_package = "poktroll/x/session/types";
+option go_package = "poktroll/x/shared/types";
 
 message Session {
     // TODO_CONSIDERATION: Reconsider the following set of fields in term of their type, need, naming, etc...
@@ -20,7 +20,7 @@ message Session {
 
     service.ServiceId service = 5;
     application.Application application = 6;
-    repeated servicer.Servicers servicers = 7;
+    repeated Servicers servicers = 7;
 
     // TODO_ADD:
     // - GeoZone

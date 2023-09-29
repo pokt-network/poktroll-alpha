@@ -12,10 +12,11 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"poktroll/x/session/types"
+	sharedtypes "poktroll/x/shared/types"
 )
 
 type SessionKeeper interface {
-	GetSessionForApp(ctx sdk.Context, appAddress string, serviceId string, blockHeight uint64) (*types.Session, error)
+	GetSessionForApp(ctx sdk.Context, appAddress string, serviceId string, blockHeight uint64) (*sharedtypes.Session, error)
 }
 
 type (

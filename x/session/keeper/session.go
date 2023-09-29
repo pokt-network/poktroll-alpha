@@ -5,13 +5,15 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	_ "golang.org/x/crypto/sha3"
+
 	apptypes "poktroll/x/application/types"
 	srvstypes "poktroll/x/service/types"
 	svctypes "poktroll/x/servicer/types"
 	"poktroll/x/session/types"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	_ "golang.org/x/crypto/sha3"
+	sharedtypes "poktroll/x/shared/types"
 )
 
 const (
@@ -25,7 +27,7 @@ var (
 	SHA3HashLen = crypto.SHA3_256.Size()
 )
 
-func (k Keeper) GetSessionForApp(ctx sdk.Context, appAddress string, serviceId string, blockHeight uint64) (*types.Session, error) {
+func (k Keeper) GetSessionForApp(ctx sdk.Context, appAddress string, serviceId string, blockHeight uint64) (*sharedtypes.Session, error) {
 	logger := k.Logger(ctx).With("module", types.ModuleName).With("method", "GetSessionForApp")
 	logger.Info(fmt.Sprintf("About to get session for app address %s", appAddress))
 
@@ -54,7 +56,7 @@ func (k Keeper) GetSessionForApp(ctx sdk.Context, appAddress string, serviceId s
 	// filter servicers only if there is an overlap between the services the app & servicers both staked for
 	servicerPointers = findMatchingServicers(app, servicerPointers, &srvstypes.ServiceId{Id: serviceId})
 
-	session := types.Session{
+	session := sharedtypes.Session{
 		// NB: These parameters are hydrated by the hydrator below
 		// SessionId:,
 		// SessionNumber:,
@@ -106,7 +108,7 @@ func findMatchingServicers(app apptypes.Application, servicers []*svctypes.Servi
 
 type sessionHydrator struct {
 	// The session being hydrated and returned
-	session *types.Session
+	session *sharedtypes.Session
 
 	// The height at which the request is being made to get session information
 	blockHeight uint64

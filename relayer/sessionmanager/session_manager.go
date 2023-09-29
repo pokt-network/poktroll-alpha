@@ -10,7 +10,7 @@ import (
 
 	"poktroll/relayer/client"
 	"poktroll/utils"
-	sessionTypes "poktroll/x/session/types"
+	sharedtypes "poktroll/x/shared/types"
 )
 
 type sessionTreeMap map[string]SessionWithTree
@@ -47,7 +47,7 @@ func (sm *SessionManager) Sessions() utils.Observable[sessionTreeMap] {
 }
 
 // returns the tree for a given session, creating it if it doesn't exist
-func (sm *SessionManager) EnsureSessionTree(sessionInfo *sessionTypes.Session) *smt.SMST {
+func (sm *SessionManager) EnsureSessionTree(sessionInfo *sharedtypes.Session) *smt.SMST {
 	// get session end so we can group sessions that end at the same height
 	// make sure we do not off by one
 	sessionId := sessionInfo.SessionId
@@ -111,7 +111,7 @@ func (sm *SessionManager) createTreeForSession(storePath string) (*smt.SMST, smt
 	return tree, treeStore, nil
 }
 
-func (sm *SessionManager) sessionCleanupFactory(sessionInfo *sessionTypes.Session) func() {
+func (sm *SessionManager) sessionCleanupFactory(sessionInfo *sharedtypes.Session) func() {
 	return func() {
 		delete(sm.sessions[sessionInfo.GetSessionEndHeight()], sessionInfo.SessionId)
 

@@ -2,14 +2,16 @@ package client
 
 import (
 	"context"
-	"poktroll/x/servicer/types"
 
 	"github.com/pokt-network/smt"
+
+	"poktroll/x/servicer/types"
+	sharedtypes "poktroll/x/shared/types"
 )
 
 func (client *servicerClient) SubmitProof(
 	ctx context.Context,
-	sessionId string,
+	session *sharedtypes.Session,
 	smtRootHash []byte,
 	closestKey []byte,
 	closestValueHash []byte,
@@ -26,7 +28,7 @@ func (client *servicerClient) SubmitProof(
 	}
 
 	msg := &types.MsgProof{
-		SessionId:       sessionId,
+		Session:         session,
 		ServicerAddress: client.address,
 		SmstRootHash:    smtRootHash,
 		Path:            closestKey,
