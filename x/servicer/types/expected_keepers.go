@@ -3,6 +3,8 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+
+	sharedtypes "poktroll/x/shared/types"
 )
 
 // AccountKeeper defines the expected account keeper used for simulations (noalias)
@@ -17,4 +19,8 @@ type BankKeeper interface {
 	// SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error
 	SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
 	SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
+}
+
+type SessionKeeper interface {
+	GetSessionForApp(ctx sdk.Context, appAddress string, serviceId string, blockHeight uint64) (*sharedtypes.Session, error)
 }
