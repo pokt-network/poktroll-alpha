@@ -4,7 +4,6 @@ package keeper
 
 import (
 	"fmt"
-
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -16,7 +15,7 @@ import (
 
 type PortalKeeper interface {
 	SetPortal(ctx sdk.Context, portals types.Portal)
-	GetPortal(ctx sdk.Context, address string)
+	GetPortal(ctx sdk.Context, address string) (val types.Portal, found bool)
 	RemovePortal(ctx sdk.Context, address string)
 	GetAllPortals(ctx sdk.Context) (list []types.Portal)
 }
