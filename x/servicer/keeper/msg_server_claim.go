@@ -61,27 +61,24 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 	//           lastEndedSessionNumber ─┘	    │   claimCommitedHeight
 	//
 
-	// TODO_THIS_COMMIT: factor all this out to a library pkg so that it can be
-	// reused in the client / relayer.
 	// TODO_CONSIDERATION: we can  do this in terms of sessionId instead of
-	// lastEndedSessionStartHeight; however, it would require refactoring the
+	// lastEndedSessionBlockHash; however, it would require refactoring the
 	// servicer and/or session modules to eliminate a dependency cycle between
 	// their protobuf message types.
-	lastEndedSessionStartHeight := (lastEndedSessionNumber*(sessionkeeper.NumSessionBlocks-1) + 1)
-	lastEndedSessionStartCtx := ctx.WithBlockHeight(int64(lastEndedSessionStartHeight))
-	lastEndedSessionBlockHash := lastEndedSessionStartCtx.BlockHeader().LastBlockId.Hash
-	rngSeed, _ := binary.Varint(lastEndedSessionBlockHash)
-	maxRandomSessionEndHeightOffset := sessionkeeper.NumSessionBlocks - govSessionEndHeightOffset
-	// TECHDEBT: ensure use of a "universal" PRNG implementation; i.e. one that
-	// is based on a spec and has multiple language implementations and/or bindings.
-	// TODO_CONSIDERATION: it would be nice if the random offset component had
-	// a normal distribution with respect to the session block range.
-	// TODO_THIS_COMMIT: should take govClaimHeightOffset into account to avoid
-	// proof submission in wrong (next) session.
-	// INVESTIGATE: using "invariants" in cosmos-sdk to ensure that we don't
-	// misconfigure  the chain params for this.
-	randSessionEndHeightOffset := uint64(rand.NewSource(rngSeed).Int63()) % maxRandomSessionEndHeightOffset
-	earliestClaimHeight := lastEndedSessionStartHeight + govSessionEndHeightOffset + randSessionEndHeightOffset
+	lastEndedSessionEndHeight := lastEndedSessionNumber * sessionkeeper.NumSessionBlocks
+	//lastEndedSessionStartCtx := ctx.WithBlockHeight(int64(lastEndedSessionStartHeight))
+	//lastEndedSessionBlockHash := lastEndedSessionStartCtx.BlockHeader().LastBlockId.Hash
+	// TODO_THIS_COMMIT: seed should be the claim's sessionId.
+	earliestClaimHeight := getPseudoRandomHeightOffset(
+		//lastEndedSessionBlockHash,
+		// *NOTE*: the session ID has not yet been verified! This will happen when
+		// the corresponding proof is submitted along with the input arguments to
+		// get the session (i.e. app address, service ID, block height / session
+		// number)
+		msg.GetSessionId(),
+		lastEndedSessionEndHeight,
+		govSessionEndHeightOffset,
+	)
 
 	// claim is too early
 	// RATIONALE: distribute the load of proofs across the session block range.
@@ -90,11 +87,15 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 	// commit heights of the majority of claims while still being random and
 	// fair.
 	if uint64(ctx.BlockHeight()) < earliestClaimHeight {
-		return nil, fmt.Errorf(
-			"claim submitted too early, earliest claim height: %d; got: %d",
-			earliestClaimHeight,
-			ctx.BlockHeight(),
-		)
+		// TODO_THIS_COMMIT: uncomment - currently debugging depinject
+		// & servicer/session module dep cycle
+		//
+		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
+		//return nil, fmt.Errorf(
+		//	"claim submitted too early, earliest claim height: %d; got: %d",
+		//	earliestClaimHeight,
+		//	ctx.BlockHeight(),
+		//)
 	}
 
 	claim := &servicertypes.Claim{
@@ -116,4 +117,21 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 	}
 
 	return &servicertypes.MsgClaimResponse{}, nil
+}
+
+// TODO_THIS_COMMIT: factor this out to a library pkg so that it can be
+// reused in the client / relayer.
+func getPseudoRandomHeightOffset(sessionId string, startHeight uint64, offset uint64) uint64 {
+	rngSeed, _ := binary.Varint([]byte(sessionId))
+	maxRandomSessionEndHeightOffset := sessionkeeper.NumSessionBlocks - govSessionEndHeightOffset
+	// TECHDEBT: ensure use of a "universal" PRNG implementation; i.e. one that
+	// is based on a spec and has multiple language implementations and/or bindings.
+	// TODO_CONSIDERATION: it would be nice if the random offset component had
+	// a normal distribution with respect to the session block range.
+	// TODO_THIS_COMMIT: should take govClaimHeightOffset into account to avoid
+	// proof submission in wrong (next) session.
+	// INVESTIGATE: using "invariants" in cosmos-sdk to ensure that we don't
+	// misconfigure  the chain params for this.
+	randSessionEndHeightOffset := uint64(rand.NewSource(rngSeed).Int63()) % maxRandomSessionEndHeightOffset
+	return startHeight + offset + randSessionEndHeightOffset
 }

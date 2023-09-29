@@ -4,10 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
-	"encoding/binary"
 	"fmt"
-	"math/rand"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pokt-network/smt"
 
@@ -48,7 +45,7 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	//}
 
 	// lookup the corresponding claim and verify that it matches.
-	claim, err := k.GetClaim(ctx, msg.SessionId)
+	claim, err := k.GetClaim(ctx, msg.GetSession().GetSessionId())
 	if err != nil {
 		return nil, err
 	}
@@ -65,22 +62,31 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		return nil, fmt.Errorf("first proof signer doesn't match claim's servicer address, expected: %s; got: %s", claim.ServicerAddress, firstSignerAddress)
 	}
 
-	// TODO_THIS_COMMIT: factor all this out to a library pkg so that it can be
-	// reused in the client / relayer.
-	claimCommittedHeightCtx := ctx.WithBlockHeight(int64(claim.GetCommittedHeight()))
-	claimCommittedBlockHash := claimCommittedHeightCtx.BlockHeader().LastBlockId.Hash
-	rngSeed, _ := binary.Varint(claimCommittedBlockHash)
-	maxRandomClaimCommittedHeightOffset := sessionkeeper.NumSessionBlocks - govClaimCommittedHeightOffset
-	// TECHDEBT: ensure use of a "universal" PRNG implementation; i.e. one that
-	// is based on a spec and has multiple language implementations and/or bindings.
-	// TODO_CONSIDERATION: it would be nice if the random offset component had
-	// a normal distribution with respect to the session block range.
-	// TODO_THIS_COMMIT: should take govClaimHeightOffset into account to avoid
-	// proof submission in wrong (next) session.
-	// INVESTIGATE: using "invariants" in cosmos-sdk to ensure that we don't
-	// misconfigure  the chain params for this.
-	randClaimCommittedHeightOffset := uint64(rand.NewSource(rngSeed).Int63()) % maxRandomClaimCommittedHeightOffset
-	earliestProofHeight := claim.GetCommittedHeight() + govClaimCommittedHeightOffset + randClaimCommittedHeightOffset
+	// WIP WIP WIP // WIP WIP WIP // WIP WIP WIP // WIP WIP WIP
+	// HELP: expecting `k.sessionKeeper != nil`
+	session, err := k.sessionKeeper.GetSessionForApp(
+		ctx, msg.GetSession().GetApplication().GetAddress(),
+		msg.GetSession().GetService().GetId(),
+		// TODO_THIS_COMMIT: replace with `Session#GetSessionBlockStartHeight()`
+		msg.GetSession().GetSessionNumber(),
+	)
+	if err != nil {
+		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
+		return nil, fmt.Errorf("failed to get session for app: %w", err)
+	}
+
+	// TODO_CONSIDERATION: we can  do this in terms of sessionId instead of
+	// claimCommittedBlockHash; however, it would require refactoring the
+	//claimCommittedHeightCtx := ctx.WithBlockHeight(int64(claim.GetCommittedHeight()))
+	//claimCommittedBlockHash := claimCommittedHeightCtx.BlockHeader().LastBlockId.Hash
+	// TODO_THIS_COMMIT: seed should be the claim's sessionId.
+	earliestProofHeight := getPseudoRandomHeightOffset(
+		//claimCommittedBlockHash,
+		//claim.GetSessionId(),
+		session.GetSessionId(),
+		claim.GetCommittedHeight(),
+		govClaimCommittedHeightOffset,
+	)
 
 	// proof is too early
 	// RATIONALE: distribute the load of proofs across the session block range.
@@ -89,12 +95,15 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	// commit heights of the majority of claims while still being random and
 	// fair.
 	if uint64(ctx.BlockHeight()) < earliestProofHeight {
+		// TODO_THIS_COMMIT: uncomment - currently debugging depinject
+		// & servicer/session module dep cycle
+		//
 		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
-		return nil, fmt.Errorf(
-			"proof submitted too early, earliest proof height: %d; got: %d",
-			earliestProofHeight,
-			ctx.BlockHeight(),
-		)
+		//return nil, fmt.Errorf(
+		//	"proof submitted too early, earliest proof height: %d; got: %d",
+		//	earliestProofHeight,
+		//	ctx.BlockHeight(),
+		//)
 	}
 
 	lastEndedSessionNumber := uint64(ctx.BlockHeight()) / sessionkeeper.NumSessionBlocks
