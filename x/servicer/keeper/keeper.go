@@ -5,6 +5,7 @@ package keeper
 import (
 	"fmt"
 
+	"cosmossdk.io/depinject"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -12,22 +13,25 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"poktroll/x/servicer/types"
+	sharedtypes "poktroll/x/shared/types"
 )
 
 type ServicerKeeper interface {
-	SetServicers(ctx sdk.Context, servicers types.Servicers)
+	SetServicers(ctx sdk.Context, servicers sharedtypes.Servicers)
 	GetServicers(ctx sdk.Context, address string)
 	RemoveServicers(ctx sdk.Context, address string)
-	GetAllServicers(ctx sdk.Context) (list []types.Servicers)
+	GetAllServicers(ctx sdk.Context) (list []sharedtypes.Servicers)
+	Inject(depinject.Config) error
 }
 
 type (
 	Keeper struct {
-		cdc        codec.BinaryCodec
-		storeKey   storetypes.StoreKey
-		memKey     storetypes.StoreKey
-		paramstore paramtypes.Subspace
-		bankKeeper types.BankKeeper
+		cdc           codec.BinaryCodec
+		storeKey      storetypes.StoreKey
+		memKey        storetypes.StoreKey
+		paramstore    paramtypes.Subspace
+		bankKeeper    types.BankKeeper
+		sessionKeeper types.SessionKeeper
 	}
 )
 
@@ -50,9 +54,14 @@ func NewKeeper(
 		memKey:     memKey,
 		paramstore: ps,
 		bankKeeper: bk,
+		// NB: sessionKeeper is provided via `depinject`
 	}
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+}
+
+func (k Keeper) Inject(config depinject.Config) error {
+	return depinject.Inject(config, &k.sessionKeeper)
 }

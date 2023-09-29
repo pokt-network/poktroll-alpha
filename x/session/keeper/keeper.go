@@ -5,6 +5,7 @@ package keeper
 import (
 	"fmt"
 
+	"cosmossdk.io/depinject"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -46,7 +47,7 @@ func NewKeeper(
 		ps = ps.WithKeyTable(types.ParamKeyTable())
 	}
 
-	return &Keeper{
+	sessionKeeper := &Keeper{
 		cdc:        cdc,
 		storeKey:   storeKey,
 		memKey:     memKey,
@@ -55,8 +56,35 @@ func NewKeeper(
 		appKeeper: appKeeper,
 		svcKeeper: svcKeeper,
 	}
+
+	depConfig := supply(sessionKeeper)
+	if err := svcKeeper.Inject(depConfig); err != nil {
+		panic(err)
+	}
+
+	return sessionKeeper
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+}
+
+func supply(k *Keeper) depinject.Config {
+	return depinject.Configs(
+		// *NOTE*: May not need to use `depinject.BindInterface()`; this part
+		// seems to be working.
+		//
+		// Not sure if using `depinject.BindInterface()` correctly:
+		// - The servicer keeper is referencing
+		// the interface defined in its expected_keepers.go (i.e. NOT the
+		// `SessionKeeper` interface defined above).
+		// - "Supplying" the session keeper here as a (concrete) `*Keeper` type.
+		// - See: https://github.com/cosmos/cosmos-sdk/tree/main/depinject#bindinterface-api
+		//depinject.BindInterface(
+		//	// NB: pkg_path/pkg_name.InterfaceName
+		//	"poktroll/x/servicer/types/types.SessionKeeper",
+		//	"poktroll/x/session/keeper/keeper.Keeper",
+		//),
+		depinject.Supply(k),
+	)
 }
