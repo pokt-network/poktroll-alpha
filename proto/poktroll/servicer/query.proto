@@ -75,7 +75,7 @@ message QueryClaimsRequest {
 }
 
 message QueryClaimsResponse {
-  repeated MsgClaim claims = 1 [(gogoproto.nullable) = false];
+  repeated Claim claims = 1 [(gogoproto.nullable) = false];
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
