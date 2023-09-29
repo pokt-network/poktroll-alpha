@@ -1,14 +1,12 @@
 package types
 
 import (
-	// poktroll "poktroll/types"
-
-	apptypes "poktroll/x/application/types"
-	svctypes "poktroll/x/servicer/types"
-
 	"cosmossdk.io/depinject"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
+
+	apptypes "poktroll/x/application/types"
+	sharedtypes "poktroll/x/shared/types"
 )
 
 // AccountKeeper defines the expected account keeper used for simulations (noalias)
@@ -29,6 +27,6 @@ type ApplicationKeeper interface {
 }
 
 type ServicerKeeper interface {
-	GetAllServicers(ctx sdk.Context) []svctypes.Servicers
+	GetAllServicers(ctx sdk.Context) []sharedtypes.Servicers
 	Inject(depinject.Config) error
 }
