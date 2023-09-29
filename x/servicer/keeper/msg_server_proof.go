@@ -6,18 +6,20 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/pokt-network/smt"
 	"math/rand"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/smt"
+
 	"poktroll/x/servicer/types"
+	sessionkeeper "poktroll/x/session/keeper"
 )
 
 const (
 	// INCOMPLETE/HACK: this should be a governance param.
 	// govSessionEndHeightOffset is a constant number of blocks after the end of
 	// a session, after which a claim for that session can be submitted.
-	govClaimCommittedHeightOffset = numSessionBlocks / 2
+	govClaimCommittedHeightOffset = sessionkeeper.NumSessionBlocks / 2
 )
 
 var errInvalidPathFmt = "invalid path: %x, expected: %x"
@@ -68,7 +70,7 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	claimCommittedHeightCtx := ctx.WithBlockHeight(int64(claim.GetCommittedHeight()))
 	claimCommittedBlockHash := claimCommittedHeightCtx.BlockHeader().LastBlockId.Hash
 	rngSeed, _ := binary.Varint(claimCommittedBlockHash)
-	maxRandomClaimCommittedHeightOffset := numSessionBlocks - govClaimCommittedHeightOffset
+	maxRandomClaimCommittedHeightOffset := sessionkeeper.NumSessionBlocks - govClaimCommittedHeightOffset
 	// TECHDEBT: ensure use of a "universal" PRNG implementation; i.e. one that
 	// is based on a spec and has multiple language implementations and/or bindings.
 	// TODO_CONSIDERATION: it would be nice if the random offset component had
@@ -95,8 +97,8 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		)
 	}
 
-	lastEndedSessionNumber := uint64(ctx.BlockHeight()) / numSessionBlocks
-	currentSessionEndHeight := (lastEndedSessionNumber + 1) * numSessionBlocks
+	lastEndedSessionNumber := uint64(ctx.BlockHeight()) / sessionkeeper.NumSessionBlocks
+	currentSessionEndHeight := (lastEndedSessionNumber + 1) * sessionkeeper.NumSessionBlocks
 
 	// proof is too late
 	// RATIONALE: only rewarding proofs committed before some threshold
