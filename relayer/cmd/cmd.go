@@ -40,6 +40,8 @@ func RelayerCmd() *cobra.Command {
 	cmd.Flags().StringVar(&signingKeyName, "signing-key", "", "Name of the key to sign transactions")
 	cmd.Flags().StringVar(&smtStorePath, "smt-store", "smt", "Path to the SMT KV store")
 	// Communication flags
+	// TODO_DISCUSS: We're using `explicitly omitting default` so the relayer crashes if these aren't specified. Figure out
+	// what the defaults should be post alpha.
 	cmd.Flags().StringVar(&sequencerNode, "sequencer-node", "explicitly omitting default", "<host>:<port> to sequencer/validator node to submit txs")
 	cmd.Flags().StringVar(&pocketNode, "pocket-node", "explicitly omitting default", "<host>:<port> to full/light pocket node for reading data and listening for on-chain events")
 	cmd.Flags().String(flags.FlagNode, "explicitly omitting default", "registering the default cosmos node flag; needed to initialize the tx and query contexts correctly")

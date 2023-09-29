@@ -37,9 +37,8 @@ flowchart TB
         pg[["Polygon"]]
         etc[["..."]]
     end
-    %%  (can easily migrate to sequencers)
     subgraph s["Servicer"]
-        pl2[("Pocket Light Node")]
+        pl2[("Pocket Light/Full Node")]
     end
     c{"Celestia DA"}
     a -- Relay Req/Res \n (JSON-RPC endpoint) --> r
