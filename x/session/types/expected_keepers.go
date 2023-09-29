@@ -6,6 +6,7 @@ import (
 	apptypes "poktroll/x/application/types"
 	svctypes "poktroll/x/servicer/types"
 
+	"cosmossdk.io/depinject"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 )
@@ -29,4 +30,5 @@ type ApplicationKeeper interface {
 
 type ServicerKeeper interface {
 	GetAllServicers(ctx sdk.Context) []svctypes.Servicers
+	Inject(depinject.Config) error
 }
