@@ -1,26 +1,30 @@
+This document describes claim and proof generation for sessions that are closing.
+
+It is a concurrent loop that executes the claim/proof submission in parallel across all sessions that are closing at the current block height.
+
 ```mermaid
 sequenceDiagram
   title: Closing sessions handling flow
-  participant ServicerClient
+  participant Servicer as Servicer<br>(Pocket Client)
   participant Miner
   participant SessionManager
 
   loop Listen to new blocks
-      ServicerClient ->> SessionManager: Notify about new block height
+      Servicer -->> SessionManager: Notify of a new committed block
       SessionManager ->> SessionManager: Collect sessions that close at that block height
-      SessionManager ->> Miner: Notify miner with a batch of sessions to close
+      SessionManager -->> Miner: Notify miner with a batch of sessions to close
 
       loop SessionWithTree map (concurrent loop)
           Miner ->>+ Miner: Get smst_root and close the tree store
-          Miner ->>+ ServicerClient: Submit claim
-          ServicerClient ->>- Miner: Ack. claim inclusion in block
-          Miner ->> Miner: Wait before proof submission
-          Miner ->>+ ServicerClient: Request latest block hash after waiting
-          ServicerClient ->>- Miner: Reply with latest block hash
+          Miner ->>+ Servicer: Submit Tx(MsgClaim)
+          note over Miner: Wait for Tx to be included in a block
+          Miner ->> Miner: Wait proof wait time blocks<br> (governance parameter)
+          Miner ->>+ Servicer: Request latest block hash after waiting
+          Servicer ->>- Miner: Reply with latest block hash
           Miner ->> Miner: Re-open tree store for proof generation
           Miner ->> Miner: Generate proof with latest block hash
-          Miner ->>+ ServicerClient: Submit proof
-          ServicerClient ->>- Miner: Ack. proof inclusion in block
+          Miner ->>+ Servicer: Submit proof
+          note over Miner: Wait for Tx to be included in a block
           Miner ->> Miner: Delete session's tree
           Miner ->> SessionManager: Delete session's entry
       end
