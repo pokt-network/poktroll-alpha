@@ -1,0 +1,12 @@
+syntax = "proto3";
+package poktroll.servicer;
+
+option go_package = "poktroll/x/servicer/types";
+
+message Claim {
+    string SessionId = 1;
+    uint64 SessionNumber = 2;
+    uint64 CommittedHeight = 3;
+    bytes SmstRootHash = 4;
+    string ServicerAddress = 5;
+}

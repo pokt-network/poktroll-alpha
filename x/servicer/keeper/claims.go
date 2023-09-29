@@ -10,7 +10,7 @@ import (
 )
 
 // InsertClaim inserts the given claim into the state tree.
-func (k Keeper) InsertClaim(ctx sdk.Context, claim *types.MsgClaim) error {
+func (k Keeper) InsertClaim(ctx sdk.Context, claim *types.Claim) error {
 	// TODO_CONSIDERATION: do we want to re-use the servicer store for claims or
 	// create a new "claims store"?
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ClaimsKeyPrefix))
@@ -19,12 +19,12 @@ func (k Keeper) InsertClaim(ctx sdk.Context, claim *types.MsgClaim) error {
 		return err
 	}
 
-	claimKey := fmt.Sprintf("%s", claim.SessionId)
+	claimKey := fmt.Sprintf("%s", claim.GetSessionId())
 	store.Set([]byte(claimKey), claimBz)
 	return nil
 }
 
-func (k Keeper) GetClaim(ctx sdk.Context, sessionId string) (*types.MsgClaim, error) {
+func (k Keeper) GetClaim(ctx sdk.Context, sessionId string) (*types.Claim, error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ClaimsKeyPrefix))
 	claimKey := fmt.Sprintf("%s", sessionId)
 	claimBz := store.Get([]byte(claimKey))
@@ -33,7 +33,7 @@ func (k Keeper) GetClaim(ctx sdk.Context, sessionId string) (*types.MsgClaim, er
 		return nil, fmt.Errorf("claim not found for sessionId: %s", sessionId)
 	}
 
-	var claim types.MsgClaim
+	var claim types.Claim
 	if err := claim.Unmarshal(claimBz); err != nil {
 		return nil, err
 	}

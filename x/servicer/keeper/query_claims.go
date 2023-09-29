@@ -18,11 +18,11 @@ func (k Keeper) Claims(goCtx context.Context, req *types.QueryClaimsRequest) (*t
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var claims []types.MsgClaim
+	var claims []types.Claim
 	// TODO_THIS_COMMIT: move into claims.go
 	claimsStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ClaimsKeyPrefix))
 	pageRes, err := query.FilteredPaginate(claimsStore, req.Pagination, func(key []byte, value []byte, accumulate bool) (bool, error) {
-		var claim types.MsgClaim
+		var claim types.Claim
 		if err := k.cdc.Unmarshal(value, &claim); err != nil {
 			return false, err
 		}
