@@ -3,13 +3,14 @@ package keeper
 import (
 	"context"
 
-	"poktroll/x/servicer/types"
-
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"poktroll/x/servicer/types"
+	sharedtypes "poktroll/x/shared/types"
 )
 
 func (k Keeper) ServicersAll(goCtx context.Context, req *types.QueryAllServicersRequest) (*types.QueryAllServicersResponse, error) {
@@ -17,14 +18,14 @@ func (k Keeper) ServicersAll(goCtx context.Context, req *types.QueryAllServicers
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
-	var servicerss []types.Servicers
+	var servicerss []sharedtypes.Servicers
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	store := ctx.KVStore(k.storeKey)
 	servicersStore := prefix.NewStore(store, types.KeyPrefix(types.ServicersKeyPrefix))
 
 	pageRes, err := query.Paginate(servicersStore, req.Pagination, func(key []byte, value []byte) error {
-		var servicers types.Servicers
+		var servicers sharedtypes.Servicers
 		if err := k.cdc.Unmarshal(value, &servicers); err != nil {
 			return err
 		}

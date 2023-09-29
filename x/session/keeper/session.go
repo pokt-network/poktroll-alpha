@@ -11,7 +11,6 @@ import (
 
 	apptypes "poktroll/x/application/types"
 	srvstypes "poktroll/x/service/types"
-	svctypes "poktroll/x/servicer/types"
 	"poktroll/x/session/types"
 	sharedtypes "poktroll/x/shared/types"
 )
@@ -48,7 +47,7 @@ func (k Keeper) GetSessionForApp(ctx sdk.Context, appAddress string, serviceId s
 	logger.Info(fmt.Sprintf("Servicers found: %v", servicers))
 
 	// INVESTIGATE: The `Session` protobuf expects pointers but the `GetAllServicers` keep methods returns values. Look into cosmos to figure out the best path here.
-	servicerPointers := make([]*svctypes.Servicers, len(servicers))
+	servicerPointers := make([]*sharedtypes.Servicers, len(servicers))
 	for i, servicer := range servicers {
 		servicerPointers[i] = &servicer
 	}
@@ -84,8 +83,8 @@ func (k Keeper) GetSessionForApp(ctx sdk.Context, appAddress string, serviceId s
 }
 
 // TODO_IMPLEMENT: Need to pseudo-randomly select only the relevant servicers
-func findMatchingServicers(app apptypes.Application, servicers []*svctypes.Servicers, targetServiceId *srvstypes.ServiceId) []*svctypes.Servicers {
-	matchingServicers := []*svctypes.Servicers{}
+func findMatchingServicers(app apptypes.Application, servicers []*sharedtypes.Servicers, targetServiceId *srvstypes.ServiceId) []*sharedtypes.Servicers {
+	matchingServicers := []*sharedtypes.Servicers{}
 
 	serviceIDMap := make(map[string]struct{})
 	for _, service := range app.Services {

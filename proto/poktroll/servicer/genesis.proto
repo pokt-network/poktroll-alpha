@@ -4,13 +4,13 @@ package poktroll.servicer;
 
 import "gogoproto/gogo.proto";
 import "poktroll/servicer/params.proto";
-import "poktroll/servicer/servicers.proto";
+import "poktroll/shared/servicers.proto";
 
 option go_package = "poktroll/x/servicer/types";
 
 // GenesisState defines the servicer module's genesis state.
 message GenesisState {
            Params    params        = 1 [(gogoproto.nullable) = false];
-  repeated Servicers servicersList = 2 [(gogoproto.nullable) = false];
+  repeated poktroll.shared.Servicers servicersList = 2 [(gogoproto.nullable) = false];
 }
 
