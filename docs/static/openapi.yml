@@ -47360,6 +47360,10 @@ paths:
               params:
                 description: params holds all the parameters of this module.
                 type: object
+                properties:
+                  max_delegated_portals:
+                    type: integer
+                    format: int64
             description: >-
               QueryParamsResponse is response type for the Query/Params RPC
               method.
@@ -79466,6 +79470,10 @@ definitions:
     type: object
   poktroll.application.Params:
     type: object
+    properties:
+      max_delegated_portals:
+        type: integer
+        format: int64
     description: Params defines the parameters for the module.
   poktroll.application.QueryAllApplicationResponse:
     type: object
@@ -79925,6 +79933,10 @@ definitions:
       params:
         description: params holds all the parameters of this module.
         type: object
+        properties:
+          max_delegated_portals:
+            type: integer
+            format: int64
     description: QueryParamsResponse is response type for the Query/Params RPC method.
   poktroll.service.ServiceId:
     type: object

@@ -1,7 +1,11 @@
 package keeper
 
 import (
+	"fmt"
+	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	cryptocdc "github.com/cosmos/cosmos-sdk/crypto/codec"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"poktroll/x/application/types"
 
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -75,17 +79,47 @@ func (k Keeper) DelegatePortal(ctx sdk.Context, appAddress string, portalPubKey 
 		// if app doesn't exist it cannot be staked
 		return types.ErrApplicationNotFound
 	}
-	// update application's delegated portals
 	app := new(types.Application)
 	k.cdc.MustUnmarshal(b, app)
+
+	// check against max delegated param
+	if uint32(len(app.DelegatedPortals.PortalPubKeys)) >= k.GetParams(ctx).MaxDelegatedPortals {
+		return types.ErrMaxDelegatedReached
+	}
+	// ensure the portal is not already present
+	for _, p := range app.DelegatedPortals.PortalPubKeys {
+		equal, err := anyPkEquality(p, portalPubKey)
+		if err != nil {
+			return err
+		}
+		if equal {
+			return types.ErrPortalAlreadyDelegated
+		}
+	}
+
+	// update application's delegated portals
 	app.DelegatedPortals.PortalPubKeys = append(app.DelegatedPortals.PortalPubKeys, portalPubKey)
 	b = k.cdc.MustMarshal(app)
 	store.Set(types.ApplicationKey(
 		app.Address,
 	), b)
-
 	// index delegated portals per app address for easy lookup for portals
 	k.portalKeeper.SetDelegatedApplication(ctx, appAddress, app.DelegatedPortals)
 
 	return nil
+}
+
+func anyPkEquality(pk1, pk2 codectypes.Any) (equal bool, err error) {
+	reg := codectypes.NewInterfaceRegistry()
+	cryptocdc.RegisterInterfaces(reg)
+	cdc := codec.NewProtoCodec(reg)
+	var pubI1 cryptotypes.PubKey
+	if err := cdc.UnpackAny(&pk1, &pubI1); err != nil {
+		return false, fmt.Errorf("portal public key [%+v] is not cryptotypes.PubKey: %w", pk1.GetValue(), err)
+	}
+	var pubI2 cryptotypes.PubKey
+	if err := cdc.UnpackAny(&pk2, &pubI2); err != nil {
+		return false, fmt.Errorf("portal public key [%+v] is not cryptotypes.PubKey: %w", pk1.GetValue(), err)
+	}
+	return pubI1.Equals(pubI2), nil
 }

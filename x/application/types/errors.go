@@ -14,4 +14,6 @@ var (
 	ErrUnstakingNonExistentApp = sdkerrors.Register(ModuleName, 4, "Could not unstake non-existent application")
 	ErrNoServicesToStake       = sdkerrors.Register(ModuleName, 5, "Must stake for at least one service")
 	ErrApplicationNotFound     = sdkerrors.Register(ModuleName, 6, "Application not found")
+	ErrMaxDelegatedReached     = sdkerrors.Register(ModuleName, 7, "Application has reached the maximum number of delegated portals")
+	ErrPortalAlreadyDelegated  = sdkerrors.Register(ModuleName, 8, "Application has already delegated to this portal")
 )
