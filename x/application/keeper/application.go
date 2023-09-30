@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"cosmossdk.io/errors"
 	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -83,8 +84,9 @@ func (k Keeper) DelegatePortal(ctx sdk.Context, appAddress string, portalPubKey 
 	k.cdc.MustUnmarshal(b, app)
 
 	// check against max delegated param
-	if uint32(len(app.DelegatedPortals.PortalPubKeys)) >= k.GetParams(ctx).MaxDelegatedPortals {
-		return types.ErrMaxDelegatedReached
+	maxPortals := k.GetParams(ctx).MaxDelegatedPortals
+	if uint32(len(app.DelegatedPortals.PortalPubKeys)) >= maxPortals {
+		return errors.Wrapf(types.ErrMaxDelegatedReached, fmt.Sprintf("delegated portals: %d, max: %d", len(app.DelegatedPortals.PortalPubKeys), k.GetParams(ctx).MaxDelegatedPortals))
 	}
 	// ensure the portal is not already present
 	for _, p := range app.DelegatedPortals.PortalPubKeys {

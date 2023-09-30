@@ -8,5 +8,5 @@ option go_package = "poktroll/x/application/types";
 // Params defines the parameters for the module.
 message Params {
   option (gogoproto.goproto_stringer) = false;
-  uint32 max_delegated_portals = 1;
+  uint32 max_delegated_portals = 1 [(gogoproto.jsontag) = "max_delegated_portals"];
 }
