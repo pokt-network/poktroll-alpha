@@ -17,7 +17,7 @@ func (k msgServer) StakePortal(goCtx context.Context, msg *types.MsgStakePortal)
 	logger.Info(fmt.Sprintf("About to stake portal %v with %v", msg.Address, msg.StakeAmount))
 
 	// Get the address of the staking portal
-	appAddress, err := sdk.AccAddressFromBech32(msg.Address)
+	portalAddress, err := sdk.AccAddressFromBech32(msg.Address)
 	if err != nil {
 		logger.Error(fmt.Sprintf("could not parse address %v", msg.Address))
 		return nil, err
@@ -34,7 +34,7 @@ func (k msgServer) StakePortal(goCtx context.Context, msg *types.MsgStakePortal)
 	var coinsToSend sdk.Coin
 	portal, found := k.GetPortal(ctx, msg.Address)
 	if !found {
-		logger.Info(fmt.Sprintf("portal not found, creating new portal for address %s with stake amount %v", appAddress, newPortalStake))
+		logger.Info(fmt.Sprintf("portal not found, creating new portal for address %s with stake amount %v", portalAddress, newPortalStake))
 
 		// If the portal is not found, create a new one
 		portal = types.Portal{
@@ -63,12 +63,12 @@ func (k msgServer) StakePortal(goCtx context.Context, msg *types.MsgStakePortal)
 	}
 
 	// Send coins to the portal module account
-	sdkError := k.bankKeeper.SendCoinsFromAccountToModule(ctx, appAddress, types.ModuleName, []sdk.Coin{coinsToSend})
+	sdkError := k.bankKeeper.SendCoinsFromAccountToModule(ctx, portalAddress, types.ModuleName, []sdk.Coin{coinsToSend})
 	if sdkError != nil {
-		logger.Error(fmt.Sprintf("could not send coins %v coins from %s to %s module account due to %v", coinsToSend, appAddress, types.ModuleName, sdkError))
+		logger.Error(fmt.Sprintf("could not send coins %v coins from %s to %s module account due to %v", coinsToSend, portalAddress, types.ModuleName, sdkError))
 		return nil, sdkError
 	}
-	logger.Info(fmt.Sprintf("successfully sent coins %v from %s to %s module account", coinsToSend, appAddress, types.ModuleName))
+	logger.Info(fmt.Sprintf("successfully sent coins %v from %s to %s module account", coinsToSend, portalAddress, types.ModuleName))
 
 	// Update the portal in the store
 	k.SetPortal(ctx, portal)

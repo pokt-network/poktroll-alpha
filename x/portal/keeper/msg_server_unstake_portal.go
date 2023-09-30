@@ -9,36 +9,36 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// INCOMPLETE: This should start an unbonding period for the application instead of unstaking it immediately
+// INCOMPLETE: This should start an unbonding period for the portal instead of unstaking it immediately
 func (k msgServer) UnstakePortal(goCtx context.Context, msg *types.MsgUnstakePortal) (*types.MsgUnstakePortalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	logger := k.Logger(ctx).With("method", "UnstakePortal")
 	logger.Info(fmt.Sprintf("About to unstake application %v", msg.Address))
 
-	// Get the address of the staking application
-	appAddress, err := sdk.AccAddressFromBech32(msg.Address)
+	// Get the address of the staking portal
+	portalAddress, err := sdk.AccAddressFromBech32(msg.Address)
 	if err != nil {
 		logger.Error(fmt.Sprintf("could not parse address %v", msg.Address))
 		return nil, err
 	}
 
-	application, found := k.GetPortal(ctx, msg.Address)
+	portal, found := k.GetPortal(ctx, msg.Address)
 	if !found {
 		logger.Error(fmt.Sprintf("application not found for address %s", msg.Address))
 		return nil, types.ErrUnstakingNonExistentPortal
 	}
 
-	sdkError := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, appAddress, []sdk.Coin{*application.Stake})
+	sdkError := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, portalAddress, []sdk.Coin{*portal.Stake})
 	if sdkError != nil {
-		logger.Error(fmt.Sprintf("could not send coins %v coins from %s module account to %s due to %v", application.Stake, types.ModuleName, appAddress, sdkError))
+		logger.Error(fmt.Sprintf("could not send coins %v coins from %s module account to %s due to %v", portal.Stake, types.ModuleName, portalAddress, sdkError))
 		return nil, sdkError
 	}
 
-	logger.Info(fmt.Sprintf("successfully sent coins %v from %s module account to %s", application.Stake, types.ModuleName, appAddress))
+	logger.Info(fmt.Sprintf("successfully sent coins %v from %s module account to %s", portal.Stake, types.ModuleName, portalAddress))
 
 	// Update the application in the store
 	k.RemovePortal(ctx, msg.Address)
-	logger.Info(fmt.Sprintf("successfully unstaked application and removed it from the store: %v", application))
+	logger.Info(fmt.Sprintf("successfully unstaked application and removed it from the store: %v", portal))
 
 	// QED
 	return &types.MsgUnstakePortalResponse{}, nil
