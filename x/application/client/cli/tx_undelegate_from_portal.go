@@ -12,20 +12,20 @@ import (
 
 var _ = strconv.Itoa(0)
 
-func CmdDelegateToPortal() *cobra.Command {
+func CmdUndelegateFromPortal() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delegate-to-portal [portal_pub_key]",
-		Short: "Broadcast message DelegateToPortal",
+		Use:   "undelegate-from-portal [portal_pub_key]",
+		Short: "Broadcast message undelegate_from_portal",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			argPortalPubKey := args[0]
+			portalPubKey := args[0]
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
-			msg := types.NewMsgDelegateToPortal(
+			msg := types.NewMsgUndelegateFromPortal(
 				clientCtx.GetFromAddress().String(),
-				argPortalPubKey,
+				portalPubKey,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

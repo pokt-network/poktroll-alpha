@@ -16,4 +16,5 @@ var (
 	ErrApplicationNotFound     = sdkerrors.Register(ModuleName, 6, "Application not found")
 	ErrMaxDelegatedReached     = sdkerrors.Register(ModuleName, 7, "Application has reached the maximum number of delegated portals")
 	ErrPortalAlreadyDelegated  = sdkerrors.Register(ModuleName, 8, "Application has already delegated to this portal")
+	ErrPortalNotDelegated      = sdkerrors.Register(ModuleName, 9, "Application has not delegated to this portal")
 )

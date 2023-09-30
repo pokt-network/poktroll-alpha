@@ -79466,6 +79466,8 @@ definitions:
     type: object
   poktroll.application.MsgStakeApplicationResponse:
     type: object
+  poktroll.application.MsgUndelegateFromPortalResponse:
+    type: object
   poktroll.application.MsgUnstakeApplicationResponse:
     type: object
   poktroll.application.Params:

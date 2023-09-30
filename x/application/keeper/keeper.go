@@ -21,6 +21,7 @@ type ApplicationKeeper interface {
 	RemoveApplication(ctx sdk.Context, address string)
 	GetAllApplication(ctx sdk.Context) (list []types.Application)
 	DelegatePortal(ctx sdk.Context, appAddress string, portalPubKey cryptotypes.PubKey) error
+	UndelagatePortal(ctx sdk.Context, appAddress string, portalPubKey cryptotypes.PubKey) error
 }
 
 type (

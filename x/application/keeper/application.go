@@ -111,6 +111,53 @@ func (k Keeper) DelegatePortal(ctx sdk.Context, appAddress string, portalPubKey 
 	return nil
 }
 
+// UndelegatePortal removes a portal from an application's delegated portals
+func (k Keeper) UndelegatePortal(ctx sdk.Context, appAddress string, portalPubKey codectypes.Any) error {
+	// update current application's value in store
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ApplicationKeyPrefix))
+	b := store.Get(types.ApplicationKey(
+		appAddress,
+	))
+	if b == nil {
+		// if app doesn't exist it cannot be staked
+		return types.ErrApplicationNotFound
+	}
+	app := new(types.Application)
+	k.cdc.MustUnmarshal(b, app)
+
+	// ensure the portal is already present
+	found := false
+	index := -1
+	for i, p := range app.DelegatedPortals.PortalPubKeys {
+		equal, err := anyPkEquality(p, portalPubKey)
+		if err != nil {
+			return err
+		}
+		if equal {
+			found = true
+			index = i
+		}
+	}
+	if !found {
+		return types.ErrPortalNotDelegated
+	}
+
+	// remove portal from application's delegated portals
+	app.DelegatedPortals.PortalPubKeys = append(
+		app.DelegatedPortals.PortalPubKeys[:index],
+		app.DelegatedPortals.PortalPubKeys[index+1:]...,
+	)
+	b = k.cdc.MustMarshal(app)
+	store.Set(types.ApplicationKey(
+		app.Address,
+	), b)
+	// reindex delegated portals per app address for easy lookup for portals
+	k.portalKeeper.SetDelegatedApplication(ctx, appAddress, app.DelegatedPortals)
+
+	return nil
+}
+
+// anyPkEquality checks if two Any types are cosmos.crypto.PubKey interfaces and whether they are equal
 func anyPkEquality(pk1, pk2 codectypes.Any) (equal bool, err error) {
 	reg := codectypes.NewInterfaceRegistry()
 	cryptocdc.RegisterInterfaces(reg)

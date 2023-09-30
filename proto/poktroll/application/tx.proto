@@ -11,9 +11,10 @@ option go_package = "poktroll/x/application/types";
 
 // Msg defines the Msg service.
 service Msg {
-  rpc StakeApplication   (MsgStakeApplication  ) returns (MsgStakeApplicationResponse  );
-  rpc UnstakeApplication (MsgUnstakeApplication) returns (MsgUnstakeApplicationResponse);
-  rpc DelegateToPortal   (MsgDelegateToPortal  ) returns (MsgDelegateToPortalResponse  );
+  rpc StakeApplication     (MsgStakeApplication    ) returns (MsgStakeApplicationResponse    );
+  rpc UnstakeApplication   (MsgUnstakeApplication  ) returns (MsgUnstakeApplicationResponse  );
+  rpc DelegateToPortal     (MsgDelegateToPortal    ) returns (MsgDelegateToPortalResponse    );
+  rpc UndelegateFromPortal (MsgUndelegateFromPortal) returns (MsgUndelegateFromPortalResponse);
 }
 message MsgStakeApplication {
            string                   address     = 1;
@@ -30,9 +31,16 @@ message MsgUnstakeApplication {
 message MsgUnstakeApplicationResponse {}
 
 message MsgDelegateToPortal {
-  string address      = 1;
+  string              address        = 1;
   google.protobuf.Any portal_pub_key = 2 [(cosmos_proto.accepts_interface) = "cosmos.crypto.PubKey"];
 }
 
 message MsgDelegateToPortalResponse {}
+
+message MsgUndelegateFromPortal {
+  string              address        = 1;
+  google.protobuf.Any portal_pub_key = 2 [(cosmos_proto.accepts_interface) = "cosmos.crypto.PubKey"];
+}
+
+message MsgUndelegateFromPortalResponse {}
 
