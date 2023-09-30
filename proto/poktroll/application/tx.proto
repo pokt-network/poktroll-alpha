@@ -2,8 +2,10 @@ syntax = "proto3";
 
 package poktroll.application;
 
+import "cosmos_proto/cosmos.proto";
 import "cosmos/base/v1beta1/coin.proto";
 import "poktroll/service/service.proto";
+import "google/protobuf/any.proto";
 
 option go_package = "poktroll/x/application/types";
 
@@ -11,12 +13,12 @@ option go_package = "poktroll/x/application/types";
 service Msg {
   rpc StakeApplication   (MsgStakeApplication  ) returns (MsgStakeApplicationResponse  );
   rpc UnstakeApplication (MsgUnstakeApplication) returns (MsgUnstakeApplicationResponse);
+  rpc DelegateToPortal   (MsgDelegateToPortal  ) returns (MsgDelegateToPortalResponse  );
 }
-
 message MsgStakeApplication {
-  string address = 1;
-  cosmos.base.v1beta1.Coin stakeAmount = 2;
-  repeated string serviceIds = 3;
+           string                   address     = 1;
+           cosmos.base.v1beta1.Coin stakeAmount = 2;
+  repeated string                   serviceIds  = 3;
 }
 
 message MsgStakeApplicationResponse {}
@@ -26,4 +28,11 @@ message MsgUnstakeApplication {
 }
 
 message MsgUnstakeApplicationResponse {}
+
+message MsgDelegateToPortal {
+  string address      = 1;
+  google.protobuf.Any portal_pub_key = 2 [(cosmos_proto.accepts_interface) = "cosmos.crypto.PubKey"];
+}
+
+message MsgDelegateToPortalResponse {}
 

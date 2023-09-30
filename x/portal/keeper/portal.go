@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	apptypes "poktroll/x/application/types"
 	"poktroll/x/portal/types"
 
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -56,4 +57,26 @@ func (k Keeper) GetAllPortals(ctx sdk.Context) (list []types.Portal) {
 		list = append(list, val)
 	}
 	return
+}
+
+// SetDelegatedApplication set a specific application's delegated portals in the store from its index
+func (k Keeper) SetDelegatedApplication(ctx sdk.Context, appAddress string, delegatedPortals apptypes.DelegatedPortals) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PortalDelegationsKeyPrefix))
+	b := k.cdc.MustMarshal(&delegatedPortals)
+	store.Set(types.PortalDelegationsKey(
+		appAddress,
+	), b)
+}
+
+// GetDelegatedPortals returns a application's delegated portals from its index
+func (k Keeper) GetDelegatedPortals(ctx sdk.Context, appAddress string) (val apptypes.DelegatedPortals, found bool) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PortalDelegationsKeyPrefix))
+	b := store.Get(types.PortalDelegationsKey(
+		appAddress,
+	))
+	if b == nil {
+		return val, false
+	}
+	k.cdc.MustUnmarshal(b, &val)
+	return val, true
 }

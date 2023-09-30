@@ -7,6 +7,7 @@ import (
 
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -19,15 +20,17 @@ type ApplicationKeeper interface {
 	GetApplication(ctx sdk.Context, address string) (val types.Application, found bool)
 	RemoveApplication(ctx sdk.Context, address string)
 	GetAllApplication(ctx sdk.Context) (list []types.Application)
+	DelegatePortal(ctx sdk.Context, appAddress string, portalPubKey cryptotypes.PubKey) error
 }
 
 type (
 	Keeper struct {
-		cdc        codec.BinaryCodec
-		storeKey   storetypes.StoreKey
-		memKey     storetypes.StoreKey
-		paramstore paramtypes.Subspace
-		bankKeeper types.BankKeeper
+		cdc          codec.BinaryCodec
+		storeKey     storetypes.StoreKey
+		memKey       storetypes.StoreKey
+		paramstore   paramtypes.Subspace
+		bankKeeper   types.BankKeeper
+		portalKeeper types.PortalKeeper
 	}
 )
 
@@ -37,6 +40,7 @@ func NewKeeper(
 	memKey storetypes.StoreKey,
 	ps paramtypes.Subspace,
 	bk types.BankKeeper,
+	pk types.PortalKeeper,
 ) *Keeper {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -44,11 +48,12 @@ func NewKeeper(
 	}
 
 	return &Keeper{
-		cdc:        cdc,
-		storeKey:   storeKey,
-		memKey:     memKey,
-		paramstore: ps,
-		bankKeeper: bk,
+		cdc:          cdc,
+		storeKey:     storeKey,
+		memKey:       memKey,
+		paramstore:   ps,
+		bankKeeper:   bk,
+		portalKeeper: pk,
 	}
 }
 

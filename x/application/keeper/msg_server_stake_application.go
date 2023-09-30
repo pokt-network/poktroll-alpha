@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 
 	"poktroll/x/application/types"
 	svcTypes "poktroll/x/service/types"
@@ -36,11 +37,15 @@ func (k msgServer) StakeApplication(goCtx context.Context, msg *types.MsgStakeAp
 	if !found {
 		logger.Info(fmt.Sprintf("application not found, creating new application for address %s with stake amount %v", appAddress, newApplicationStake))
 
+		emptyPortals := make([]codectypes.Any, 0)
 		// If the application is not found, create a new one
 		application = types.Application{
 			Address:  msg.Address,
 			Stake:    msg.StakeAmount,
 			Services: serviceIdsToService(msg.ServiceIds),
+			DelegatedPortals: types.DelegatedPortals{
+				PortalPubKeys: emptyPortals,
+			},
 		}
 
 		// Determine the number of coins to send from the application address to the application module account

@@ -13,4 +13,5 @@ var (
 	ErrStakeAmountMustBeHigher = sdkerrors.Register(ModuleName, 3, "The stake amount for a previously staked application must be explicitly higher than the prior amount")
 	ErrUnstakingNonExistentApp = sdkerrors.Register(ModuleName, 4, "Could not unstake non-existent application")
 	ErrNoServicesToStake       = sdkerrors.Register(ModuleName, 5, "Must stake for at least one service")
+	ErrApplicationNotFound     = sdkerrors.Register(ModuleName, 6, "Application not found")
 )

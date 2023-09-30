@@ -31,6 +31,10 @@ const (
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgUnstakeApplication int = 100
 
+	opWeightMsgDelegateToPortal = "op_weight_msg_delegate_to_portal"
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgDelegateToPortal int = 100
+
 	// this line is used by starport scaffolding # simapp/module/const
 )
 
@@ -81,6 +85,17 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		applicationsimulation.SimulateMsgUnstakeApplication(am.accountKeeper, am.bankKeeper, am.keeper),
 	))
 
+	var weightMsgDelegateToPortal int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgDelegateToPortal, &weightMsgDelegateToPortal, nil,
+		func(_ *rand.Rand) {
+			weightMsgDelegateToPortal = defaultWeightMsgDelegateToPortal
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgDelegateToPortal,
+		applicationsimulation.SimulateMsgDelegateToPortal(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
 	// this line is used by starport scaffolding # simapp/module/operation
 
 	return operations
@@ -102,6 +117,14 @@ func (am AppModule) ProposalMsgs(simState module.SimulationState) []simtypes.Wei
 			defaultWeightMsgUnstakeApplication,
 			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
 				applicationsimulation.SimulateMsgUnstakeApplication(am.accountKeeper, am.bankKeeper, am.keeper)
+				return nil
+			},
+		),
+		simulation.NewWeightedProposalMsg(
+			opWeightMsgDelegateToPortal,
+			defaultWeightMsgDelegateToPortal,
+			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
+				applicationsimulation.SimulateMsgDelegateToPortal(am.accountKeeper, am.bankKeeper, am.keeper)
 				return nil
 			},
 		),

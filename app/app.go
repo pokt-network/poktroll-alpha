@@ -585,6 +585,7 @@ func New(
 		app.GetSubspace(applicationmoduletypes.ModuleName),
 
 		app.BankKeeper,
+		app.PortalKeeper,
 	)
 	applicationModule := applicationmodule.NewAppModule(appCodec, app.ApplicationKeeper, app.AccountKeeper, app.BankKeeper)
 

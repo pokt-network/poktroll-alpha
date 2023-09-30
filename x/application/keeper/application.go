@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"poktroll/x/application/types"
 
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -16,7 +17,7 @@ func (k Keeper) SetApplication(ctx sdk.Context, application types.Application) {
 	), b)
 }
 
-// GetApplication returns a application from its index
+// GetApplication returns an application from its index
 func (k Keeper) GetApplication(
 	ctx sdk.Context,
 	address string,
@@ -61,4 +62,30 @@ func (k Keeper) GetAllApplication(ctx sdk.Context) (list []types.Application) {
 	}
 
 	return
+}
+
+// DelegatePortal delegates an application to a portal
+func (k Keeper) DelegatePortal(ctx sdk.Context, appAddress string, portalPubKey codectypes.Any) error {
+	// update current application's value in store
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ApplicationKeyPrefix))
+	b := store.Get(types.ApplicationKey(
+		appAddress,
+	))
+	if b == nil {
+		// if app doesn't exist it cannot be staked
+		return types.ErrApplicationNotFound
+	}
+	// update application's delegated portals
+	app := new(types.Application)
+	k.cdc.MustUnmarshal(b, app)
+	app.DelegatedPortals.PortalPubKeys = append(app.DelegatedPortals.PortalPubKeys, portalPubKey)
+	b = k.cdc.MustMarshal(app)
+	store.Set(types.ApplicationKey(
+		app.Address,
+	), b)
+
+	// index delegated portals per app address for easy lookup for portals
+	k.portalKeeper.SetDelegatedApplication(ctx, appAddress, app.DelegatedPortals)
+
+	return nil
 }
