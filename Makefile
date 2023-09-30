@@ -209,6 +209,38 @@ app2_unstake: ## Unstake for app2
 app3_unstake: ## Unstake for app3
 	APP=app3 make app_unstake
 
+.PHONY: delegate
+delegate: ## Delegate the application to the specified portal (must specify the APP and PORTAL env vars)
+	poktrolld --home=$(POKTROLLD_HOME) tx application delegate-to-portal '$(PORTAL)' --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+
+.PHONY: delegate_app1_portal1
+delegate_app1_portal1: ## Delegate app1 to portal1
+	APP=app1 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"AlghoqxZegNCUKwUt3LvzPkpeqfEvqVERWQFmnz7FSBj"}' make delegate
+
+.PHONY: delegate_app2_portal2
+delegate_app2_portal2: ## Delegate app2 to portal2
+	APP=app2 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"A2aNm2PV6rlLBZY7VvzillQg4WBX+zW4nTeGPfVUPeN/"}' make delegate
+
+.PHONY: delegate_app3_portal3
+delegate_app3_portal3: ## Delegate app3 to portal3
+	APP=app3 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"AyGPgyaQxtxTC3xMf6vzM3qo8FDSO+fOs4DDN/RSTreR"}' make delegate
+
+.PHONY: undelegate
+undelegate: ## Undelegate the application to the specified portal (must specify the APP and PORTAL env vars)
+	poktrolld --home=$(POKTROLLD_HOME) tx application undelegate-from-portal '$(PORTAL)' --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+
+.PHONY: undelegate_app1_portal1
+undelegate_app1_portal1: ## Undelegate app1 to portal1
+	APP=app1 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"AlghoqxZegNCUKwUt3LvzPkpeqfEvqVERWQFmnz7FSBj"}' make undelegate
+
+.PHONY: undelegate_app2_portal2
+undelegate_app2_portal2: ## Delegate app2 to portal2
+	APP=app2 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"A2aNm2PV6rlLBZY7VvzillQg4WBX+zW4nTeGPfVUPeN/"}' make undelegate
+
+.PHONY: undelegate_app3_portal3
+undelegate_app3_portal3: ## Delegate app3 to portal3
+	APP=app3 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"AyGPgyaQxtxTC3xMf6vzM3qo8FDSO+fOs4DDN/RSTreR"}' make undelegate
+
 .PHONY: portals_get
 portals_get: ## Retrieves all portals from the poktroll state
 	poktrolld --home=$(POKTROLLD_HOME) q portal list-portals --node $(POKTROLLD_NODE)
