@@ -209,6 +209,42 @@ app2_unstake: ## Unstake for app2
 app3_unstake: ## Unstake for app3
 	APP=app3 make app_unstake
 
+.PHONY: portals_get
+portals_get: ## Retrieves all portals from the poktroll state
+	poktrolld --home=$(POKTROLLD_HOME) q portal list-portals --node $(POKTROLLD_NODE)
+
+.PHONY: portal_stake
+portal_stake: ## Stake tokens for the portal specified (must specify the PORTAL and SERVICES env vars)
+	poktrolld --home=$(POKTROLLD_HOME) tx portal stake-portal 1000stake $(SERVICES) --keyring-backend test --from $(PORTAL) --node $(POKTROLLD_NODE)
+
+.PHONY: portal1_stake
+portal1_stake: ## Stake for portal1
+	SERVICES=svc1,svc2 PORTAL=portal1 make portal_stake
+
+.PHONY: portal2_stake
+portal2_stake: ## Stake for portal2
+	SERVICES=svc2,svc3 PORTAL=portal2 make portal_stake
+
+.PHONY: portal3_stake
+portal3_stake: ## Stake for portal3
+	SERVICES=svc3,svc4 PORTAL=portal3 make portal_stake
+
+.PHONY: portal_unstake
+portal_unstake: ## Unstake tokens for the portal specified (must specify the PORTAL env var)
+	poktrolld --home=$(POKTROLLD_HOME) tx portal unstake-portal --keyring-backend test --from $(PORTAL) --node $(POKTROLLD_NODE)
+
+.PHONY: portal1_unstake
+portal1_unstake: ## Unstake for portal1
+	PORTAL=portal1 make portal_unstake
+
+.PHONY: portal2_unstake
+portal2_unstake: ## Unstake for portal2
+	PORTAL=portal2 make portal_unstake
+
+.PHONY: portal3_unstake
+portal3_unstake: ## Unstake for portal3
+	PORTAL=portal3 make portal_unstake
+
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests
 	go test -v ./...

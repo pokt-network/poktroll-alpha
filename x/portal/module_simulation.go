@@ -23,7 +23,15 @@ var (
 )
 
 const (
-// this line is used by starport scaffolding # simapp/module/const
+	opWeightMsgStakePortal = "op_weight_msg_stake_portal"
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgStakePortal int = 100
+
+	opWeightMsgUnstakePortal = "op_weight_msg_unstake_portal"
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgUnstakePortal int = 100
+
+	// this line is used by starport scaffolding # simapp/module/const
 )
 
 // GenerateGenesisState creates a randomized GenState of the module.
@@ -51,6 +59,28 @@ func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedP
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
 	operations := make([]simtypes.WeightedOperation, 0)
 
+	var weightMsgStakePortal int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgStakePortal, &weightMsgStakePortal, nil,
+		func(_ *rand.Rand) {
+			weightMsgStakePortal = defaultWeightMsgStakePortal
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgStakePortal,
+		portalsimulation.SimulateMsgStakePortal(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
+	var weightMsgUnstakePortal int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgUnstakePortal, &weightMsgUnstakePortal, nil,
+		func(_ *rand.Rand) {
+			weightMsgUnstakePortal = defaultWeightMsgUnstakePortal
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgUnstakePortal,
+		portalsimulation.SimulateMsgUnstakePortal(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
 	// this line is used by starport scaffolding # simapp/module/operation
 
 	return operations
@@ -59,6 +89,22 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 // ProposalMsgs returns msgs used for governance proposals for simulations.
 func (am AppModule) ProposalMsgs(simState module.SimulationState) []simtypes.WeightedProposalMsg {
 	return []simtypes.WeightedProposalMsg{
+		simulation.NewWeightedProposalMsg(
+			opWeightMsgStakePortal,
+			defaultWeightMsgStakePortal,
+			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
+				portalsimulation.SimulateMsgStakePortal(am.accountKeeper, am.bankKeeper, am.keeper)
+				return nil
+			},
+		),
+		simulation.NewWeightedProposalMsg(
+			opWeightMsgUnstakePortal,
+			defaultWeightMsgUnstakePortal,
+			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
+				portalsimulation.SimulateMsgUnstakePortal(am.accountKeeper, am.bankKeeper, am.keeper)
+				return nil
+			},
+		),
 		// this line is used by starport scaffolding # simapp/module/OpMsg
 	}
 }

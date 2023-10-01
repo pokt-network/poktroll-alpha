@@ -16,6 +16,7 @@ localnet/poktrolld/*
 # Development
 .vscode
 .env
+.idea/
 
 **/*.pb.go
 **/*.pb.gw.go
