@@ -24,6 +24,9 @@ A Dependant Relayer is one that:
   - listen for on-chain events
 
 ```mermaid
+---
+title: Dependant Relayer
+---
 flowchart TB
     a(("Application"))
     subgraph p["Pocket Node"]
@@ -61,6 +64,9 @@ A Sovereign Relayer is one that:
   - listen for on-chain events
 
 ```mermaid
+---
+title: Sovereign Servicer
+---
 flowchart TB
     a(("Application"))
     subgraph prln["Rollup Nodes"]
