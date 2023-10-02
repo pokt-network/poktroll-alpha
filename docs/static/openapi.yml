@@ -79995,6 +79995,8 @@ definitions:
     type: object
   poktroll.portal.MsgUnstakePortalResponse:
     type: object
+  poktroll.portal.MsgUnwhitelistApplicationResponse:
+    type: object
   poktroll.portal.MsgWhitelistApplicationResponse:
     type: object
   poktroll.portal.Params:

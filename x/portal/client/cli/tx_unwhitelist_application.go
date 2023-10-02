@@ -1,32 +1,33 @@
 package cli
 
 import (
+	"strconv"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/spf13/cobra"
 	"poktroll/x/portal/types"
-	"strconv"
 )
 
 var _ = strconv.Itoa(0)
 
-func CmdWhitelistApplication() *cobra.Command {
+func CmdUnwhitelistApplication() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "whitelist-application",
-		Short: "Broadcast message whitelist_application",
+		Use:   "unwhitelist-application [app-address]",
+		Short: "Broadcast message unwhitelist_application",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			appAddress := args[0]
+			argAppAddress := args[0]
 
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgWhitelistApplication(
+			msg := types.NewMsgUnwhitelistApplication(
 				clientCtx.GetFromAddress().String(),
-				appAddress,
+				argAppAddress,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
