@@ -76,3 +76,36 @@ func CmdShowPortal() *cobra.Command {
 
 	return cmd
 }
+
+func CmdGetPortalWhitelist() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-portal-whitelist [portal-address]",
+		Short: "Query get_portal_whitelist",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			reqPortalAddress := args[0]
+
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := &types.QueryGetPortalWhitelistRequest{
+				PortalAddress: reqPortalAddress,
+			}
+
+			res, err := queryClient.GetPortalWhitelist(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}

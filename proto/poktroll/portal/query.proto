@@ -7,6 +7,7 @@ import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "poktroll/portal/params.proto";
 import "poktroll/portal/portal.proto";
+import "cosmos_proto/cosmos.proto";
 
 option go_package = "poktroll/x/portal/types";
 
@@ -24,9 +25,15 @@ service Query {
     option (google.api.http).get = "/poktroll/portal/portals";
   
   }
-  rpc Portal (QueryGetPortalRequest) returns (QueryGetPortalResponse) {
+  rpc Portal  (QueryGetPortalRequest ) returns (QueryGetPortalResponse ) {
     option (google.api.http).get = "/poktroll/portal/portals/{address}";
-
+  
+  }
+  
+  // Queries a list of GetPortalWhitelist items.
+  rpc GetPortalWhitelist (QueryGetPortalWhitelistRequest) returns (QueryGetPortalWhitelistResponse) {
+    option (google.api.http).get = "/poktroll/portal/get_portal_whitelist/{portalAddress}";
+  
   }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -54,5 +61,13 @@ message QueryGetPortalRequest {
 
 message QueryGetPortalResponse {
   Portal portal = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetPortalWhitelistRequest {
+  string                                portalAddress = 1;
+}
+
+message QueryGetPortalWhitelistResponse {
+  repeated string app_addresses = 1 [(gogoproto.nullable) = false, (cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
