@@ -31,6 +31,10 @@ const (
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgUnstakePortal int = 100
 
+	opWeightMsgWhitelistApplication = "op_weight_msg_whitelist_application"
+	// TODO: Determine the simulation weight value
+	defaultWeightMsgWhitelistApplication int = 100
+
 	// this line is used by starport scaffolding # simapp/module/const
 )
 
@@ -81,6 +85,17 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		portalsimulation.SimulateMsgUnstakePortal(am.accountKeeper, am.bankKeeper, am.keeper),
 	))
 
+	var weightMsgWhitelistApplication int
+	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgWhitelistApplication, &weightMsgWhitelistApplication, nil,
+		func(_ *rand.Rand) {
+			weightMsgWhitelistApplication = defaultWeightMsgWhitelistApplication
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgWhitelistApplication,
+		portalsimulation.SimulateMsgWhitelistApplication(am.accountKeeper, am.bankKeeper, am.keeper),
+	))
+
 	// this line is used by starport scaffolding # simapp/module/operation
 
 	return operations
@@ -102,6 +117,14 @@ func (am AppModule) ProposalMsgs(simState module.SimulationState) []simtypes.Wei
 			defaultWeightMsgUnstakePortal,
 			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
 				portalsimulation.SimulateMsgUnstakePortal(am.accountKeeper, am.bankKeeper, am.keeper)
+				return nil
+			},
+		),
+		simulation.NewWeightedProposalMsg(
+			opWeightMsgWhitelistApplication,
+			defaultWeightMsgWhitelistApplication,
+			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
+				portalsimulation.SimulateMsgWhitelistApplication(am.accountKeeper, am.bankKeeper, am.keeper)
 				return nil
 			},
 		),

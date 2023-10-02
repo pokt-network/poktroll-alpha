@@ -21,6 +21,8 @@ type PortalKeeper interface {
 	GetAllPortals(ctx sdk.Context) (list []types.Portal)
 	SetDelegatedApplication(ctx sdk.Context, appAddress string, delegatedPortals apptypes.DelegatedPortals)
 	GetDelegatedPortals(ctx sdk.Context, appAddress string) (val apptypes.DelegatedPortals, found bool)
+	WhitelistApp(ctx sdk.Context, portalAddress, appAddress string) error
+	UnwhitelistApp(ctx sdk.Context, portalAddress, appAddress string) error
 }
 
 type (

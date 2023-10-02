@@ -80,3 +80,51 @@ func (k Keeper) GetDelegatedPortals(ctx sdk.Context, appAddress string) (val app
 	k.cdc.MustUnmarshal(b, &val)
 	return val, true
 }
+
+// WhitelistApp updates the portal state appending the application address to its whitelist
+func (k Keeper) WhitelistApp(ctx sdk.Context, portalAddress, appAddress string) error {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PortalKeyPrefix))
+	b := store.Get(types.PortalKey(
+		portalAddress,
+	))
+	if b == nil {
+		return types.ErrPortalNotFound
+	}
+	portal := new(types.Portal)
+	k.cdc.MustUnmarshal(b, portal)
+	portal.WhitelistedApps.AppAddresses = append(portal.WhitelistedApps.AppAddresses, appAddress)
+	b = k.cdc.MustMarshal(portal)
+	store.Set(types.PortalKey(
+		portalAddress,
+	), b)
+	return nil
+}
+
+// UnwhitelistApp updates the portal state removing the application address from its whitelist
+func (k Keeper) UnwhitelistApp(ctx sdk.Context, portalAddress, appAddress string) error {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PortalKeyPrefix))
+	b := store.Get(types.PortalKey(
+		portalAddress,
+	))
+	if b == nil {
+		return types.ErrPortalNotFound
+	}
+	portal := new(types.Portal)
+	k.cdc.MustUnmarshal(b, portal)
+	idx := -1
+	for i, a := range portal.WhitelistedApps.AppAddresses {
+		if a == appAddress {
+			idx = i
+			break
+		}
+	}
+	if idx == -1 {
+		return types.ErrAppNotWhitelisted
+	}
+	portal.WhitelistedApps.AppAddresses = append(portal.WhitelistedApps.AppAddresses[:idx], portal.WhitelistedApps.AppAddresses[idx+1:]...)
+	b = k.cdc.MustMarshal(portal)
+	store.Set(types.PortalKey(
+		portalAddress,
+	), b)
+	return nil
+}

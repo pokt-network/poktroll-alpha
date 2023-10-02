@@ -8,14 +8,14 @@ option go_package = "poktroll/x/portal/types";
 
 // Msg defines the Msg service.
 service Msg {
-  rpc StakePortal   (MsgStakePortal  ) returns (MsgStakePortalResponse  );
-  rpc UnstakePortal (MsgUnstakePortal) returns (MsgUnstakePortalResponse);
+  rpc StakePortal          (MsgStakePortal         ) returns (MsgStakePortalResponse         );
+  rpc UnstakePortal        (MsgUnstakePortal       ) returns (MsgUnstakePortalResponse       );
+  rpc WhitelistApplication (MsgWhitelistApplication) returns (MsgWhitelistApplicationResponse);
 }
-
 message MsgStakePortal {
-  string address = 1;
-  cosmos.base.v1beta1.Coin stake_amount = 2;
-  repeated string service_ids = 3;
+           string                   address      = 1;
+           cosmos.base.v1beta1.Coin stake_amount = 2;
+  repeated string                   service_ids  = 3;
 }
 
 message MsgStakePortalResponse {}
@@ -25,4 +25,11 @@ message MsgUnstakePortal {
 }
 
 message MsgUnstakePortalResponse {}
+
+message MsgWhitelistApplication {
+  string portal_address = 1;
+  string app_address = 2;
+}
+
+message MsgWhitelistApplicationResponse {}
 

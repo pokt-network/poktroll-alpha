@@ -47836,6 +47836,19 @@ paths:
                           name:
                             type: string
                             title: human-readable name for the service
+                      title: >-
+                        TODO_DISCUSS: Should Portal actors need to stake
+                        services?
+
+                        THOUGHT(h5law): If not what stops a regular app from
+                        registering as a portal to bypass this limitation?
+                    whitelisted_apps:
+                      type: object
+                      properties:
+                        app_addresses:
+                          type: array
+                          items:
+                            type: string
               pagination:
                 type: object
                 properties:
@@ -48148,6 +48161,18 @@ paths:
                         name:
                           type: string
                           title: human-readable name for the service
+                    title: >-
+                      TODO_DISCUSS: Should Portal actors need to stake services?
+
+                      THOUGHT(h5law): If not what stops a regular app from
+                      registering as a portal to bypass this limitation?
+                  whitelisted_apps:
+                    type: object
+                    properties:
+                      app_addresses:
+                        type: array
+                        items:
+                          type: string
         default:
           description: An unexpected error response.
           schema:
@@ -79959,9 +79984,18 @@ definitions:
         description: params holds all the parameters of this module.
         type: object
     description: QueryParamsResponse is response type for the Query/Params RPC method.
+  poktroll.portal.DelagateeWhitelist:
+    type: object
+    properties:
+      app_addresses:
+        type: array
+        items:
+          type: string
   poktroll.portal.MsgStakePortalResponse:
     type: object
   poktroll.portal.MsgUnstakePortalResponse:
+    type: object
+  poktroll.portal.MsgWhitelistApplicationResponse:
     type: object
   poktroll.portal.Params:
     type: object
@@ -79994,6 +80028,18 @@ definitions:
             name:
               type: string
               title: human-readable name for the service
+        title: >-
+          TODO_DISCUSS: Should Portal actors need to stake services?
+
+          THOUGHT(h5law): If not what stops a regular app from registering as a
+          portal to bypass this limitation?
+      whitelisted_apps:
+        type: object
+        properties:
+          app_addresses:
+            type: array
+            items:
+              type: string
   poktroll.portal.QueryAllPortalsResponse:
     type: object
     properties:
@@ -80030,6 +80076,18 @@ definitions:
                   name:
                     type: string
                     title: human-readable name for the service
+              title: >-
+                TODO_DISCUSS: Should Portal actors need to stake services?
+
+                THOUGHT(h5law): If not what stops a regular app from registering
+                as a portal to bypass this limitation?
+            whitelisted_apps:
+              type: object
+              properties:
+                app_addresses:
+                  type: array
+                  items:
+                    type: string
       pagination:
         type: object
         properties:
@@ -80090,6 +80148,18 @@ definitions:
                 name:
                   type: string
                   title: human-readable name for the service
+            title: >-
+              TODO_DISCUSS: Should Portal actors need to stake services?
+
+              THOUGHT(h5law): If not what stops a regular app from registering
+              as a portal to bypass this limitation?
+          whitelisted_apps:
+            type: object
+            properties:
+              app_addresses:
+                type: array
+                items:
+                  type: string
   poktroll.portal.QueryParamsResponse:
     type: object
     properties:

@@ -37,10 +37,14 @@ func (k msgServer) StakePortal(goCtx context.Context, msg *types.MsgStakePortal)
 		logger.Info(fmt.Sprintf("portal not found, creating new portal for address %s with stake amount %v", portalAddress, newPortalStake))
 
 		// If the portal is not found, create a new one
+		emptyWhitelist := make([]string, 0)
 		portal = types.Portal{
 			Address:  msg.Address,
 			Stake:    msg.StakeAmount,
 			Services: serviceIdsToService(msg.ServiceIds),
+			WhitelistedApps: types.DelagateeWhitelist{
+				AppAddresses: emptyWhitelist,
+			},
 		}
 
 		// Determine the number of coins to send from the portal address to the portal module account
