@@ -13,6 +13,8 @@ service Msg {
   rpc WhitelistApplication   (MsgWhitelistApplication  ) returns (MsgWhitelistApplicationResponse  );
   rpc UnwhitelistApplication (MsgUnwhitelistApplication) returns (MsgUnwhitelistApplicationResponse);
 }
+
+// TODO: Enable giving pre-made whitelist when staking a portal
 message MsgStakePortal {
            string                   address      = 1;
            cosmos.base.v1beta1.Coin stake_amount = 2;
