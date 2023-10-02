@@ -128,3 +128,17 @@ func (k Keeper) UnwhitelistApp(ctx sdk.Context, portalAddress, appAddress string
 	), b)
 	return nil
 }
+
+// GetWhitelist returns the portal's whitelist
+func (k Keeper) GetWhitelist(ctx sdk.Context, portalAddress string) (val []string, found bool) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PortalKeyPrefix))
+	b := store.Get(types.PortalKey(
+		portalAddress,
+	))
+	if b == nil {
+		return nil, false
+	}
+	portal := new(types.Portal)
+	k.cdc.MustUnmarshal(b, portal)
+	return portal.WhitelistedApps.AppAddresses, true
+}

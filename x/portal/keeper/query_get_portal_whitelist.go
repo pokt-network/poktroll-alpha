@@ -16,7 +16,7 @@ func (k Keeper) GetPortalWhitelist(goCtx context.Context, req *types.QueryGetPor
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	val, found := k.GetPortal(
+	val, found := k.GetWhitelist(
 		ctx,
 		req.PortalAddress,
 	)
@@ -24,5 +24,5 @@ func (k Keeper) GetPortalWhitelist(goCtx context.Context, req *types.QueryGetPor
 		return nil, status.Error(codes.NotFound, "not found")
 	}
 
-	return &types.QueryGetPortalWhitelistResponse{AppAddresses: val.WhitelistedApps.AppAddresses}, nil
+	return &types.QueryGetPortalWhitelistResponse{AppAddresses: val}, nil
 }
