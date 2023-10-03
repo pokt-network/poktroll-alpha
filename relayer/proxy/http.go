@@ -2,12 +2,13 @@ package proxy
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"poktroll/relayer/client"
+	"poktroll/utils"
 	serviceTypes "poktroll/x/service/types"
 	servicerTypes "poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
@@ -24,6 +25,7 @@ type httpProxy struct {
 	client                client.ServicerClient
 	relayNotifier         chan *RelayWithSession
 	signResponseFn        responseSigner
+	servicerAddress       string
 }
 
 func NewHttpProxy(
@@ -33,6 +35,7 @@ func NewHttpProxy(
 	client client.ServicerClient,
 	relayNotifier chan *RelayWithSession,
 	signResponse responseSigner,
+	servicerAddress string,
 ) *httpProxy {
 	return &httpProxy{
 		serviceId:             serviceId,
@@ -41,6 +44,7 @@ func NewHttpProxy(
 		client:                client,
 		relayNotifier:         relayNotifier,
 		signResponseFn:        signResponse,
+		servicerAddress:       servicerAddress,
 	}
 }
 
@@ -56,43 +60,47 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 	ctx := req.Context()
 	relayRequest, err := newHTTPRelayRequest(req)
 	if err != nil {
-		replyWithHTTPError(500, err, httpResponseWriter)
+		utils.ReplyWithHTTPError(500, err, httpResponseWriter)
 		return
 	}
 
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  relayRequest.ApplicationAddress,
 		ServiceId:   httpProxy.serviceId.Id,
-		BlockHeight: httpProxy.client.LatestBlock().Height(),
+		BlockHeight: httpProxy.client.LatestBlock(ctx).Height(),
 	}
 
-	// INVESTIGATE: get the context instead of creating a new one?
 	sessionResult, err := httpProxy.sessionQueryClient.GetSession(ctx, query)
 	if err != nil {
-		replyWithHTTPError(500, err, httpResponseWriter)
+		utils.ReplyWithHTTPError(500, err, httpResponseWriter)
 		return
 	}
 
 	if err := validateSessionRequest(&sessionResult.Session, relayRequest); err != nil {
-		replyWithHTTPError(400, err, httpResponseWriter)
+		utils.ReplyWithHTTPError(400, err, httpResponseWriter)
 		return
 	}
 
 	url, err := parseURLWithScheme(httpProxy.serviceForwardingAddr)
 	if err != nil {
-		replyWithHTTPError(400, err, httpResponseWriter)
+		utils.ReplyWithHTTPError(400, err, httpResponseWriter)
+	}
+
+	headers := make(http.Header)
+	for k, v := range relayRequest.Headers {
+		headers.Add(k, v)
 	}
 
 	serviceRequest := &http.Request{
-		Method: req.Method,
-		Header: req.Header,
+		Method: relayRequest.Method,
+		Header: headers,
 		URL:    url,
 		Host:   url.Host,
 		Body:   io.NopCloser(bytes.NewBuffer(relayRequest.Payload)),
 	}
-	relayResponse, err := httpProxy.executeRelay(serviceRequest, relayRequest.Payload)
+	relayResponse, err := httpProxy.executeRelay(serviceRequest, sessionResult.Session.SessionId)
 	if err != nil {
-		replyWithHTTPError(500, err, httpResponseWriter)
+		utils.ReplyWithHTTPError(500, err, httpResponseWriter)
 		return
 	}
 
@@ -112,60 +120,54 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 	httpProxy.relayNotifier <- relayWithSession
 }
 
-func (httpProxy *httpProxy) executeRelay(req *http.Request, requestPayload []byte) (*servicerTypes.RelayResponse, error) {
+func (httpProxy *httpProxy) executeRelay(req *http.Request, sessionId string) (*servicerTypes.RelayResponse, error) {
 	// Change the request host to the service address
-	// DISCUSS: create a new request instead of mutating the existing one?
 	serviceResponse, err := proxyHTTPServiceRequest(req)
 	if err != nil {
 		return nil, err
 	}
 
-	relayResponse, err := newRelayResponse(serviceResponse)
+	relayResponse, err := newRelayResponse(serviceResponse, httpProxy.servicerAddress, sessionId)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := httpProxy.signResponseFn(relayResponse); err != nil {
+	signature, err := httpProxy.signResponseFn(relayResponse)
+	if err != nil {
 		return nil, err
 	}
+
+	relayResponse.ServicerSignature = signature
 	return relayResponse, nil
 }
 
 func newHTTPRelayRequest(req *http.Request) (*servicerTypes.RelayRequest, error) {
-	requestHeaders := make(map[string]string)
-	for k, v := range req.Header {
-		// TECHDEBT: this will drop all but the first value of a header containing multiple values.
-		requestHeaders[k] = v[0]
+	requestBz, err := io.ReadAll(req.Body)
+	if err != nil {
+		return nil, err
+	}
+	var relayRequest servicerTypes.RelayRequest
+	if err := relayRequest.Unmarshal(requestBz); err != nil {
+		return nil, err
 	}
 
-	relayRequest := &servicerTypes.RelayRequest{
-		Method:  req.Method,
-		Url:     req.URL.String(),
-		Headers: requestHeaders,
-	}
-
-	if req.Body != nil {
-		// Read the request body
-		requestBody, err := io.ReadAll(req.Body)
-		if err != nil {
-			return nil, err
-		}
-		relayRequest.Payload = requestBody
-	}
-
-	// HACK: the application address should be populated by the requesting client
-	relayRequest.ApplicationAddress = "pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4"
-	return relayRequest, nil
+	return &relayRequest, nil
 }
 
 func proxyHTTPServiceRequest(req *http.Request) (*http.Response, error) {
 	return http.DefaultClient.Do(req)
 }
 
-func newRelayResponse(serviceResponse *http.Response) (_ *servicerTypes.RelayResponse, err error) {
+func newRelayResponse(
+	serviceResponse *http.Response,
+	servicerAddress string,
+	sessionId string,
+) (_ *servicerTypes.RelayResponse, err error) {
 	relayResponse := &servicerTypes.RelayResponse{
-		Headers:    make(map[string]string),
-		StatusCode: int32(serviceResponse.StatusCode),
+		Headers:         make(map[string]string),
+		StatusCode:      int32(serviceResponse.StatusCode),
+		ServicerAddress: servicerAddress,
+		SessionId:       sessionId,
 	}
 
 	if serviceResponse.Body != nil {
@@ -177,40 +179,19 @@ func newRelayResponse(serviceResponse *http.Response) (_ *servicerTypes.RelayRes
 	}
 
 	for key, value := range serviceResponse.Header {
-		// TECHDEBT: this drops all but the first value for headers with
-		// multiple values
-		relayResponse.Headers[key] = value[0]
+		relayResponse.Headers[key] = strings.Join(value, ", ")
 	}
 	return relayResponse, nil
 }
 
 func sendRelayResponse(relayResponse *servicerTypes.RelayResponse, wr http.ResponseWriter) error {
-	// Set HTTP statuscode to match the service response's
-	wr.WriteHeader(int(relayResponse.StatusCode))
-
-	// Set relay response headers to match the service response's
-	for k, v := range relayResponse.Headers {
-		wr.Header().Add(k, v)
+	relayResponseBz, err := relayResponse.Marshal()
+	if err != nil {
+		return err
 	}
 
-	// Send the response to the client
-	if _, err := wr.Write(relayResponse.Payload); err != nil {
+	if _, err := wr.Write(relayResponseBz); err != nil {
 		return err
 	}
 	return nil
-}
-
-// TODO: send appropriate error instead of the original error
-// CONSIDERATION: receive err message format string so we don't loose the context of the error.
-func replyWithHTTPError(statusCode int, err error, wr http.ResponseWriter) {
-	wr.WriteHeader(statusCode)
-	clientError := err
-	if statusCode == 500 {
-		clientError = fmt.Errorf("internal server error")
-		log.Printf("internal server error: %v", err)
-	}
-
-	if _, replyError := wr.Write([]byte(clientError.Error())); replyError != nil {
-		log.Printf("failed sending error response: %v", replyError)
-	}
 }

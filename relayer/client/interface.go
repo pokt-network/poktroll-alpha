@@ -20,7 +20,7 @@ type ServicerClient interface {
 	// BlocksNotifee returns an observable which emits newly committed blocks.
 	BlocksNotifee() (blocksNotifee utils.Observable[types.Block])
 	// LatestBlock returns the latest block that has been committed.
-	LatestBlock() types.Block
+	LatestBlock(ctx context.Context) types.Block
 	// SubmitClaim sends a claim message with the given SMT root hash as the
 	// commitment.
 	SubmitClaim(ctx context.Context, sessionId string, smtRootHash []byte) error

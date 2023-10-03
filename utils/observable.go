@@ -1,10 +1,13 @@
 package utils
 
-import "sync"
+import (
+	"context"
+	"sync"
+)
 
 // Observable is a generic interface that allows multiple subscribers to read from a single channel
 type Observable[V any] interface {
-	Subscribe() Subscription[V]
+	Subscribe(context.Context) Subscription[V]
 }
 
 type ObservableImpl[V any] struct {
@@ -30,7 +33,7 @@ func NewControlledObservable[V any](emitter chan V) (Observable[V], chan V) {
 }
 
 // Get a subscription to the observable
-func (o *ObservableImpl[V]) Subscribe() Subscription[V] {
+func (o *ObservableImpl[V]) Subscribe(ctx context.Context) Subscription[V] {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
@@ -52,7 +55,16 @@ func (o *ObservableImpl[V]) Subscribe() Subscription[V] {
 	}
 
 	// Subscription gets its closed state from the observable
-	return &SubscriptionImpl[V]{ch, o.closed, removeFromObservable}
+	subscription := &SubscriptionImpl[V]{ch, o.closed, removeFromObservable}
+
+	go func() {
+		if ctx != nil {
+			<-ctx.Done()
+			subscription.Unsubscribe()
+		}
+	}()
+
+	return subscription
 }
 
 // Listen to the emitter and emit values to subscribers

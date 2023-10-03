@@ -80,20 +80,8 @@ func (sm *SessionManager) EnsureSessionTree(sessionInfo *sessionTypes.Session) *
 }
 
 func (sm *SessionManager) handleBlocks(ctx context.Context) {
-	subscription := sm.client.BlocksNotifee().Subscribe()
-	go func() {
-		<-ctx.Done()
-		subscription.Unsubscribe()
-	}()
-
-	// tick sessions along as new blocks are received
-	ch := subscription.Ch()
+	ch := sm.client.BlocksNotifee().Subscribe(ctx).Ch()
 	for block := range ch {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-		}
 		// if some sessions end by this block, process them
 		if sessions, ok := sm.sessions[block.Height()]; ok {
 			sm.sessionsNotifier <- sessions
