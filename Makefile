@@ -2,8 +2,9 @@
 
 POKTROLLD_HOME := ./localnet/poktrolld
 
-POCKET_NODE = 127.0.0.1:36657
-SEQUENCER_NODE = 127.0.0.1:36657
+NODE = tcp://127.0.0.1:36657 # Used by the client (i.e. CLI in this file) to send transactions & query things
+POCKET_NODE = 127.0.0.1:36657 # Used by the relayer for reading and listening on data
+SEQUENCER_NODE = 127.0.0.1:36657 # Used by the relayer to send transactions
 
 SESSION_HEIGHT ?= 1 # Default height when retrieving session data
 
@@ -126,8 +127,8 @@ poktroll_send: ## Send tokens from one key to another
 poktroll_balance: ## Check the balances of both keys
 	KEY1=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
 	KEY2=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
-	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY1 --node $(POCKET_NODE); \
-	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY2 --node $(POCKET_NODE);
+	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY1 --node $(NODE); \
+	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY2 --node $(NODE);
 
 # Ref: https://rollkit.dev/tutorials/gm-world-frontend
 .PHONY: poktroll_frontend_cosmology
@@ -142,11 +143,11 @@ poktroll_frontend_react: ## Start the poktroll react frontend
 
 .PHONY: servicers_get
 servicers_get: ## Retrieves all servicers from the poktroll state
-	poktrolld --home=$(POKTROLLD_HOME) q servicer list-servicers --node $(POCKET_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) q servicer list-servicers --node $(NODE)
 
 .PHONY: servicer_stake
 servicer_stake: ## Stake tokens for the servicer specified (must specify the SERVICER env var)
-	poktrolld --home=$(POKTROLLD_HOME) tx servicer stake-servicer ./testutil/json/$(SERVICER).json --keyring-backend test --from $(SERVICER) --node $(SEQUENCER_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx servicer stake-servicer ./testutil/json/$(SERVICER).json --keyring-backend test --from $(SERVICER) --node $(NODE)
 
 .PHONY: servicer1_stake
 servicer1_stake: ## Stake for servicer1
@@ -162,7 +163,7 @@ servicer3_stake: ## Stake for servicer3
 
 .PHONY: servicer_unstake
 servicer_unstake: ## Unstake tokens for the servicer specified
-	poktrolld --home=$(POKTROLLD_HOME) tx servicer unstake-servicer --keyring-backend test --from $(SERVICER) --node $(SEQUENCER_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx servicer unstake-servicer --keyring-backend test --from $(SERVICER) --node $(NODE)
 
 .PHONY: servicer1_unstake
 servicer1_unstake: ## Unstake for servicer1
@@ -178,11 +179,11 @@ servicer3_unstake: ## Unstake for servicer3
 
 .PHONY: apps_get
 apps_get: ## Retrieves all applications from the poktroll state
-	poktrolld --home=$(POKTROLLD_HOME) q application list-application --node $(POCKET_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) q application list-application --node $(NODE)
 
 .PHONY: app_stake
 app_stake: ## Stake tokens for the application specified (must specify the APP and SERVICES env vars)
-	poktrolld --home=$(POKTROLLD_HOME) tx application stake-application 1000stake $(SERVICES) --keyring-backend test --from $(APP) --node $(SEQUENCER_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx application stake-application 1000stake $(SERVICES) --keyring-backend test --from $(APP) --node $(NODE)
 
 .PHONY: app1_stake
 app1_stake: ## Stake for app1
