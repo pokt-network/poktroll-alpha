@@ -83,6 +83,28 @@ func (k Keeper) DelegatePortal(ctx sdk.Context, appAddress string, portalPubKey 
 	app := new(types.Application)
 	k.cdc.MustUnmarshal(b, app)
 
+	// ensure the app is whitelisted by the portal
+	portalAddr, err := anyPkToAddr(portalPubKey)
+	if err != nil {
+		return err
+	}
+	portalWhitelist, found := k.portalKeeper.GetWhitelist(ctx, portalAddr)
+	if !found {
+		return errors.Wrapf(types.ErrPortalNotFound, fmt.Sprintf("portal [%s] not found", portalAddr))
+	}
+	if len(portalWhitelist) > 0 {
+		whitelisted := false
+		for _, p := range portalWhitelist {
+			if p == appAddress {
+				whitelisted = true
+				break
+			}
+		}
+		if !whitelisted {
+			return errors.Wrapf(types.ErrAppNotWhitelisted, fmt.Sprintf("app [%s] is not whitelisted for portal [%s]", appAddress, portalAddr))
+		}
+	}
+
 	// check against max delegated param
 	maxPortals := k.GetParams(ctx).MaxDelegatedPortals
 	if uint32(len(app.DelegatedPortals.PortalPubKeys)) >= maxPortals {
@@ -171,4 +193,21 @@ func anyPkEquality(pk1, pk2 codectypes.Any) (equal bool, err error) {
 		return false, fmt.Errorf("portal public key [%+v] is not cryptotypes.PubKey: %w", pk1.GetValue(), err)
 	}
 	return pubI1.Equals(pubI2), nil
+}
+
+// pkToAddr converts a public key to a bech32 address string
+func pkToAddr(pk cryptotypes.PubKey) string {
+	return sdk.AccAddress(pk.Address()).String()
+}
+
+// anyPkToAddr converts an Any type to a bech32 address string
+func anyPkToAddr(ak codectypes.Any) (string, error) {
+	reg := codectypes.NewInterfaceRegistry()
+	cryptocdc.RegisterInterfaces(reg)
+	cdc := codec.NewProtoCodec(reg)
+	var pub cryptotypes.PubKey
+	if err := cdc.UnpackAny(&ak, &pub); err != nil {
+		return "", fmt.Errorf("Any type [%+v] is not cryptotypes.PubKey: %w", ak.GetValue(), err)
+	}
+	return pkToAddr(pub), nil
 }

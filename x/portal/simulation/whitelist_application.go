@@ -19,7 +19,7 @@ func SimulateMsgWhitelistApplication(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgWhitelistApplication{
-			Address: simAccount.Address.String(),
+			PortalAddress: simAccount.Address.String(),
 		}
 
 		// TODO: Handling the WhitelistApplication simulation

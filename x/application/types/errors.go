@@ -17,4 +17,6 @@ var (
 	ErrMaxDelegatedReached     = sdkerrors.Register(ModuleName, 7, "Application has reached the maximum number of delegated portals")
 	ErrPortalAlreadyDelegated  = sdkerrors.Register(ModuleName, 8, "Application has already delegated to this portal")
 	ErrPortalNotDelegated      = sdkerrors.Register(ModuleName, 9, "Application has not delegated to this portal")
+	ErrPortalNotFound          = sdkerrors.Register(ModuleName, 10, "Portal not found")
+	ErrAppNotWhitelisted       = sdkerrors.Register(ModuleName, 11, "Application is not whitelisted for this portal")
 )
