@@ -1,6 +1,7 @@
 package types
 
 import (
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 )
@@ -8,6 +9,7 @@ import (
 // AccountKeeper defines the expected account keeper used for simulations (noalias)
 type AccountKeeper interface {
 	GetAccount(ctx sdk.Context, addr sdk.AccAddress) types.AccountI
+	GetPubKey(ctx sdk.Context, addr sdk.AccAddress) (pk cryptotypes.PubKey, err error)
 	// Methods imported from account should be defined here
 }
 
@@ -21,6 +23,6 @@ type BankKeeper interface {
 }
 
 type PortalKeeper interface {
-	SetDelegatedApplication(ctx sdk.Context, appAddress string, delegatedPortals DelegatedPortals)
+	SetDelegator(ctx sdk.Context, appAddress string, delegatedPortals Delegatees)
 	GetWhitelist(ctx sdk.Context, portalAddress string) (val []string, found bool)
 }

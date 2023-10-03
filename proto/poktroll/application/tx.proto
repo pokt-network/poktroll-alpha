@@ -31,15 +31,15 @@ message MsgUnstakeApplication {
 message MsgUnstakeApplicationResponse {}
 
 message MsgDelegateToPortal {
-  string              address        = 1;
-  google.protobuf.Any portal_pub_key = 2 [(cosmos_proto.accepts_interface) = "cosmos.crypto.PubKey"];
+  string address        = 1;
+  string portal_address = 2;
 }
 
 message MsgDelegateToPortalResponse {}
 
 message MsgUndelegateFromPortal {
-  string              address        = 1;
-  google.protobuf.Any portal_pub_key = 2 [(cosmos_proto.accepts_interface) = "cosmos.crypto.PubKey"];
+  string address        = 1;
+  string portal_address = 2;
 }
 
 message MsgUndelegateFromPortalResponse {}

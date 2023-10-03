@@ -215,15 +215,15 @@ delegate: ## Delegate the application to the specified portal (must specify the 
 
 .PHONY: delegate_app1_portal1
 delegate_app1_portal1: ## Delegate app1 to portal1
-	APP=app1 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"AlghoqxZegNCUKwUt3LvzPkpeqfEvqVERWQFmnz7FSBj"}' make delegate
+	APP=app1 PORTAL=pokt15vzxjqklzjtlz7lahe8z2dfe9nm5vxwwmscne4 make delegate
 
 .PHONY: delegate_app2_portal2
 delegate_app2_portal2: ## Delegate app2 to portal2
-	APP=app2 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"A2aNm2PV6rlLBZY7VvzillQg4WBX+zW4nTeGPfVUPeN/"}' make delegate
+	APP=app2 PORTAL=pokt15w3fhfyc0lttv7r585e2ncpf6t2kl9uh8rsnyz make delegate
 
 .PHONY: delegate_app3_portal3
 delegate_app3_portal3: ## Delegate app3 to portal3
-	APP=app3 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"AyGPgyaQxtxTC3xMf6vzM3qo8FDSO+fOs4DDN/RSTreR"}' make delegate
+	APP=app3 PORTAL=pokt1zhmkkd0rh788mc9prfq0m2h88t9ge0j83gnxya make delegate
 
 .PHONY: undelegate
 undelegate: ## Undelegate the application to the specified portal (must specify the APP and PORTAL env vars)
@@ -231,15 +231,15 @@ undelegate: ## Undelegate the application to the specified portal (must specify 
 
 .PHONY: undelegate_app1_portal1
 undelegate_app1_portal1: ## Undelegate app1 to portal1
-	APP=app1 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"AlghoqxZegNCUKwUt3LvzPkpeqfEvqVERWQFmnz7FSBj"}' make undelegate
+	APP=app1 PORTAL=pokt15vzxjqklzjtlz7lahe8z2dfe9nm5vxwwmscne4 make undelegate
 
 .PHONY: undelegate_app2_portal2
 undelegate_app2_portal2: ## Delegate app2 to portal2
-	APP=app2 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"A2aNm2PV6rlLBZY7VvzillQg4WBX+zW4nTeGPfVUPeN/"}' make undelegate
+	APP=app2 PORTAL=pokt15w3fhfyc0lttv7r585e2ncpf6t2kl9uh8rsnyz make undelegate
 
 .PHONY: undelegate_app3_portal3
 undelegate_app3_portal3: ## Delegate app3 to portal3
-	APP=app3 PORTAL='{"@type":"/cosmos.crypto.secp256k1.PubKey","key":"AyGPgyaQxtxTC3xMf6vzM3qo8FDSO+fOs4DDN/RSTreR"}' make undelegate
+	APP=app3 PORTAL=pokt1zhmkkd0rh788mc9prfq0m2h88t9ge0j83gnxya make undelegate
 
 .PHONY: portals_get
 portals_get: ## Retrieves all portals from the poktroll state
@@ -276,6 +276,38 @@ portal2_unstake: ## Unstake for portal2
 .PHONY: portal3_unstake
 portal3_unstake: ## Unstake for portal3
 	PORTAL=portal3 make portal_unstake
+
+.PHONY: portal_whitelist
+portal_whitelist: ## Whitelist the application for the portal specified (must specify the PORTAL and APP env vars)
+	poktrolld --home=$(POKTROLLD_HOME) tx portal whitelist-application '$(APP)' --keyring-backend test --from $(PORTAL) --node $(POKTROLLD_NODE)
+
+.PHONY: portal1_whitelist_app1
+portal1_whitelist_app1: ## Whitelist app1 for portal1
+	PORTAL=portal1 APP=pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4 make portal_whitelist
+
+.PHONY: portal2_whitelist_app2
+portal2_whitelist_app2: ## Whitelist app2 for portal2
+	PORTAL=portal2 APP=pokt184zvylazwu4queyzpl0gyz9yf5yxm2kdhh9hpm make portal_whitelist
+
+.PHONY: portal3_whitelist_app3
+portal3_whitelist_app3: ## Whitelist app3 for portal3
+	PORTAL=portal3 APP=pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex make portal_whitelist
+
+.PHONY: portal_unwhitelist
+portal_unwhitelist: ## Unwhitelist the application for the portal specified (must specify the PORTAL and APP env vars)
+	poktrolld --home=$(POKTROLLD_HOME) tx portal unwhitelist-application '$(APP)' --keyring-backend test --from $(PORTAL) --node $(POKTROLLD_NODE)
+
+.PHONY: portal1_unwhitelist_app1
+portal1_unwhitelist_app1: ## Unwhitelist app1 for portal1
+	PORTAL=portal1 APP=pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4 make portal_unwhitelist
+
+.PHONY: portal2_unwhitelist_app2
+portal2_unwhitelist_app2: ## Unwhitelist app2 for portal2
+	PORTAL=portal2 APP=pokt184zvylazwu4queyzpl0gyz9yf5yxm2kdhh9hpm make portal_unwhitelist
+
+.PHONY: portal3_unwhitelist_app3
+portal3_unwhitelist_app3: ## Unwhitelist app3 for portal3
+	PORTAL=portal3 APP=pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex make portal_unwhitelist:pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex
 
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests

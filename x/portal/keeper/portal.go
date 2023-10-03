@@ -60,7 +60,7 @@ func (k Keeper) GetAllPortals(ctx sdk.Context) (list []types.Portal) {
 }
 
 // SetDelegatedApplication set a specific application's delegated portals in the store from its index
-func (k Keeper) SetDelegatedApplication(ctx sdk.Context, appAddress string, delegatedPortals apptypes.DelegatedPortals) {
+func (k Keeper) SetDelegator(ctx sdk.Context, appAddress string, delegatedPortals apptypes.Delegatees) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PortalDelegationsKeyPrefix))
 	b := k.cdc.MustMarshal(&delegatedPortals)
 	store.Set(types.PortalDelegationsKey(
@@ -69,7 +69,7 @@ func (k Keeper) SetDelegatedApplication(ctx sdk.Context, appAddress string, dele
 }
 
 // GetDelegatedPortals returns a application's delegated portals from its index
-func (k Keeper) GetDelegatedPortals(ctx sdk.Context, appAddress string) (val apptypes.DelegatedPortals, found bool) {
+func (k Keeper) GetDelegatees(ctx sdk.Context, appAddress string) (val apptypes.Delegatees, found bool) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.PortalDelegationsKeyPrefix))
 	b := store.Get(types.PortalDelegationsKey(
 		appAddress,

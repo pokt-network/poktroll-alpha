@@ -15,6 +15,8 @@ import (
 
 var _ = strconv.Itoa(0)
 
+var whitelistedApps = make([]string, 0)
+
 func CmdStakePortal() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stake-portal",
@@ -36,6 +38,7 @@ func CmdStakePortal() *cobra.Command {
 				clientCtx.GetFromAddress().String(),
 				stakeAmount,
 				strings.Split(serviceIdsCommaSeparated, ","),
+				whitelistedApps,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
@@ -46,6 +49,8 @@ func CmdStakePortal() *cobra.Command {
 	}
 
 	flags.AddTxFlagsToCmd(cmd)
+	f := cmd.Flags()
+	f.StringSliceVar(&whitelistedApps, "whitelisted-apps", []string{}, "comma separated list of whitelisted application addresses")
 
 	return cmd
 }

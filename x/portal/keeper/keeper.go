@@ -19,8 +19,8 @@ type PortalKeeper interface {
 	GetPortal(ctx sdk.Context, address string) (val types.Portal, found bool)
 	RemovePortal(ctx sdk.Context, address string)
 	GetAllPortals(ctx sdk.Context) (list []types.Portal)
-	SetDelegatedApplication(ctx sdk.Context, appAddress string, delegatedPortals apptypes.DelegatedPortals)
-	GetDelegatedPortals(ctx sdk.Context, appAddress string) (val apptypes.DelegatedPortals, found bool)
+	SetDelegator(ctx sdk.Context, appAddress string, delegatedPortals apptypes.Delegatees)
+	GetDelegatees(ctx sdk.Context, appAddress string) (val apptypes.Delegatees, found bool)
 	WhitelistApp(ctx sdk.Context, portalAddress, appAddress string) error
 	UnwhitelistApp(ctx sdk.Context, portalAddress, appAddress string) error
 	GetWhitelist(ctx sdk.Context, portalAddress string) (val []string, found bool)
@@ -33,6 +33,7 @@ type (
 		memKey     storetypes.StoreKey
 		paramstore paramtypes.Subspace
 		bankKeeper types.BankKeeper
+		authKeeper types.AccountKeeper
 	}
 )
 
@@ -42,7 +43,7 @@ func NewKeeper(
 	memKey storetypes.StoreKey,
 	ps paramtypes.Subspace,
 	bk types.BankKeeper,
-
+	ak types.AccountKeeper,
 ) *Keeper {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -55,6 +56,7 @@ func NewKeeper(
 		memKey:     memKey,
 		paramstore: ps,
 		bankKeeper: bk,
+		authKeeper: ak,
 	}
 }
 

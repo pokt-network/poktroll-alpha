@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/errors"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -16,11 +17,13 @@ func NewMsgStakePortal(
 	address string,
 	stakeAmount types.Coin,
 	serviceIds []string,
+	whitelistedApps []string,
 ) *MsgStakePortal {
 	return &MsgStakePortal{
-		Address:     address,
-		StakeAmount: &stakeAmount,
-		ServiceIds:  serviceIds,
+		Address:         address,
+		StakeAmount:     &stakeAmount,
+		ServiceIds:      serviceIds,
+		WhitelistedApps: whitelistedApps,
 	}
 }
 
@@ -50,9 +53,8 @@ func (msg *MsgStakePortal) GetSignBytes() []byte {
 func (msg *MsgStakePortal) ValidateBasic() error {
 	fmt.Println("MsgStakePortal.ValidateBasic()", msg)
 	// Validate the address
-	_, err := sdk.AccAddressFromBech32(msg.Address)
-	if err != nil {
-		return sdkerrors.ErrInvalidAddress
+	if _, err := sdk.AccAddressFromBech32(msg.Address); err != nil {
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, fmt.Sprintf("portal address invalid: %s", msg.Address))
 	}
 
 	// Validate the stake amount
@@ -60,16 +62,23 @@ func (msg *MsgStakePortal) ValidateBasic() error {
 		return ErrNilStakeAmount
 	}
 	stakeAmount, err := sdk.ParseCoinNormalized(msg.StakeAmount.String())
-	if !stakeAmount.IsValid() {
-		return stakeAmount.Validate()
-	}
 	if err != nil {
 		return err
+	}
+	if !stakeAmount.IsValid() {
+		return stakeAmount.Validate()
 	}
 
 	// Validate the services
 	if len(msg.ServiceIds) == 0 {
 		return ErrNoServicesToStake
+	}
+
+	// Validate the whitelisted apps
+	for _, a := range msg.WhitelistedApps {
+		if _, err := sdk.AccAddressFromBech32(a); err != nil {
+			return errors.Wrapf(sdkerrors.ErrInvalidAddress, fmt.Sprintf("whitelisted app address invalid: %s", a))
+		}
 	}
 
 	return nil

@@ -469,6 +469,14 @@
       "servicersList": [
         {
           "address": "pokt19a3t4yunp0dlpfjrp7qwnzwlrzd5fzs2gjaaaj",
+          "delegatees": {
+            "pub_keys": [
+              {
+                "@type": "/cosmos.crypto.secp256k1.PubKey",
+                "key": "A5eJbpsQbfcBJKhWhhzJvlL6yZgOLHoRijbBnQGYaSzF"
+              }
+            ]
+          },
           "services": [
             {
               "endpoints": [

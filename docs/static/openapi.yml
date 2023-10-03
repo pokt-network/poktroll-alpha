@@ -46479,10 +46479,10 @@ paths:
                           name:
                             type: string
                             title: human-readable name for the service
-                    delegated_portals:
+                    delegatees:
                       type: object
                       properties:
-                        portal_pub_keys:
+                        pub_keys:
                           type: array
                           items:
                             type: object
@@ -46974,10 +46974,10 @@ paths:
                         name:
                           type: string
                           title: human-readable name for the service
-                  delegated_portals:
+                  delegatees:
                     type: object
                     properties:
-                      portal_pub_keys:
+                      pub_keys:
                         type: array
                         items:
                           type: object
@@ -79356,10 +79356,10 @@ definitions:
             name:
               type: string
               title: human-readable name for the service
-      delegated_portals:
+      delegatees:
         type: object
         properties:
-          portal_pub_keys:
+          pub_keys:
             type: array
             items:
               type: object
@@ -79528,10 +79528,10 @@ definitions:
                       "@type": "type.googleapis.com/google.protobuf.Duration",
                       "value": "1.212s"
                     }
-  poktroll.application.DelegatedPortals:
+  poktroll.application.Delegatees:
     type: object
     properties:
-      portal_pub_keys:
+      pub_keys:
         type: array
         items:
           type: object
@@ -79744,10 +79744,10 @@ definitions:
                   name:
                     type: string
                     title: human-readable name for the service
-            delegated_portals:
+            delegatees:
               type: object
               properties:
-                portal_pub_keys:
+                pub_keys:
                   type: array
                   items:
                     type: object
@@ -79982,10 +79982,10 @@ definitions:
                 name:
                   type: string
                   title: human-readable name for the service
-          delegated_portals:
+          delegatees:
             type: object
             properties:
-              portal_pub_keys:
+              pub_keys:
                 type: array
                 items:
                   type: object

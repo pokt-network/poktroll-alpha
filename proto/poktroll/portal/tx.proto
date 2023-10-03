@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package poktroll.portal;
 
+import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "poktroll/x/portal/types";
@@ -14,11 +15,11 @@ service Msg {
   rpc UnwhitelistApplication (MsgUnwhitelistApplication) returns (MsgUnwhitelistApplicationResponse);
 }
 
-// TODO: Enable giving pre-made whitelist when staking a portal
 message MsgStakePortal {
-           string                   address      = 1;
-           cosmos.base.v1beta1.Coin stake_amount = 2;
-  repeated string                   service_ids  = 3;
+           string                   address          = 1;
+           cosmos.base.v1beta1.Coin stake_amount     = 2;
+  repeated string                   service_ids      = 3;
+  repeated string                   whitelisted_apps = 4 [(gogoproto.nullable) = false];
 }
 
 message MsgStakePortalResponse {}
