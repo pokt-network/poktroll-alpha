@@ -10,7 +10,7 @@ import (
 func TestObservable(t *testing.T) {
 	obs, controller := utils.NewControlledObservable[int](nil)
 
-	subscription := obs.Subscribe()
+	subscription := obs.Subscribe(nil)
 	ch := subscription.Ch()
 	go func() {
 		controller <- 1

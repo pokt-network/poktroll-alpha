@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -18,7 +19,7 @@ import (
 
 var urlSchemePresenceRegex = regexp.MustCompile(`^\w{0,25}://`)
 
-type responseSigner func(*servicerTypes.RelayResponse) error
+type responseSigner func(*servicerTypes.RelayResponse) (signature []byte, err error)
 
 type RelayWithSession struct {
 	Relay   *servicerTypes.Relay
@@ -35,6 +36,7 @@ type Proxy struct {
 	relayNotifier       chan *RelayWithSession
 	relayNotifee        utils.Observable[*RelayWithSession]
 	serviceEndpoints    map[string][]string
+	servicerAddress     string
 }
 
 // IMPROVE: be consistent with component configuration & setup.
@@ -64,6 +66,7 @@ func NewProxy(
 		keyName:             keyName,
 		client:              client,
 		serviceEndpoints:    serviceEndpoints,
+		servicerAddress:     address,
 	}
 
 	proxy.relayNotifee, proxy.relayNotifier = utils.NewControlledObservable[*RelayWithSession](nil)
@@ -93,6 +96,7 @@ func (proxy *Proxy) listen(ctx context.Context) error {
 					proxy.client,
 					proxy.relayNotifier,
 					proxy.signResponse,
+					proxy.servicerAddress,
 				)
 				go httpProxy.Start(advertisedEndpoint.Url)
 			case types.RPCType_WEBSOCKET:
@@ -104,6 +108,7 @@ func (proxy *Proxy) listen(ctx context.Context) error {
 					proxy.client,
 					proxy.relayNotifier,
 					proxy.signResponse,
+					proxy.servicerAddress,
 				)
 				go websocketProxy.Start(ctx, advertisedEndpoint.Url)
 			default:
@@ -116,14 +121,19 @@ func (proxy *Proxy) listen(ctx context.Context) error {
 	return nil
 }
 
-func (proxy *Proxy) signResponse(relayResponse *servicerTypes.RelayResponse) error {
+func (proxy *Proxy) signResponse(relayResponse *servicerTypes.RelayResponse) (signature []byte, err error) {
 	relayResBz, err := relayResponse.Marshal()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	relayResponse.ServicerSignature, _, err = proxy.keyring.Sign(proxy.keyName, relayResBz)
-	return nil
+	relayHash := sha256.Sum256(relayResBz)
+	signature, _, err = proxy.keyring.Sign(proxy.keyName, relayHash[:])
+	if err != nil {
+		return nil, err
+	}
+
+	return signature, nil
 }
 
 func validateSessionRequest(session *sessionTypes.Session, relayRequest *servicerTypes.RelayRequest) error {

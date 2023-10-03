@@ -8,6 +8,7 @@ import (
 	ws "github.com/gorilla/websocket"
 
 	"poktroll/relayer/client"
+	"poktroll/utils"
 	serviceTypes "poktroll/x/service/types"
 	servicerTypes "poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
@@ -21,6 +22,7 @@ type wsProxy struct {
 	client                client.ServicerClient
 	relayNotifier         chan *RelayWithSession
 	signResponse          responseSigner
+	servicerAddress       string
 	upgrader              *ws.Upgrader
 }
 
@@ -31,6 +33,7 @@ func NewWsProxy(
 	client client.ServicerClient,
 	relayNotifier chan *RelayWithSession,
 	signResponse responseSigner,
+	servicerAddress string,
 ) *wsProxy {
 	return &wsProxy{
 		serviceId:             serviceId,
@@ -39,6 +42,7 @@ func NewWsProxy(
 		client:                client,
 		relayNotifier:         relayNotifier,
 		signResponse:          signResponse,
+		servicerAddress:       servicerAddress,
 		upgrader:              &ws.Upgrader{},
 	}
 }
@@ -55,10 +59,11 @@ func (wsProxy *wsProxy) Start(ctx context.Context, advertisedEndpointUrl string)
 // websocket connections are also long-lived and may last across multiple sessions, so each message
 // should be validated against the session were that message occurred.
 func (wsProxy *wsProxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	relayRequest, err := newHTTPRelayRequest(req)
 	if err != nil {
 		log.Printf("failed creating relay request: %v", err)
-		replyWithHTTPError(500, err, wr)
+		utils.ReplyWithHTTPError(500, err, wr)
 		return
 	}
 
@@ -66,20 +71,20 @@ func (wsProxy *wsProxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  relayRequest.ApplicationAddress,
 		ServiceId:   wsProxy.serviceId.Id,
-		BlockHeight: wsProxy.client.LatestBlock().Height(),
+		BlockHeight: wsProxy.client.LatestBlock(ctx).Height(),
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?
 	sessionResult, err := wsProxy.sessionQueryClient.GetSession(wsProxy.ctx, query)
 	if err != nil {
 		log.Printf("failed getting session info: %v", err)
-		replyWithHTTPError(500, err, wr)
+		utils.ReplyWithHTTPError(500, err, wr)
 		return
 	}
 
 	// validate the http upgrade request
 	if err := validateSessionRequest(&sessionResult.Session, relayRequest); err != nil {
-		replyWithHTTPError(400, err, wr)
+		utils.ReplyWithHTTPError(400, err, wr)
 		return
 	}
 
@@ -87,7 +92,7 @@ func (wsProxy *wsProxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	clientConn, err := wsProxy.upgrader.Upgrade(wr, req, nil)
 	if err != nil {
 		log.Printf("failed upgrading connection: %v", err)
-		replyWithHTTPError(500, err, wr)
+		utils.ReplyWithHTTPError(500, err, wr)
 		return
 	}
 
@@ -96,7 +101,7 @@ func (wsProxy *wsProxy) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	serviceConn, _, err := ws.DefaultDialer.Dial(wsProxy.serviceForwardingAddr, nil)
 	if err != nil {
 		log.Printf("failed dialing service: %v", err)
-		replyWithWsError(err, clientConn)
+		utils.ReplyWithWsError(err, clientConn)
 		return
 	}
 
@@ -120,7 +125,7 @@ func (wsProxy *wsProxy) handleWsClientMessages(ctx context.Context, clientConn, 
 				return
 			}
 			log.Printf("failed reading message: %v", err)
-			replyWithWsError(err, clientConn)
+			utils.ReplyWithWsError(err, clientConn)
 			return
 		}
 
@@ -138,7 +143,7 @@ func (wsProxy *wsProxy) handleWsServiceMessages(ctx context.Context, clientConn,
 				return
 			}
 			log.Printf("failed reading message: %v", err)
-			replyWithWsError(err, clientConn)
+			utils.ReplyWithWsError(err, clientConn)
 			return
 		}
 
@@ -157,7 +162,7 @@ func (wsProxy *wsProxy) handleWsRequestMessage(
 ) error {
 	relayRequest, err := newWsRelayRequest(req)
 	if err != nil {
-		return replyWithWsError(err, clientConn)
+		return utils.ReplyWithWsError(err, clientConn)
 	}
 
 	// TODO: make sure to not request for session info if block height did not change
@@ -165,18 +170,18 @@ func (wsProxy *wsProxy) handleWsRequestMessage(
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  relayRequest.ApplicationAddress,
 		ServiceId:   wsProxy.serviceId.Id,
-		BlockHeight: wsProxy.client.LatestBlock().Height(),
+		BlockHeight: wsProxy.client.LatestBlock(ctx).Height(),
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?
 	sessionResult, err := wsProxy.sessionQueryClient.GetSession(ctx, query)
 	if err != nil {
-		return replyWithWsError(err, clientConn)
+		return utils.ReplyWithWsError(err, clientConn)
 	}
 
 	// validate the websocket request
 	if err := validateSessionRequest(&sessionResult.Session, relayRequest); err != nil {
-		return replyWithWsError(err, clientConn)
+		return utils.ReplyWithWsError(err, clientConn)
 	}
 
 	// send the request to the service without handling the response.
@@ -184,7 +189,7 @@ func (wsProxy *wsProxy) handleWsRequestMessage(
 	// if the client sends requests without waiting for the response, the service should do the same.
 	// if the messages contain ordering information, the service would just pass it along.
 	if serviceConn.WriteMessage(messageType, req) != nil {
-		return replyWithWsError(err, clientConn)
+		return utils.ReplyWithWsError(err, clientConn)
 	}
 
 	// account for request relaying work
@@ -208,7 +213,7 @@ func (wsProxy *wsProxy) handleWsResponseMessage(
 ) error {
 	relayResponse, err := newWsRelayResponse(response)
 	if err != nil {
-		return replyWithWsError(err, clientConn)
+		return utils.ReplyWithWsError(err, clientConn)
 	}
 
 	// TODO: make sure to not request for session info if block height did not change
@@ -216,21 +221,24 @@ func (wsProxy *wsProxy) handleWsResponseMessage(
 	query := &sessionTypes.QueryGetSessionRequest{
 		AppAddress:  appAddress,
 		ServiceId:   wsProxy.serviceId.Id,
-		BlockHeight: wsProxy.client.LatestBlock().Height(),
+		BlockHeight: wsProxy.client.LatestBlock(ctx).Height(),
 	}
 
 	// INVESTIGATE: get the context instead of creating a new one?
 	sessionResult, err := wsProxy.sessionQueryClient.GetSession(ctx, query)
 	if err != nil {
-		return replyWithWsError(err, clientConn)
+		return utils.ReplyWithWsError(err, clientConn)
 	}
 
-	if err := wsProxy.signResponse(relayResponse); err != nil {
-		return replyWithWsError(err, clientConn)
+	signature, err := wsProxy.signResponse(relayResponse)
+	if err != nil {
+		return utils.ReplyWithWsError(err, clientConn)
 	}
+
+	relayResponse.ServicerSignature = signature
 
 	if err := clientConn.WriteMessage(messageType, response); err != nil {
-		return replyWithWsError(err, clientConn)
+		return utils.ReplyWithWsError(err, clientConn)
 	}
 
 	// account for reply relaying work
@@ -257,15 +265,4 @@ func newWsRelayResponse(req []byte) (*servicerTypes.RelayResponse, error) {
 		Payload: req,
 	}
 	return relayResponse, nil
-}
-
-// reply to the client with a derived error message then return the original error
-// TODO: send appropriate error instead of the original error
-func replyWithWsError(err error, clientConn *ws.Conn) error {
-	replyError := clientConn.WriteMessage(ws.TextMessage, []byte(err.Error()))
-	if replyError != nil {
-		log.Printf("failed sending error response: %v", replyError)
-	}
-
-	return err
 }
