@@ -50,7 +50,7 @@ func RelayerCmd() *cobra.Command {
 }
 
 func runRelayer(cmd *cobra.Command, _ []string) error {
-	// Set --node flag to the sequencer-node for the tx client context
+	// Set --node flag to the --sequencer-node for the tx client context
 	cmd.Flags().Set(flags.FlagNode, fmt.Sprintf("tcp://%s", sequencerNode))
 	clientCtx, err := cosmosclient.GetClientTxContext(cmd)
 	if err != nil {
@@ -61,7 +61,7 @@ func runRelayer(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	// Set --node flag to the pocket-node for the tx client context
+	// Set --node flag to the --pocket-node for the tx client context
 	cmd.Flags().Set(flags.FlagNode, fmt.Sprintf("tcp://%s", pocketNode))
 	clientCtx, err = cosmosclient.GetClientQueryContext(cmd)
 	if err != nil {
