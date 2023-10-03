@@ -4,6 +4,7 @@ POKTROLLD_HOME := ./localnet/poktrolld
 
 NODE = tcp://127.0.0.1:36657 # Used by the client (i.e. CLI in this file) to send transactions & query things
 POCKET_NODE = 127.0.0.1:36657 # Used by the relayer for reading and listening on data
+# TODO: Consider renaming this to `ROLLUP_NODE` since they gossip Txs with the sequencer until the block is published
 SEQUENCER_NODE = 127.0.0.1:36657 # Used by the relayer to send transactions
 
 SESSION_HEIGHT ?= 1 # Default height when retrieving session data

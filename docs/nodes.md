@@ -17,7 +17,7 @@ The diagram below shows the absolute base case where there is:
 
 A Dependant Relayer is one that:
 
-- Sends Txs to the sequencer
+- Sends Txs to the sequencer (or another rollup that gossips with the sequencer)
   - specified via `--sequencer-node`
 - Trusts another node (i.e. spefieid via `--pocket-node`) to:
   - read on-chain data
@@ -57,7 +57,7 @@ The diagram below shows the Celestia DA, Rollup Nodes in the network, the sequen
 
 A Sovereign Relayer is one that:
 
-- Sends Txs to the sequencer
+- Sends Txs to the sequencer (or its own rollup node that gossips with the sequencer)
   - specified via `--sequencer-node`
 - Runs it's own Pocket Full Node (specified via `--pocket-node`) to:
   - read on-chain data
