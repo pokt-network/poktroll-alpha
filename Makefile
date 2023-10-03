@@ -309,6 +309,22 @@ portal2_unwhitelist_app2: ## Unwhitelist app2 for portal2
 portal3_unwhitelist_app3: ## Unwhitelist app3 for portal3
 	PORTAL=portal3 APP=pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex make portal_unwhitelist:pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex
 
+.PHONY: app_delegatees
+app_delegatees: ## Retrieves all delegatees for the application specified (must specify the APP env var)
+	poktrolld --home=$(POKTROLLD_HOME) query portal get-delegated-portals '$(APP)' --node $(POKTROLLD_NODE)
+
+.PHONY: app1_delegatees
+app1_delegatees: ## Retrieves all delegatees for app1
+	APP=pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4 make app_delegatees
+
+.PHONY: app2_delegatees
+app2_delegatees: ## Retrieves all delegatees for app2
+	APP=pokt184zvylazwu4queyzpl0gyz9yf5yxm2kdhh9hpm make app_delegatees
+
+.PHONY: app3_delegatees
+app3_delegatees: ## Retrieves all delegatees for app3
+	APP=pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex make app_delegatees
+
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests
 	go test -v ./...
