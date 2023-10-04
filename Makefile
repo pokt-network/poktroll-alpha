@@ -277,38 +277,6 @@ portal2_unstake: ## Unstake for portal2
 portal3_unstake: ## Unstake for portal3
 	PORTAL=portal3 make portal_unstake
 
-.PHONY: portal_allowlist
-portal_allowlist: ## allowlist the application for the portal specified (must specify the PORTAL and APP env vars)
-	poktrolld --home=$(POKTROLLD_HOME) tx portal allowlist-application '$(APP)' --keyring-backend test --from $(PORTAL) --node $(POKTROLLD_NODE)
-
-.PHONY: portal1_allowlist_app1
-portal1_allowlist_app1: ## Allowlist app1 for portal1
-	PORTAL=portal1 APP=pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4 make portal_allowlist
-
-.PHONY: portal2_allowlist_app2
-portal2_allowlist_app2: ## Allowlist app2 for portal2
-	PORTAL=portal2 APP=pokt184zvylazwu4queyzpl0gyz9yf5yxm2kdhh9hpm make portal_allowlist
-
-.PHONY: portal3_allowlist_app3
-portal3_allowlist_app3: ## Allowlist app3 for portal3
-	PORTAL=portal3 APP=pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex make portal_allowlist
-
-.PHONY: portal_unallowlist
-portal_unallowlist: ## Unallowlist the application for the portal specified (must specify the PORTAL and APP env vars)
-	poktrolld --home=$(POKTROLLD_HOME) tx portal unallowlist-application '$(APP)' --keyring-backend test --from $(PORTAL) --node $(POKTROLLD_NODE)
-
-.PHONY: portal1_unallowlist_app1
-portal1_unallowlist_app1: ## Unallowlist app1 for portal1
-	PORTAL=portal1 APP=pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4 make portal_unallowlist
-
-.PHONY: portal2_unallowlist_app2
-portal2_unallowlist_app2: ## Unallowlist app2 for portal2
-	PORTAL=portal2 APP=pokt184zvylazwu4queyzpl0gyz9yf5yxm2kdhh9hpm make portal_unallowlist
-
-.PHONY: portal3_unallowlist_app3
-portal3_unallowlist_app3: ## Unallowlist app3 for portal3
-	PORTAL=portal3 APP=pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex make portal_unallowlist:pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex
-
 .PHONY: app_delegatees
 app_delegatees: ## Retrieves all delegatees for the application specified (must specify the APP env var)
 	poktrolld --home=$(POKTROLLD_HOME) query portal get-delegated-portals '$(APP)' --node $(POKTROLLD_NODE)

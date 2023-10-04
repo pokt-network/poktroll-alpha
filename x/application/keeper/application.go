@@ -83,24 +83,6 @@ func (k Keeper) DelegatePortal(ctx sdk.Context, appAddress, portalAddress string
 	app := new(types.Application)
 	k.cdc.MustUnmarshal(b, app)
 
-	// ensure the app is allowlisted by the portal
-	portalAllowlist, found := k.portalKeeper.GetAllowlist(ctx, portalAddress)
-	if !found {
-		return errors.Wrapf(types.ErrPortalNotFound, fmt.Sprintf("portal [%s] not found", portalAddress))
-	}
-	if len(portalAllowlist) > 0 {
-		allowlisted := false
-		for _, p := range portalAllowlist {
-			if p == appAddress {
-				allowlisted = true
-				break
-			}
-		}
-		if !allowlisted {
-			return errors.Wrapf(types.ErrAppNotAllowlisted, fmt.Sprintf("app [%s] is not allowlisted for portal [%s]", appAddress, portalAddress))
-		}
-	}
-
 	// check against max delegated param
 	maxPortals := k.GetParams(ctx).MaxDelegatedPortals
 	if uint32(len(app.Delegatees.PubKeys)) >= maxPortals {

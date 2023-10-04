@@ -89,28 +89,6 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		portalsimulation.SimulateMsgUnstakePortal(am.accountKeeper, am.bankKeeper, am.keeper),
 	))
 
-	var weightMsgAllowlistApplication int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgAllowlistApplication, &weightMsgAllowlistApplication, nil,
-		func(_ *rand.Rand) {
-			weightMsgAllowlistApplication = defaultWeightMsgAllowlistApplication
-		},
-	)
-	operations = append(operations, simulation.NewWeightedOperation(
-		weightMsgAllowlistApplication,
-		portalsimulation.SimulateMsgAllowlistApplication(am.accountKeeper, am.bankKeeper, am.keeper),
-	))
-
-	var weightMsgUnallowlistApplication int
-	simState.AppParams.GetOrGenerate(simState.Cdc, opWeightMsgUnallowlistApplication, &weightMsgUnallowlistApplication, nil,
-		func(_ *rand.Rand) {
-			weightMsgUnallowlistApplication = defaultWeightMsgUnallowlistApplication
-		},
-	)
-	operations = append(operations, simulation.NewWeightedOperation(
-		weightMsgUnallowlistApplication,
-		portalsimulation.SimulateMsgUnallowlistApplication(am.accountKeeper, am.bankKeeper, am.keeper),
-	))
-
 	// this line is used by starport scaffolding # simapp/module/operation
 
 	return operations
@@ -132,22 +110,6 @@ func (am AppModule) ProposalMsgs(simState module.SimulationState) []simtypes.Wei
 			defaultWeightMsgUnstakePortal,
 			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
 				portalsimulation.SimulateMsgUnstakePortal(am.accountKeeper, am.bankKeeper, am.keeper)
-				return nil
-			},
-		),
-		simulation.NewWeightedProposalMsg(
-			opWeightMsgAllowlistApplication,
-			defaultWeightMsgAllowlistApplication,
-			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
-				portalsimulation.SimulateMsgAllowlistApplication(am.accountKeeper, am.bankKeeper, am.keeper)
-				return nil
-			},
-		),
-		simulation.NewWeightedProposalMsg(
-			opWeightMsgUnallowlistApplication,
-			defaultWeightMsgUnallowlistApplication,
-			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
-				portalsimulation.SimulateMsgUnallowlistApplication(am.accountKeeper, am.bankKeeper, am.keeper)
 				return nil
 			},
 		),

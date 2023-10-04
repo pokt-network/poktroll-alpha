@@ -38,7 +38,6 @@ func CmdStakePortal() *cobra.Command {
 				clientCtx.GetFromAddress().String(),
 				stakeAmount,
 				strings.Split(serviceIdsCommaSeparated, ","),
-				allowlistedApps,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
@@ -49,8 +48,6 @@ func CmdStakePortal() *cobra.Command {
 	}
 
 	flags.AddTxFlagsToCmd(cmd)
-	f := cmd.Flags()
-	f.StringSliceVar(&allowlistedApps, "allowlisted-apps", []string{}, "comma separated list of allowlisted application addresses")
 
 	return cmd
 }

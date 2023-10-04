@@ -24,5 +24,4 @@ type BankKeeper interface {
 
 type PortalKeeper interface {
 	SetDelegator(ctx sdk.Context, appAddress string, delegatedPortals Delegatees)
-	GetAllowlist(ctx sdk.Context, portalAddress string) (val []string, found bool)
 }

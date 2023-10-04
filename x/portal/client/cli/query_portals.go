@@ -79,39 +79,6 @@ func CmdShowPortal() *cobra.Command {
 	return cmd
 }
 
-func CmdGetPortalAllowlist() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "get-portal-allowlist [portal-address]",
-		Short: "Query get-portal-allowlist",
-		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			reqPortalAddress := args[0]
-
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := types.NewQueryClient(clientCtx)
-
-			params := &types.QueryGetPortalAllowlistRequest{
-				PortalAddress: reqPortalAddress,
-			}
-
-			res, err := queryClient.GetPortalAllowlist(cmd.Context(), params)
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(res)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
 func CmdGetDelegatedPortals() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-delegated-portals [app-address]",
