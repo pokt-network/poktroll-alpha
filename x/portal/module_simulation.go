@@ -31,14 +31,6 @@ const (
 	// TODO: Determine the simulation weight value
 	defaultWeightMsgUnstakePortal int = 100
 
-	opWeightMsgAllowlistApplication = "op_weight_msg_allowlist_application"
-	// TODO: Determine the simulation weight value
-	defaultWeightMsgAllowlistApplication int = 100
-
-	opWeightMsgUnallowlistApplication = "op_weight_msg_unallowlist_application"
-	// TODO: Determine the simulation weight value
-	defaultWeightMsgUnallowlistApplication int = 100
-
 	// this line is used by starport scaffolding # simapp/module/const
 )
 

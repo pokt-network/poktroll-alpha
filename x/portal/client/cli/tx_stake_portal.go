@@ -15,8 +15,6 @@ import (
 
 var _ = strconv.Itoa(0)
 
-var allowlistedApps = make([]string, 0)
-
 func CmdStakePortal() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "stake-portal",
