@@ -10,8 +10,8 @@ import (
 func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgStakePortal{}, "portal/StakePortal", nil)
 	cdc.RegisterConcrete(&MsgUnstakePortal{}, "portal/UnstakePortal", nil)
-	cdc.RegisterConcrete(&MsgWhitelistApplication{}, "portal/WhitelistApplication", nil)
-	cdc.RegisterConcrete(&MsgUnwhitelistApplication{}, "portal/UnwhitelistApplication", nil)
+	cdc.RegisterConcrete(&MsgAllowlistApplication{}, "portal/AllowlistApplication", nil)
+	cdc.RegisterConcrete(&MsgUnallowlistApplication{}, "portal/UnallowlistApplication", nil)
 	// this line is used by starport scaffolding # 2
 }
 
@@ -23,10 +23,10 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgUnstakePortal{},
 	)
 	registry.RegisterImplementations((*sdk.Msg)(nil),
-		&MsgWhitelistApplication{},
+		&MsgAllowlistApplication{},
 	)
 	registry.RegisterImplementations((*sdk.Msg)(nil),
-		&MsgUnwhitelistApplication{},
+		&MsgUnallowlistApplication{},
 	)
 	// this line is used by starport scaffolding # 3
 

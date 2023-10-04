@@ -35,24 +35,13 @@ func (k msgServer) StakeApplication(goCtx context.Context, msg *types.MsgStakeAp
 	application, found := k.GetApplication(ctx, msg.Address)
 	if !found {
 		logger.Info(fmt.Sprintf("application not found, creating new application for address %s with stake amount %v", appAddress, newApplicationStake))
-		// Add application as its only delegatee at first
-		pub, err := k.addressToPublicKey(ctx, msg.Address)
-		if err != nil {
-			logger.Error(fmt.Sprintf("could not get public key for address %v", msg.Address))
-			return nil, err
-		}
-		anyPk, err := codectypes.NewAnyWithValue(pub)
-		if err != nil {
-			logger.Error(fmt.Sprintf("could not create any for public key %v", pub))
-			return nil, err
-		}
 		// If the application is not found, create a new one
 		application = types.Application{
 			Address:  msg.Address,
 			Stake:    msg.StakeAmount,
 			Services: serviceIdsToService(msg.ServiceIds),
 			Delegatees: types.Delegatees{
-				PubKeys: []codectypes.Any{*anyPk},
+				PubKeys: make([]codectypes.Any, 0),
 			},
 		}
 

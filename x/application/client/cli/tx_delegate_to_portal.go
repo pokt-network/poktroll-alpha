@@ -18,14 +18,14 @@ func CmdDelegateToPortal() *cobra.Command {
 		Short: "Broadcast message DelegateToPortal",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			argPortalPubKey := args[0]
+			portalPubKey := args[0]
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 			msg := types.NewMsgDelegateToPortal(
 				clientCtx.GetFromAddress().String(),
-				argPortalPubKey,
+				portalPubKey,
 			)
 			if err := msg.ValidateBasic(); err != nil {
 				return err

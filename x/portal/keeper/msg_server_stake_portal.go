@@ -38,12 +38,10 @@ func (k msgServer) StakePortal(goCtx context.Context, msg *types.MsgStakePortal)
 
 		// If the portal is not found, create a new one
 		portal = types.Portal{
-			Address:  msg.Address,
-			Stake:    msg.StakeAmount,
-			Services: serviceIdsToService(msg.ServiceIds),
-			WhitelistedApps: types.DelagateeWhitelist{
-				AppAddresses: msg.WhitelistedApps,
-			},
+			Address:         msg.Address,
+			Stake:           msg.StakeAmount,
+			Services:        serviceIdsToService(msg.ServiceIds),
+			AllowlistedApps: msg.AllowlistedApps,
 		}
 
 		// Determine the number of coins to send from the portal address to the portal module account
@@ -64,10 +62,8 @@ func (k msgServer) StakePortal(goCtx context.Context, msg *types.MsgStakePortal)
 		// Update the services (just an override operation)
 		portal.Services = serviceIdsToService(msg.ServiceIds)
 
-		// Update whitelist (just an override operation)
-		portal.WhitelistedApps = types.DelagateeWhitelist{
-			AppAddresses: msg.WhitelistedApps,
-		}
+		// Update allowlist (just an override operation)
+		portal.AllowlistedApps = msg.AllowlistedApps
 	}
 
 	// Send coins to the portal module account

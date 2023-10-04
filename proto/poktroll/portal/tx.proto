@@ -11,15 +11,15 @@ option go_package = "poktroll/x/portal/types";
 service Msg {
   rpc StakePortal            (MsgStakePortal           ) returns (MsgStakePortalResponse           );
   rpc UnstakePortal          (MsgUnstakePortal         ) returns (MsgUnstakePortalResponse         );
-  rpc WhitelistApplication   (MsgWhitelistApplication  ) returns (MsgWhitelistApplicationResponse  );
-  rpc UnwhitelistApplication (MsgUnwhitelistApplication) returns (MsgUnwhitelistApplicationResponse);
+  rpc AllowlistApplication   (MsgAllowlistApplication  ) returns (MsgAllowlistApplicationResponse  );
+  rpc UnallowlistApplication (MsgUnallowlistApplication) returns (MsgUnallowlistApplicationResponse);
 }
 
 message MsgStakePortal {
            string                   address          = 1;
            cosmos.base.v1beta1.Coin stake_amount     = 2;
   repeated string                   service_ids      = 3;
-  repeated string                   whitelisted_apps = 4 [(gogoproto.nullable) = false];
+  repeated string                   allowlisted_apps = 4 [(gogoproto.nullable) = false];
 }
 
 message MsgStakePortalResponse {}
@@ -30,17 +30,17 @@ message MsgUnstakePortal {
 
 message MsgUnstakePortalResponse {}
 
-message MsgWhitelistApplication {
+message MsgAllowlistApplication {
   string portal_address = 1;
   string app_address    = 2;
 }
 
-message MsgWhitelistApplicationResponse {}
+message MsgAllowlistApplicationResponse {}
 
-message MsgUnwhitelistApplication {
+message MsgUnallowlistApplication {
   string portal_address = 1;
   string app_address    = 2;
 }
 
-message MsgUnwhitelistApplicationResponse {}
+message MsgUnallowlistApplicationResponse {}
 

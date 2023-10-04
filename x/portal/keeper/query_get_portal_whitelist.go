@@ -9,14 +9,14 @@ import (
 	"poktroll/x/portal/types"
 )
 
-func (k Keeper) GetPortalWhitelist(goCtx context.Context, req *types.QueryGetPortalWhitelistRequest) (*types.QueryGetPortalWhitelistResponse, error) {
+func (k Keeper) GetPortalAllowlist(goCtx context.Context, req *types.QueryGetPortalAllowlistRequest) (*types.QueryGetPortalAllowlistResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	val, found := k.GetWhitelist(
+	val, found := k.GetAllowlist(
 		ctx,
 		req.PortalAddress,
 	)
@@ -24,5 +24,5 @@ func (k Keeper) GetPortalWhitelist(goCtx context.Context, req *types.QueryGetPor
 		return nil, status.Error(codes.NotFound, "not found")
 	}
 
-	return &types.QueryGetPortalWhitelistResponse{AppAddresses: val}, nil
+	return &types.QueryGetPortalAllowlistResponse{AppAddresses: val}, nil
 }

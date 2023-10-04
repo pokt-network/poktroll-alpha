@@ -47972,10 +47972,10 @@ paths:
           type: string
       tags:
         - Query
-  /poktroll/portal/get_portal_whitelist/{portalAddress}:
+  /poktroll/portal/get_portal_allowlist/{portalAddress}:
     get:
-      summary: Queries a list of GetPortalWhitelist items.
-      operationId: PoktrollPortalGetPortalWhitelist
+      summary: Queries a list of GetPortalallowlist items.
+      operationId: PoktrollPortalGetPortalAllowlist
       responses:
         '200':
           description: A successful response.
@@ -48430,13 +48430,11 @@ paths:
 
                         THOUGHT(h5law): If not what stops a regular app from
                         registering as a portal to bypass this limitation?
-                    whitelisted_apps:
-                      type: object
-                      properties:
-                        app_addresses:
-                          type: array
-                          items:
-                            type: string
+                    allowlisted_apps:
+                      type: array
+                      items:
+                        type: string
+                      title: 'TODO: s/allowlist/allowlist/ge'
               pagination:
                 type: object
                 properties:
@@ -48754,13 +48752,11 @@ paths:
 
                       THOUGHT(h5law): If not what stops a regular app from
                       registering as a portal to bypass this limitation?
-                  whitelisted_apps:
-                    type: object
-                    properties:
-                      app_addresses:
-                        type: array
-                        items:
-                          type: string
+                  allowlisted_apps:
+                    type: array
+                    items:
+                      type: string
+                    title: 'TODO: s/allowlist/allowlist/ge'
         default:
           description: An unexpected error response.
           schema:
@@ -80572,20 +80568,13 @@ definitions:
         description: params holds all the parameters of this module.
         type: object
     description: QueryParamsResponse is response type for the Query/Params RPC method.
-  poktroll.portal.DelagateeWhitelist:
+  poktroll.portal.MsgAllowlistApplicationResponse:
     type: object
-    properties:
-      app_addresses:
-        type: array
-        items:
-          type: string
   poktroll.portal.MsgStakePortalResponse:
     type: object
+  poktroll.portal.MsgUnallowlistApplicationResponse:
+    type: object
   poktroll.portal.MsgUnstakePortalResponse:
-    type: object
-  poktroll.portal.MsgUnwhitelistApplicationResponse:
-    type: object
-  poktroll.portal.MsgWhitelistApplicationResponse:
     type: object
   poktroll.portal.Params:
     type: object
@@ -80623,13 +80612,11 @@ definitions:
 
           THOUGHT(h5law): If not what stops a regular app from registering as a
           portal to bypass this limitation?
-      whitelisted_apps:
-        type: object
-        properties:
-          app_addresses:
-            type: array
-            items:
-              type: string
+      allowlisted_apps:
+        type: array
+        items:
+          type: string
+        title: 'TODO: s/allowlist/allowlist/ge'
   poktroll.portal.QueryAllPortalsResponse:
     type: object
     properties:
@@ -80671,13 +80658,11 @@ definitions:
 
                 THOUGHT(h5law): If not what stops a regular app from registering
                 as a portal to bypass this limitation?
-            whitelisted_apps:
-              type: object
-              properties:
-                app_addresses:
-                  type: array
-                  items:
-                    type: string
+            allowlisted_apps:
+              type: array
+              items:
+                type: string
+              title: 'TODO: s/allowlist/allowlist/ge'
       pagination:
         type: object
         properties:
@@ -80879,6 +80864,13 @@ definitions:
                       "@type": "type.googleapis.com/google.protobuf.Duration",
                       "value": "1.212s"
                     }
+  poktroll.portal.QueryGetPortalAllowlistResponse:
+    type: object
+    properties:
+      app_addresses:
+        type: array
+        items:
+          type: string
   poktroll.portal.QueryGetPortalResponse:
     type: object
     properties:
@@ -80918,20 +80910,11 @@ definitions:
 
               THOUGHT(h5law): If not what stops a regular app from registering
               as a portal to bypass this limitation?
-          whitelisted_apps:
-            type: object
-            properties:
-              app_addresses:
-                type: array
-                items:
-                  type: string
-  poktroll.portal.QueryGetPortalWhitelistResponse:
-    type: object
-    properties:
-      app_addresses:
-        type: array
-        items:
-          type: string
+          allowlisted_apps:
+            type: array
+            items:
+              type: string
+            title: 'TODO: s/allowlist/allowlist/ge'
   poktroll.portal.QueryParamsResponse:
     type: object
     properties:

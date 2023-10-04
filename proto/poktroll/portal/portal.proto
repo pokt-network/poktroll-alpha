@@ -14,9 +14,5 @@ message Portal {
   // TODO_DISCUSS: Should Portal actors need to stake services?
   // THOUGHT(h5law): If not what stops a regular app from registering as a portal to bypass this limitation?
   repeated service.ServiceId services = 3;
-  DelagateeWhitelist whitelisted_apps = 4 [(gogoproto.nullable) = false];
-}
-
-message DelagateeWhitelist {
-  repeated string app_addresses = 1 [(cosmos_proto.scalar) = "cosmos.AddressString", (gogoproto.nullable) = false];
+  repeated string allowlisted_apps = 4 [(cosmos_proto.scalar) = "cosmos.AddressString", (gogoproto.nullable) = false];
 }

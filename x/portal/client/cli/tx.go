@@ -32,8 +32,8 @@ func GetTxCmd() *cobra.Command {
 
 	cmd.AddCommand(CmdStakePortal())
 	cmd.AddCommand(CmdUnstakePortal())
-	cmd.AddCommand(CmdWhitelistApplication())
-	cmd.AddCommand(CmdUnwhitelistApplication())
+	cmd.AddCommand(CmdAllowlistApplication())
+	cmd.AddCommand(CmdUnallowlistApplication())
 	// this line is used by starport scaffolding # 1
 
 	return cmd

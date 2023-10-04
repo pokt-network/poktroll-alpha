@@ -7,26 +7,26 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-const TypeMsgWhitelistApplication = "whitelist_application"
+const TypeMsgAllowlistApplication = "allowlist_application"
 
-var _ sdk.Msg = &MsgWhitelistApplication{}
+var _ sdk.Msg = &MsgAllowlistApplication{}
 
-func NewMsgWhitelistApplication(portalAddress, appAddress string) *MsgWhitelistApplication {
-	return &MsgWhitelistApplication{
+func NewMsgAllowlistApplication(portalAddress, appAddress string) *MsgAllowlistApplication {
+	return &MsgAllowlistApplication{
 		PortalAddress: portalAddress,
 		AppAddress:    appAddress,
 	}
 }
 
-func (msg *MsgWhitelistApplication) Route() string {
+func (msg *MsgAllowlistApplication) Route() string {
 	return RouterKey
 }
 
-func (msg *MsgWhitelistApplication) Type() string {
-	return TypeMsgWhitelistApplication
+func (msg *MsgAllowlistApplication) Type() string {
+	return TypeMsgAllowlistApplication
 }
 
-func (msg *MsgWhitelistApplication) GetSigners() []sdk.AccAddress {
+func (msg *MsgAllowlistApplication) GetSigners() []sdk.AccAddress {
 	address, err := sdk.AccAddressFromBech32(msg.PortalAddress)
 	if err != nil {
 		panic(err)
@@ -34,12 +34,12 @@ func (msg *MsgWhitelistApplication) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{address}
 }
 
-func (msg *MsgWhitelistApplication) GetSignBytes() []byte {
+func (msg *MsgAllowlistApplication) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
-func (msg *MsgWhitelistApplication) ValidateBasic() error {
+func (msg *MsgAllowlistApplication) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.PortalAddress); err != nil {
 		return errors.Wrapf(sdkerrors.ErrInvalidAddress, fmt.Errorf("invalid portal address: %w", err).Error())
 	}

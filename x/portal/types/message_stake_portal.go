@@ -17,13 +17,13 @@ func NewMsgStakePortal(
 	address string,
 	stakeAmount types.Coin,
 	serviceIds []string,
-	whitelistedApps []string,
+	allowlistedApps []string,
 ) *MsgStakePortal {
 	return &MsgStakePortal{
 		Address:         address,
 		StakeAmount:     &stakeAmount,
 		ServiceIds:      serviceIds,
-		WhitelistedApps: whitelistedApps,
+		AllowlistedApps: allowlistedApps,
 	}
 }
 
@@ -74,10 +74,10 @@ func (msg *MsgStakePortal) ValidateBasic() error {
 		return ErrNoServicesToStake
 	}
 
-	// Validate the whitelisted apps
-	for _, a := range msg.WhitelistedApps {
+	// Validate the allowlisted apps
+	for _, a := range msg.AllowlistedApps {
 		if _, err := sdk.AccAddressFromBech32(a); err != nil {
-			return errors.Wrapf(sdkerrors.ErrInvalidAddress, fmt.Sprintf("whitelisted app address invalid: %s", a))
+			return errors.Wrapf(sdkerrors.ErrInvalidAddress, fmt.Sprintf("allowlisted app address invalid: %s", a))
 		}
 	}
 

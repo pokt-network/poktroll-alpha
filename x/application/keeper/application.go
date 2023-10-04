@@ -83,39 +83,27 @@ func (k Keeper) DelegatePortal(ctx sdk.Context, appAddress, portalAddress string
 	app := new(types.Application)
 	k.cdc.MustUnmarshal(b, app)
 
-	// ensure the app is whitelisted by the portal
-	portalWhitelist, found := k.portalKeeper.GetWhitelist(ctx, portalAddress)
+	// ensure the app is allowlisted by the portal
+	portalAllowlist, found := k.portalKeeper.GetAllowlist(ctx, portalAddress)
 	if !found {
 		return errors.Wrapf(types.ErrPortalNotFound, fmt.Sprintf("portal [%s] not found", portalAddress))
 	}
-	if len(portalWhitelist) > 0 {
-		whitelisted := false
-		for _, p := range portalWhitelist {
+	if len(portalAllowlist) > 0 {
+		allowlisted := false
+		for _, p := range portalAllowlist {
 			if p == appAddress {
-				whitelisted = true
+				allowlisted = true
 				break
 			}
 		}
-		if !whitelisted {
-			return errors.Wrapf(types.ErrAppNotWhitelisted, fmt.Sprintf("app [%s] is not whitelisted for portal [%s]", appAddress, portalAddress))
+		if !allowlisted {
+			return errors.Wrapf(types.ErrAppNotAllowlisted, fmt.Sprintf("app [%s] is not allowlisted for portal [%s]", appAddress, portalAddress))
 		}
 	}
 
 	// check against max delegated param
 	maxPortals := k.GetParams(ctx).MaxDelegatedPortals
-	if len(app.Delegatees.PubKeys) == 0 {
-		return errors.Wrapf(types.ErrNotSelfDelegated, fmt.Sprintf("app [%s] is not self-delegated", appAddress))
-	}
-	if len(app.Delegatees.PubKeys) > 0 {
-		firstKey, err := anyToPubKey(app.Delegatees.PubKeys[0])
-		if err != nil {
-			return err
-		}
-		if publicKeyToAddress(firstKey) != appAddress {
-			return fmt.Errorf("invalid delegatees public key list, app not first index: found %s", publicKeyToAddress(firstKey))
-		}
-	}
-	if uint32(len(app.Delegatees.PubKeys)) >= maxPortals+1 { // +1 because the app is already delegated to itself
+	if uint32(len(app.Delegatees.PubKeys)) >= maxPortals {
 		return errors.Wrapf(types.ErrMaxDelegatedReached, fmt.Sprintf("delegated portals: %d, max: %d", len(app.Delegatees.PubKeys), k.GetParams(ctx).MaxDelegatedPortals))
 	}
 	// ensure the portal is not already present
@@ -163,10 +151,6 @@ func (k Keeper) UndelegatePortal(ctx sdk.Context, appAddress, portalAddress stri
 	app := new(types.Application)
 	k.cdc.MustUnmarshal(b, app)
 
-	// ensure app is not removing itself
-	if appAddress == portalAddress {
-		return types.ErrCannotUndelegateSelf
-	}
 	// ensure the portal is already present
 	found := false
 	index := -1

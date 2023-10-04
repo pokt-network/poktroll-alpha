@@ -8,10 +8,10 @@ import (
 	"poktroll/x/portal/types"
 )
 
-func (k msgServer) UnwhitelistApplication(goCtx context.Context, msg *types.MsgUnwhitelistApplication) (*types.MsgUnwhitelistApplicationResponse, error) {
+func (k msgServer) UnallowlistApplication(goCtx context.Context, msg *types.MsgUnallowlistApplication) (*types.MsgUnallowlistApplicationResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	logger := k.Logger(ctx).With("method", "UnwhitelistApplication")
-	logger.Info(fmt.Sprintf("About to unwhitelist application %s from portal %s", msg.AppAddress, msg.PortalAddress))
+	logger := k.Logger(ctx).With("method", "UnallowlistApplication")
+	logger.Info(fmt.Sprintf("About to unallowlist application %s from portal %s", msg.AppAddress, msg.PortalAddress))
 
 	// DISCUSS: Do we need to check the application exists too?
 	portal, found := k.GetPortal(ctx, msg.PortalAddress)
@@ -20,25 +20,25 @@ func (k msgServer) UnwhitelistApplication(goCtx context.Context, msg *types.MsgU
 		return nil, types.ErrUnstakingNonExistentPortal
 	}
 
-	// check the app is already whitelisted
+	// check the app is already allowlisted
 	found = false
-	for _, a := range portal.WhitelistedApps.AppAddresses {
+	for _, a := range portal.AllowlistedApps {
 		if a == msg.AppAddress {
 			found = true
 		}
 	}
 	if !found {
-		logger.Error(fmt.Sprintf("portal [%s] hasn't whitelisted app: %s", msg.PortalAddress, msg.AppAddress))
-		return nil, types.ErrAppNotWhitelisted
+		logger.Error(fmt.Sprintf("portal [%s] hasn't allowlisted app: %s", msg.PortalAddress, msg.AppAddress))
+		return nil, types.ErrAppNotAllowlisted
 	}
 
 	// Update the application in the store
-	if err := k.UnwhitelistApp(ctx, msg.PortalAddress, msg.AppAddress); err != nil {
+	if err := k.UnallowlistApp(ctx, msg.PortalAddress, msg.AppAddress); err != nil {
 		logger.Error(fmt.Errorf("unable to update portal state: %w", err).Error())
 		return nil, err
 	}
-	logger.Info(fmt.Sprintf("successfully updated portal's [%s] whitelist to exclude: %s", msg.PortalAddress, msg.AppAddress))
+	logger.Info(fmt.Sprintf("successfully updated portal's [%s] allowlist to exclude: %s", msg.PortalAddress, msg.AppAddress))
 
 	// QED
-	return &types.MsgUnwhitelistApplicationResponse{}, nil
+	return &types.MsgUnallowlistApplicationResponse{}, nil
 }

@@ -19,7 +19,7 @@ func SimulateMsgUndelegateFromPortal(
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		msg := &types.MsgUndelegateFromPortal{
-			Address: simAccount.Address.String(),
+			AppAddress: simAccount.Address.String(),
 		}
 
 		// TODO: Handling the UndelegateFromPortal simulation

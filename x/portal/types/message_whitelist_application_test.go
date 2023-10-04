@@ -8,21 +8,21 @@ import (
 	"poktroll/testutil/sample"
 )
 
-func TestMsgWhitelistApplication_ValidateBasic(t *testing.T) {
+func TestMsgAllowlistApplication_ValidateBasic(t *testing.T) {
 	tests := []struct {
 		name string
-		msg  MsgWhitelistApplication
+		msg  MsgAllowlistApplication
 		err  error
 	}{
 		{
 			name: "invalid address",
-			msg: MsgWhitelistApplication{
+			msg: MsgAllowlistApplication{
 				Address: "invalid_address",
 			},
 			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
-			msg: MsgWhitelistApplication{
+			msg: MsgAllowlistApplication{
 				Address: sample.AccAddress(),
 			},
 		},

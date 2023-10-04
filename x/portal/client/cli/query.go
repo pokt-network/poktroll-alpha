@@ -28,7 +28,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 	cmd.AddCommand(CmdListPortals())
 	cmd.AddCommand(CmdShowPortal())
 
-	cmd.AddCommand(CmdGetPortalWhitelist())
+	cmd.AddCommand(CmdGetPortalAllowlist())
 
 	cmd.AddCommand(CmdGetDelegatedPortals())
 

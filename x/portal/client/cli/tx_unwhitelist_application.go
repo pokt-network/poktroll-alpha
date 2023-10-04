@@ -12,10 +12,10 @@ import (
 
 var _ = strconv.Itoa(0)
 
-func CmdUnwhitelistApplication() *cobra.Command {
+func CmdUnallowlistApplication() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "unwhitelist-application [app-address]",
-		Short: "Broadcast message unwhitelist_application",
+		Use:   "unallowlist-application [app-address]",
+		Short: "Broadcast message unallowlist_application",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
 			argAppAddress := args[0]
@@ -25,7 +25,7 @@ func CmdUnwhitelistApplication() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgUnwhitelistApplication(
+			msg := types.NewMsgUnallowlistApplication(
 				clientCtx.GetFromAddress().String(),
 				argAppAddress,
 			)

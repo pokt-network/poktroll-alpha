@@ -17,13 +17,13 @@ func TestMsgDelegateToPortal_ValidateBasic(t *testing.T) {
 		{
 			name: "invalid address",
 			msg: MsgDelegateToPortal{
-				Address: "invalid_address",
+				AppAddress: "invalid_address",
 			},
 			err: sdkerrors.ErrInvalidAddress,
 		}, {
 			name: "valid address",
 			msg: MsgDelegateToPortal{
-				Address: sample.AccAddress(),
+				AppAddress: sample.AccAddress(),
 			},
 		},
 	}
