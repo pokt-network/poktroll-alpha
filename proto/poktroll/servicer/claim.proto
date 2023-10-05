@@ -4,6 +4,7 @@ package poktroll.servicer;
 option go_package = "poktroll/x/servicer/types";
 
 message Claim {
+    // TODO_REFACTOR: Use SessionHeader everywhere
     string SessionId = 1;
     uint64 SessionNumber = 2;
     uint64 CommittedHeight = 3;

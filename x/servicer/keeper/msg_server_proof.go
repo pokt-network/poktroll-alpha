@@ -22,8 +22,6 @@ const (
 	govClaimCommittedHeightOffset = sessionkeeper.NumSessionBlocks / 2
 )
 
-var errInvalidPathFmt = "invalid path: %x, expected: %x"
-
 // TODO_INCOMPLETE: Just some placeholder implementation for the proof on the server side for now.
 func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.MsgProofResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
@@ -42,7 +40,7 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 
 	// INCOMPLETE: we need to verify that the closest path matches the last block hash.
 	//if proof.VerifyClosest(currentBlockHash) {
-	//	err := fmt.Errorf(errInvalidPathFmt, msg.Path, currentBlockHash)
+	//	err := types.ErrInvalidPath.Wrapf("expected %x; got %x", msg.Path, currentBlockHash)
 	//	logger.Error(err.Error())
 	//	return nil, err
 	//}
@@ -55,14 +53,27 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 
 	// verify the claim is for the same session tree.
 	if !bytes.Equal(claim.SmstRootHash, msg.SmstRootHash) {
-		return nil, fmt.Errorf("smst root hash mismatch, expected: %x; got: %x", claim.SmstRootHash, msg.SmstRootHash)
+		return nil, types.ErrSMSTRootHashMismatch.Wrapf(
+			"expected: %x; got: %x",
+			claim.SmstRootHash,
+			msg.SmstRootHash,
+		)
 	}
 
 	// ASSUMPTION: the first signer is the servicer address.
-	firstSignerAddress := msg.GetSigners()[0]
-	if claim.ServicerAddress != firstSignerAddress.String() {
-		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
-		return nil, fmt.Errorf("first proof signer doesn't match claim's servicer address, expected: %s; got: %s", claim.ServicerAddress, firstSignerAddress)
+	// Assert that there is only one signer (until we have rev share and delegation)
+	signers := msg.GetSigners()
+	if len(signers) != 1 {
+		return nil, types.ErrUnsupportedMultiSig.Wrapf("got: %d", len(signers))
+	}
+
+	signer := msg.GetSigners()[0]
+	if claim.ServicerAddress != signer.String() {
+		return nil, types.ErrProofAndClaimSignerMismatch.Wrapf(
+			"expected: %s;got: %s",
+			claim.ServicerAddress,
+			signer,
+		)
 	}
 
 	// TODO_THIS_COMMIT: factor all this out to a library pkg so that it can be
@@ -89,9 +100,8 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	// commit heights of the majority of claims while still being random and
 	// fair.
 	if uint64(ctx.BlockHeight()) < earliestProofHeight {
-		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
-		return nil, fmt.Errorf(
-			"proof submitted too early, earliest proof height: %d; got: %d",
+		return nil, types.ErrEarlyProofSubmission.Wrapf(
+			"earliest proof height: %d; got: %d",
 			earliestProofHeight,
 			ctx.BlockHeight(),
 		)
@@ -104,9 +114,8 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	// RATIONALE: only rewarding proofs committed before some threshold
 	// This allows us to set an upper bound on application unstake delay.
 	if uint64(ctx.BlockHeight()) > currentSessionEndHeight {
-		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
-		return nil, fmt.Errorf(
-			"proof submitted too late, current session end height: %d; got: %d",
+		return nil, types.ErrLateProofSubmission.Wrapf(
+			"current session end height: %d; got: %d",
 			currentSessionEndHeight,
 			ctx.BlockHeight(),
 		)
@@ -130,13 +139,11 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		msg.SmstSum,
 		smt.NoPrehashSpec(sha256.New(), true),
 	); !valid {
-		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
-		errInvalidProof := fmt.Errorf("failed to validate proof")
 
 		// TECHDEBT: remove this error logs; they're intended for development use only.
-		logger.Error(errInvalidProof.Error())
+		logger.Error(types.ErrInvalidProof.Error())
 
-		return nil, errInvalidProof
+		return nil, types.ErrInvalidProof
 	}
 
 	if err := k.InsertProof(ctx, msg); err != nil {

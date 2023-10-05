@@ -3,11 +3,11 @@ package keeper
 import (
 	"context"
 	"encoding/binary"
-	"fmt"
 	"math/rand"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"poktroll/x/servicer/types"
 	servicertypes "poktroll/x/servicer/types"
 	sessionkeeper "poktroll/x/session/keeper"
 )
@@ -34,29 +34,26 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 	// impossible to submit a valid msg until after the first session has ended
 	lastEndedSessionNumber := uint64(ctx.BlockHeight()) / sessionkeeper.NumSessionBlocks
 	if lastEndedSessionNumber == 0 {
-		// TODO_THIS_COMMIT: make a cosmos-sdk error for this
-		return nil, fmt.Errorf("first session has not ended yet")
+		return nil, types.ErrActiveFirstSession
 	}
 
 	// TECHDEBT: If we're considering invalidation height... unclear why this would be useful.
 	// (NB: this is carryover from V0)
 	//if ctx.BlockHeight() > msg.GetInvalidationHeight() {
-	//	// TODO_THIS_COMMIT: make a cosmos-sdk error for this
-	//	return nil, fmt.Errorf(
-	//		"msg session number is in the future, current session number: %d; got: %d",
+	//	return nil, types.ErrFutureSessionNumber.Wrapf(
+	//		"current session number: %d; got: %d",
 	//		lastEndedSessionNumber,
-	//		msg.Session.SessionNumber,
+	//		msg.GetSessionNumber(),
 	//	)
 	//}
 
 	// claim must be for a session that has ended
 	if lastEndedSessionNumber < msg.GetSessionNumber() {
-		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
-		return nil, fmt.Errorf("claim session number has not ended: %d", msg.GetSessionNumber())
+		return nil, types.ErrClaimSessionNumberNotEnded.Wrapf("got: %d", msg.GetSessionNumber())
 	}
 
 	// block#:                     [ 1 2 3 4 5 ][ 6 7 8 9 10 ]
-	// session#:                   [ ↑   1     ][	↑   2      ]
+	// session#:                   [ ↑   1     ][ ↑   2      ]
 	//  lastEndedSessionStartHeight ─┘   ↑──────┬───┤
 	//           lastEndedSessionNumber ─┘	    │   claimCommitedHeight
 	//
@@ -90,8 +87,8 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 	// commit heights of the majority of claims while still being random and
 	// fair.
 	if uint64(ctx.BlockHeight()) < earliestClaimHeight {
-		return nil, fmt.Errorf(
-			"claim submitted too early, earliest claim height: %d; got: %d",
+		return nil, types.ErrEarlyClaimSubmission.Wrapf(
+			"earliest claim height: %d; got: %d",
 			earliestClaimHeight,
 			ctx.BlockHeight(),
 		)

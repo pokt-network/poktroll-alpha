@@ -26,8 +26,7 @@ func (k Keeper) InsertClaim(ctx sdk.Context, claim *types.Claim) error {
 
 func (k Keeper) GetClaim(ctx sdk.Context, sessionId string) (*types.Claim, error) {
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ClaimsKeyPrefix))
-	claimKey := fmt.Sprintf("%s", sessionId)
-	claimBz := store.Get([]byte(claimKey))
+	claimBz := store.Get(types.ClaimsKey(sessionId))
 
 	if claimBz == nil {
 		return nil, fmt.Errorf("claim not found for sessionId: %s", sessionId)
