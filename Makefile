@@ -7,6 +7,7 @@ POCKET_NODE = 127.0.0.1:36657 # Used by the relayer for reading and listening on
 # TODO: Consider renaming this to `ROLLUP_NODE` since they gossip Txs with the sequencer until the block is published
 SEQUENCER_NODE = 127.0.0.1:36657 # Used by the relayer to send transactions
 
+# TODO(post-alpha): Rename to portal because that's what this is basically doing
 SMART_CLIENT := localhost:8080
 SESSION_HEIGHT ?= 1 # Default height when retrieving session data
 
@@ -332,6 +333,7 @@ claims_query: ## Query the poktroll node for claims data
 	SERVICER_ADDR=$(shell poktrolld keys show servicer1 -a --keyring-backend test); \
 	poktrolld query servicer claims $$SERVICER_ADDR --node $(POKTROLLD_NODE)
 
+# TODO(post-alpha): Rename this to gateway because it's basically starting a daemon process
 .PHONY: appclient_start
 appclient_start: ## Start the appclient
 	poktrolld smartclient \
@@ -345,7 +347,7 @@ anvil_start: ## Start the anvil
 	anvil -p 8547 -b 5
 
 .PHONY: cast_relay
-cast_relay: ## Cast a relay
+cast_relay: ## Cast a relay from localhost through the "smart client" (kind of like a gateway)
 	cast block -r http://$(SMART_CLIENT)/svc2
 
 .PHONY: ws_subscribe

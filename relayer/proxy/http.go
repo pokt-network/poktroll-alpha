@@ -120,6 +120,7 @@ func (httpProxy *httpProxy) ServeHTTP(httpResponseWriter http.ResponseWriter, re
 	httpProxy.relayNotifier <- relayWithSession
 }
 
+// TODO: Update this function to accept a sessionHeader instead of a sessionId
 func (httpProxy *httpProxy) executeRelay(req *http.Request, sessionId string) (*servicerTypes.RelayResponse, error) {
 	// Change the request host to the service address
 	serviceResponse, err := proxyHTTPServiceRequest(req)

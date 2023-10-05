@@ -42,7 +42,7 @@ func PortalKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 		storeKey,
 		memStoreKey,
 		paramsSubspace,
-		nil, // added t make it compile
+		nil, // TODO: Needed for compilation but should be mocked in the future
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
