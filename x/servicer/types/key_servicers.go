@@ -10,6 +10,7 @@ const (
 	// TODO_CONSIDERATION: should this be moved to x/servicer/types/key_claims.go?
 	// ClaimsKeyPrefix is the prefix to retrieve Claims
 	ClaimsKeyPrefix = "Claims/value/"
+	// ProofsKeyProfix is the prefix to retrieve Proofs for claims
 	ProofsKeyPrefix = "Proofs/value/"
 )
 
