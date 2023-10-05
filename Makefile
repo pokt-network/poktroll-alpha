@@ -215,6 +215,38 @@ app2_unstake: ## Unstake for app2
 app3_unstake: ## Unstake for app3
 	APP=app3 make app_unstake
 
+.PHONY: delegate
+delegate: ## Delegate the application to the specified portal (must specify the APP and PORTAL env vars)
+	poktrolld --home=$(POKTROLLD_HOME) tx application delegate-to-portal '$(PORTAL)' --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+
+.PHONY: delegate_app1_portal1
+delegate_app1_portal1: ## Delegate app1 to portal1
+	APP=app1 PORTAL=pokt15vzxjqklzjtlz7lahe8z2dfe9nm5vxwwmscne4 make delegate
+
+.PHONY: delegate_app2_portal2
+delegate_app2_portal2: ## Delegate app2 to portal2
+	APP=app2 PORTAL=pokt15w3fhfyc0lttv7r585e2ncpf6t2kl9uh8rsnyz make delegate
+
+.PHONY: delegate_app3_portal3
+delegate_app3_portal3: ## Delegate app3 to portal3
+	APP=app3 PORTAL=pokt1zhmkkd0rh788mc9prfq0m2h88t9ge0j83gnxya make delegate
+
+.PHONY: undelegate
+undelegate: ## Undelegate the application to the specified portal (must specify the APP and PORTAL env vars)
+	poktrolld --home=$(POKTROLLD_HOME) tx application undelegate-from-portal '$(PORTAL)' --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+
+.PHONY: undelegate_app1_portal1
+undelegate_app1_portal1: ## Undelegate app1 to portal1
+	APP=app1 PORTAL=pokt15vzxjqklzjtlz7lahe8z2dfe9nm5vxwwmscne4 make undelegate
+
+.PHONY: undelegate_app2_portal2
+undelegate_app2_portal2: ## Delegate app2 to portal2
+	APP=app2 PORTAL=pokt15w3fhfyc0lttv7r585e2ncpf6t2kl9uh8rsnyz make undelegate
+
+.PHONY: undelegate_app3_portal3
+undelegate_app3_portal3: ## Delegate app3 to portal3
+	APP=app3 PORTAL=pokt1zhmkkd0rh788mc9prfq0m2h88t9ge0j83gnxya make undelegate
+
 .PHONY: portals_get
 portals_get: ## Retrieves all portals from the poktroll state
 	poktrolld --home=$(POKTROLLD_HOME) q portal list-portals --node $(POKTROLLD_NODE)
@@ -250,6 +282,22 @@ portal2_unstake: ## Unstake for portal2
 .PHONY: portal3_unstake
 portal3_unstake: ## Unstake for portal3
 	PORTAL=portal3 make portal_unstake
+
+.PHONY: app_delegatees
+app_delegatees: ## Retrieves all delegatees for the application specified (must specify the APP env var)
+	poktrolld --home=$(POKTROLLD_HOME) query portal get-delegated-portals '$(APP)' --node $(POKTROLLD_NODE)
+
+.PHONY: app1_delegatees
+app1_delegatees: ## Retrieves all delegatees for app1
+	APP=pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4 make app_delegatees
+
+.PHONY: app2_delegatees
+app2_delegatees: ## Retrieves all delegatees for app2
+	APP=pokt184zvylazwu4queyzpl0gyz9yf5yxm2kdhh9hpm make app_delegatees
+
+.PHONY: app3_delegatees
+app3_delegatees: ## Retrieves all delegatees for app3
+	APP=pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex make app_delegatees
 
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests

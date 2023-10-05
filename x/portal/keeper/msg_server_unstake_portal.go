@@ -13,7 +13,7 @@ import (
 func (k msgServer) UnstakePortal(goCtx context.Context, msg *types.MsgUnstakePortal) (*types.MsgUnstakePortalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	logger := k.Logger(ctx).With("method", "UnstakePortal")
-	logger.Info(fmt.Sprintf("About to unstake application %v", msg.Address))
+	logger.Info(fmt.Sprintf("About to unstake portal %v", msg.Address))
 
 	// Get the address of the staking portal
 	portalAddress, err := sdk.AccAddressFromBech32(msg.Address)
@@ -24,7 +24,7 @@ func (k msgServer) UnstakePortal(goCtx context.Context, msg *types.MsgUnstakePor
 
 	portal, found := k.GetPortal(ctx, msg.Address)
 	if !found {
-		logger.Error(fmt.Sprintf("application not found for address %s", msg.Address))
+		logger.Error(fmt.Sprintf("portal not found for address %s", msg.Address))
 		return nil, types.ErrUnstakingNonExistentPortal
 	}
 
@@ -36,9 +36,9 @@ func (k msgServer) UnstakePortal(goCtx context.Context, msg *types.MsgUnstakePor
 
 	logger.Info(fmt.Sprintf("successfully sent coins %v from %s module account to %s", portal.Stake, types.ModuleName, portalAddress))
 
-	// Update the application in the store
+	// Update the portal in the store
 	k.RemovePortal(ctx, msg.Address)
-	logger.Info(fmt.Sprintf("successfully unstaked application and removed it from the store: %v", portal))
+	logger.Info(fmt.Sprintf("successfully unstaked portal and removed it from the store: %v", portal))
 
 	// QED
 	return &types.MsgUnstakePortalResponse{}, nil

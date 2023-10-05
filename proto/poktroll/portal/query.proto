@@ -7,6 +7,8 @@ import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "poktroll/portal/params.proto";
 import "poktroll/portal/portal.proto";
+import "poktroll/application/application.proto";
+import "cosmos_proto/cosmos.proto";
 
 option go_package = "poktroll/x/portal/types";
 
@@ -24,9 +26,15 @@ service Query {
     option (google.api.http).get = "/poktroll/portal/portals";
   
   }
-  rpc Portal (QueryGetPortalRequest) returns (QueryGetPortalResponse) {
+  rpc Portal  (QueryGetPortalRequest ) returns (QueryGetPortalResponse ) {
     option (google.api.http).get = "/poktroll/portal/portals/{address}";
-
+  
+  }
+  
+  // Queries a list of GetDelegatedPortals items.
+  rpc GetDelegatedPortals (QueryGetDelegatedPortalsRequest) returns (QueryGetDelegatedPortalsResponse) {
+    option (google.api.http).get = "/poktroll/portal/get_delegated_portals/{appAddress}";
+  
   }
 }
 // QueryParamsRequest is request type for the Query/Params RPC method.
@@ -54,5 +62,13 @@ message QueryGetPortalRequest {
 
 message QueryGetPortalResponse {
   Portal portal = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetDelegatedPortalsRequest {
+  string appAddress = 1;
+}
+
+message QueryGetDelegatedPortalsResponse {
+  application.Delegatees delegatees = 1 [(gogoproto.nullable) = false];
 }
 

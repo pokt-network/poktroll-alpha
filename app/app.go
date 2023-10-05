@@ -575,6 +575,7 @@ func New(
 		app.GetSubspace(portalmoduletypes.ModuleName),
 
 		app.BankKeeper,
+		app.AccountKeeper,
 	)
 	portalModule := portalmodule.NewAppModule(appCodec, app.PortalKeeper, app.AccountKeeper, app.BankKeeper)
 
@@ -585,6 +586,8 @@ func New(
 		app.GetSubspace(applicationmoduletypes.ModuleName),
 
 		app.BankKeeper,
+		app.AccountKeeper,
+		app.PortalKeeper,
 	)
 	applicationModule := applicationmodule.NewAppModule(appCodec, app.ApplicationKeeper, app.AccountKeeper, app.BankKeeper)
 
