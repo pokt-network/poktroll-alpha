@@ -1,5 +1,8 @@
 package client
 
+// TODO: Rename the `smartclient` package to a `gateway`
+// TODO: Add diagrams for how the components of the `gateway` work
+
 import (
 	"context"
 	"fmt"
@@ -17,7 +20,7 @@ import (
 
 // BlocksQueryClient is a client for querying blocks from a relayer
 // it is inspired from the relayer's client but does not need the transaction
-// and signing features thus reducing the number of its dependencies
+// and signing features thus reducing the number of dependencies
 type BlocksQueryClient struct {
 	conn             *websocket.Conn
 	blocksNotifee    utils.Observable[types.Block]
@@ -85,6 +88,7 @@ func (qc *BlocksQueryClient) listen(ctx context.Context, blocksNotifier chan typ
 	}
 }
 
+// TODO: Need to consolidate this sort of code with the relayer's client
 func (qc *BlocksQueryClient) subscribeToBlocks(ctx context.Context) error {
 	blocksNotifee, blocksNotifier := utils.NewControlledObservable[types.Block](nil)
 

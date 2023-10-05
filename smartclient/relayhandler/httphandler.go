@@ -105,6 +105,7 @@ func (relayHandler *RelayHandler) handleHTTPRelays(
 	}
 }
 
+// TODO_REFACTOR: Move this into a shared utils (with the relayer) and reuse
 // cloneHeaders clones the headers map and joins the values of each header with a comma
 // to comply with the RelayRequest protobuf definition
 func cloneHeaders(headers map[string][]string) map[string]string {

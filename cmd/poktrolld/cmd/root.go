@@ -122,9 +122,11 @@ func initRootCmd(
 		),
 		genutilcli.ValidateGenesisCmd(app.ModuleBasics),
 		AddGenesisAccountCmd(app.DefaultNodeHome),
-		// Adding the relayer cobra command via a command factory function
+		// Adding the relayer cobra command via a command factory function so off-chain "actor" has access to the client context
 		relayer.RelayerCmd(),
+		// Adding the smart cobra command via a command factory function so off-chain "actor" has access to the client context
 		smartclient.SmartClientCmd(),
+		// Default configs
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debug.Cmd(),
 		config.Cmd(),

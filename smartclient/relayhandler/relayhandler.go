@@ -33,7 +33,7 @@ var (
 type RelayHandler struct {
 	ctx context.Context
 	// listenAddr is the address where the relay handler will listen for new relays
-	// it handles both http and websocket requests
+	// it handles all types of requests (http, websockets, etc...)
 	listenAddr string
 
 	// the current application address
