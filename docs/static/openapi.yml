@@ -47469,6 +47469,12 @@ paths:
                           name:
                             type: string
                             title: human-readable name for the service
+                      title: >-
+                        TODO_DISCUSS: Should Portal actors need to stake
+                        services?
+
+                        THOUGHT(h5law): If not what stops a regular app from
+                        registering as a portal to bypass this limitation?
               pagination:
                 type: object
                 properties:
@@ -47781,6 +47787,11 @@ paths:
                         name:
                           type: string
                           title: human-readable name for the service
+                    title: >-
+                      TODO_DISCUSS: Should Portal actors need to stake services?
+
+                      THOUGHT(h5law): If not what stops a regular app from
+                      registering as a portal to bypass this limitation?
         default:
           description: An unexpected error response.
           schema:
@@ -78922,6 +78933,11 @@ definitions:
             name:
               type: string
               title: human-readable name for the service
+        title: >-
+          TODO_DISCUSS: Should Portal actors need to stake services?
+
+          THOUGHT(h5law): If not what stops a regular app from registering as a
+          portal to bypass this limitation?
   poktroll.portal.QueryAllPortalsResponse:
     type: object
     properties:
@@ -78958,6 +78974,11 @@ definitions:
                   name:
                     type: string
                     title: human-readable name for the service
+              title: >-
+                TODO_DISCUSS: Should Portal actors need to stake services?
+
+                THOUGHT(h5law): If not what stops a regular app from registering
+                as a portal to bypass this limitation?
       pagination:
         type: object
         properties:
@@ -79018,6 +79039,11 @@ definitions:
                 name:
                   type: string
                   title: human-readable name for the service
+            title: >-
+              TODO_DISCUSS: Should Portal actors need to stake services?
+
+              THOUGHT(h5law): If not what stops a regular app from registering
+              as a portal to bypass this limitation?
   poktroll.portal.QueryParamsResponse:
     type: object
     properties:

@@ -26,6 +26,15 @@ func ReplyWithHTTPError(statusCode int, err error, wr http.ResponseWriter) {
 // reply to the client with a derived error message then return the original error
 // TODO: send appropriate error instead of the original error
 func ReplyWithWsError(err error, clientConn *ws.Conn) error {
+	if clientConn == nil {
+		log.Println("trying to send error response to closed connection")
+		return err
+	}
+
+	if err == nil {
+		err = fmt.Errorf("nil error")
+	}
+
 	replyError := clientConn.WriteMessage(ws.TextMessage, []byte(err.Error()))
 	if replyError != nil {
 		log.Printf("failed sending error response: %v", replyError)

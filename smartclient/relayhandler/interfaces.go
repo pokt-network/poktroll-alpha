@@ -10,5 +10,4 @@ type EndpointSelectionStrategy interface {
 
 type Signer interface {
 	Sign(relayRequest [32]byte) (signature []byte, err error)
-	Verify(relayRequest [32]byte, signature []byte) bool
 }

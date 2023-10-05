@@ -7,6 +7,7 @@ POCKET_NODE = 127.0.0.1:36657 # Used by the relayer for reading and listening on
 # TODO: Consider renaming this to `ROLLUP_NODE` since they gossip Txs with the sequencer until the block is published
 SEQUENCER_NODE = 127.0.0.1:36657 # Used by the relayer to send transactions
 
+SMART_CLIENT := localhost:8080
 SESSION_HEIGHT ?= 1 # Default height when retrieving session data
 
 .PHONY: prompt_user
@@ -281,7 +282,15 @@ relayer_start: ## Start the relayer
 .PHONY: claims_query
 claims_query: ## Query the poktroll node for claims data
 	SERVICER_ADDR=$(shell poktrolld keys show servicer1 -a --keyring-backend test); \
-	poktrolld query servicer claims $$SERVICER_ADDR
+	poktrolld query servicer claims $$SERVICER_ADDR --node $(POKTROLLD_NODE)
+
+.PHONY: appclient_start
+appclient_start: ## Start the appclient
+	poktrolld smartclient \
+	--listen http://$(SMART_CLIENT)/ \
+	--node $(POKTROLLD_NODE) \
+	--signing-key app1 \
+	--keyring-backend test
 
 .PHONY: anvil_start
 anvil_start: ## Start the anvil
@@ -289,12 +298,12 @@ anvil_start: ## Start the anvil
 
 .PHONY: cast_relay
 cast_relay: ## Cast a relay
-	cast block
+	cast block -r http://$(SMART_CLIENT)/svc2
 
 .PHONY: ws_subscribe
 ws_subscribe: ## Subscribe to the websocket for new blocks
-	echo "Copy paste the following: {"id":1,"jsonrpc":"2.0","method":"eth_subscribe","params":["newHeads"]}"
-	wscat --connect ws://localhost:8546
+	echo "Copy paste the following: {\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"eth_subscribe\",\"params\":[\"newHeads\"]}"
+	wscat --connect ws://$(SMART_CLIENT)/svc1
 
 .PHONY: localnet_up
 localnet_up: ## Starts localnet
