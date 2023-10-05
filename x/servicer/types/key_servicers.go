@@ -11,6 +11,7 @@ const (
 	// ClaimsKeyPrefix is the prefix to retrieve Claims
 	ClaimsKeyPrefix = "Claims/value/"
 	// ProofsKeyProfix is the prefix to retrieve Proofs for claims
+	// ProofsKeyPrefix is the prefix to retrieve Proofs for Claims
 	ProofsKeyPrefix = "Proofs/value/"
 )
 
