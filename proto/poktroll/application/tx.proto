@@ -2,21 +2,24 @@ syntax = "proto3";
 
 package poktroll.application;
 
+import "cosmos_proto/cosmos.proto";
 import "cosmos/base/v1beta1/coin.proto";
 import "poktroll/service/service.proto";
+import "google/protobuf/any.proto";
 
 option go_package = "poktroll/x/application/types";
 
 // Msg defines the Msg service.
 service Msg {
-  rpc StakeApplication   (MsgStakeApplication  ) returns (MsgStakeApplicationResponse  );
-  rpc UnstakeApplication (MsgUnstakeApplication) returns (MsgUnstakeApplicationResponse);
+  rpc StakeApplication     (MsgStakeApplication    ) returns (MsgStakeApplicationResponse    );
+  rpc UnstakeApplication   (MsgUnstakeApplication  ) returns (MsgUnstakeApplicationResponse  );
+  rpc DelegateToPortal     (MsgDelegateToPortal    ) returns (MsgDelegateToPortalResponse    );
+  rpc UndelegateFromPortal (MsgUndelegateFromPortal) returns (MsgUndelegateFromPortalResponse);
 }
-
 message MsgStakeApplication {
-  string address = 1;
-  cosmos.base.v1beta1.Coin stakeAmount = 2;
-  repeated string serviceIds = 3;
+           string                   address     = 1;
+           cosmos.base.v1beta1.Coin stakeAmount = 2;
+  repeated string                   serviceIds  = 3;
 }
 
 message MsgStakeApplicationResponse {}
@@ -26,4 +29,18 @@ message MsgUnstakeApplication {
 }
 
 message MsgUnstakeApplicationResponse {}
+
+message MsgDelegateToPortal {
+  string app_address    = 1;
+  string portal_address = 2;
+}
+
+message MsgDelegateToPortalResponse {}
+
+message MsgUndelegateFromPortal {
+  string app_address    = 1;
+  string portal_address = 2;
+}
+
+message MsgUndelegateFromPortalResponse {}
 

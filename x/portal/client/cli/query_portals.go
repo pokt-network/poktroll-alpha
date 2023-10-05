@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"fmt"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -64,6 +66,43 @@ func CmdShowPortal() *cobra.Command {
 			}
 
 			res, err := queryClient.Portal(cmd.Context(), params)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdGetDelegatedPortals() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-delegated-portals [app-address]",
+		Short: "Query get-delegated-portals",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) (err error) {
+			reqAppAddress := args[0]
+			addr, err := sdk.AccAddressFromBech32(reqAppAddress)
+			if err != nil {
+				return fmt.Errorf("invalid app address [%s]: %w", reqAppAddress, err)
+			}
+
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			params := &types.QueryGetDelegatedPortalsRequest{
+				AppAddress: addr.String(),
+			}
+
+			res, err := queryClient.GetDelegatedPortals(cmd.Context(), params)
 			if err != nil {
 				return err
 			}

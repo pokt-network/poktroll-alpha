@@ -9,6 +9,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
+	apptypes "poktroll/x/application/types"
 
 	"poktroll/x/portal/types"
 )
@@ -18,6 +19,8 @@ type PortalKeeper interface {
 	GetPortal(ctx sdk.Context, address string) (val types.Portal, found bool)
 	RemovePortal(ctx sdk.Context, address string)
 	GetAllPortals(ctx sdk.Context) (list []types.Portal)
+	SetDelegator(ctx sdk.Context, appAddress string, delegatedPortals apptypes.Delegatees)
+	GetDelegatees(ctx sdk.Context, appAddress string) (val apptypes.Delegatees, found bool)
 }
 
 type (
@@ -27,6 +30,7 @@ type (
 		memKey     storetypes.StoreKey
 		paramstore paramtypes.Subspace
 		bankKeeper types.BankKeeper
+		authKeeper types.AccountKeeper
 	}
 )
 
@@ -36,7 +40,7 @@ func NewKeeper(
 	memKey storetypes.StoreKey,
 	ps paramtypes.Subspace,
 	bk types.BankKeeper,
-
+	ak types.AccountKeeper,
 ) *Keeper {
 	// set KeyTable if it has not already been set
 	if !ps.HasKeyTable() {
@@ -49,6 +53,7 @@ func NewKeeper(
 		memKey:     memKey,
 		paramstore: ps,
 		bankKeeper: bk,
+		authKeeper: ak,
 	}
 }
 

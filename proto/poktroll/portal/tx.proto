@@ -2,20 +2,21 @@ syntax = "proto3";
 
 package poktroll.portal;
 
+import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "poktroll/x/portal/types";
 
 // Msg defines the Msg service.
 service Msg {
-  rpc StakePortal   (MsgStakePortal  ) returns (MsgStakePortalResponse  );
-  rpc UnstakePortal (MsgUnstakePortal) returns (MsgUnstakePortalResponse);
+  rpc StakePortal            (MsgStakePortal           ) returns (MsgStakePortalResponse           );
+  rpc UnstakePortal          (MsgUnstakePortal         ) returns (MsgUnstakePortalResponse         );
 }
 
 message MsgStakePortal {
-  string address = 1;
-  cosmos.base.v1beta1.Coin stake_amount = 2;
-  repeated string service_ids = 3;
+           string                   address          = 1;
+           cosmos.base.v1beta1.Coin stake_amount     = 2;
+  repeated string                   service_ids      = 3;
 }
 
 message MsgStakePortalResponse {}
@@ -25,4 +26,3 @@ message MsgUnstakePortal {
 }
 
 message MsgUnstakePortalResponse {}
-

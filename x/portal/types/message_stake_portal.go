@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/errors"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -50,9 +51,8 @@ func (msg *MsgStakePortal) GetSignBytes() []byte {
 func (msg *MsgStakePortal) ValidateBasic() error {
 	fmt.Println("MsgStakePortal.ValidateBasic()", msg)
 	// Validate the address
-	_, err := sdk.AccAddressFromBech32(msg.Address)
-	if err != nil {
-		return sdkerrors.ErrInvalidAddress
+	if _, err := sdk.AccAddressFromBech32(msg.Address); err != nil {
+		return errors.Wrapf(sdkerrors.ErrInvalidAddress, fmt.Sprintf("portal address invalid: %s", msg.Address))
 	}
 
 	// Validate the stake amount
@@ -60,11 +60,11 @@ func (msg *MsgStakePortal) ValidateBasic() error {
 		return ErrNilStakeAmount
 	}
 	stakeAmount, err := sdk.ParseCoinNormalized(msg.StakeAmount.String())
-	if !stakeAmount.IsValid() {
-		return stakeAmount.Validate()
-	}
 	if err != nil {
 		return err
+	}
+	if !stakeAmount.IsValid() {
+		return stakeAmount.Validate()
 	}
 
 	// Validate the services
