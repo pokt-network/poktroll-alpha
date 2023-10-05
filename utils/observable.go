@@ -58,7 +58,7 @@ func (o *ObservableImpl[V]) Subscribe(ctx context.Context) Subscription[V] {
 	subscription := &SubscriptionImpl[V]{ch, o.closed, removeFromObservable}
 
 	go func() {
-		if ctx != nil {
+		if ctx != nil && !subscription.closed {
 			<-ctx.Done()
 			subscription.Unsubscribe()
 		}

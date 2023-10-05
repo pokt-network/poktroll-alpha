@@ -15,6 +15,9 @@ import (
 	"poktroll/x/servicer/types"
 )
 
+// BlocksQueryClient is a client for querying blocks from a relayer
+// it is inspired from the relayer's client but does not need the transaction
+// and signing features thus reducing the number of its dependencies
 type BlocksQueryClient struct {
 	conn             *websocket.Conn
 	blocksNotifee    utils.Observable[types.Block]
