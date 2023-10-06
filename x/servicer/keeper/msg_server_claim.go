@@ -7,7 +7,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"poktroll/x/servicer/types"
 	servicertypes "poktroll/x/servicer/types"
 	sessionkeeper "poktroll/x/session/keeper"
 )
@@ -44,12 +43,12 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 	// Assert that there is only one signer (until we have rev share and delegation)
 	signers := msg.GetSigners()
 	if len(signers) != 1 {
-		return nil, types.ErrUnsupportedMultiSig.Wrapf("got: %d", len(signers))
+		return nil, servicertypes.ErrUnsupportedMultiSig.Wrapf("got: %d", len(signers))
 	}
 
 	signer := msg.GetSigners()[0]
 	if msg.GetServicerAddress() != signer.String() {
-		return nil, types.ErrProofAndClaimSignerMismatch.Wrapf(
+		return nil, servicertypes.ErrProofAndClaimSignerMismatch.Wrapf(
 			"expected: %s;got: %s",
 			msg.GetServicerAddress(),
 			signer,
@@ -61,7 +60,7 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 
 	// impossible to submit a valid msg until the first session has ended
 	if lastEndedSessionNumber == 0 {
-		return nil, types.ErrActiveFirstSession
+		return nil, servicertypes.ErrActiveFirstSession
 	}
 
 	// block#:                     [ 1 2 3 4 5 ][ 6 7 8 9 10 ]
@@ -106,7 +105,7 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 	// fair.
 	earliestServicerClaimSubmissionBlockHeight := earliestClaimSubmissionBlockHeight + uint64(randClaimSubmissionBlockHeightOffset)
 	if currentBlockHeight < earliestServicerClaimSubmissionBlockHeight {
-		return nil, types.ErrEarlyClaimSubmission.Wrapf(
+		return nil, servicertypes.ErrEarlyClaimSubmission.Wrapf(
 			"early claim height: %d; got: %d",
 			earliestServicerClaimSubmissionBlockHeight,
 			currentBlockHeight,
@@ -116,7 +115,7 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 	// claim is too late
 	latestServicerClaimSubmissionBlockHeight := earliestServicerClaimSubmissionBlockHeight + uint64(GovClaimSubmissionBlocksWindow)
 	if currentBlockHeight > latestServicerClaimSubmissionBlockHeight {
-		return nil, types.ErrLateClaimSubmission.Wrapf(
+		return nil, servicertypes.ErrLateClaimSubmission.Wrapf(
 			"late claim height: %d; got: %d",
 			latestServicerClaimSubmissionBlockHeight,
 			currentBlockHeight,
