@@ -109,11 +109,11 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	// fair.
 	earliestServicerProofSubmissionBlockHeight := earliestProofSubmissionBlockHeight + randProofSubmissionBlockHeightOffset
 	if currentBlockHeight < uint64(earliestServicerProofSubmissionBlockHeight) {
-		return nil, types.ErrEarlyProofSubmission.Wrapf(
-			"earliest proof height: %d; got: %d",
-			earliestServicerProofSubmissionBlockHeight,
-			currentBlockHeight,
-		)
+		//return nil, types.ErrEarlyProofSubmission.Wrapf(
+		//	"earliest proof height: %d; got: %d",
+		//	earliestServicerProofSubmissionBlockHeight,
+		//	currentBlockHeight,
+		//)
 	}
 
 	// proof is too late
@@ -121,11 +121,11 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	// This allows us to set an upper bound on application unstake delay.
 	latestServicerClaimSubmissionBlockHeight := earliestProofSubmissionBlockHeight + GovProofSubmissionBlocksWindow
 	if currentBlockHeight > uint64(latestServicerClaimSubmissionBlockHeight) {
-		return nil, types.ErrLateProofSubmission.Wrapf(
-			"current session end height: %d; got: %d",
-			latestServicerClaimSubmissionBlockHeight,
-			currentBlockHeight,
-		)
+		//return nil, types.ErrLateProofSubmission.Wrapf(
+		//	"current session end height: %d; got: %d",
+		//	latestServicerClaimSubmissionBlockHeight,
+		//	currentBlockHeight,
+		//)
 	}
 
 	// use smt.VerifyClosestSumProof(

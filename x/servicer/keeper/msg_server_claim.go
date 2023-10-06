@@ -105,21 +105,21 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 	// fair.
 	earliestServicerClaimSubmissionBlockHeight := earliestClaimSubmissionBlockHeight + uint64(randClaimSubmissionBlockHeightOffset)
 	if currentBlockHeight < earliestServicerClaimSubmissionBlockHeight {
-		return nil, servicertypes.ErrEarlyClaimSubmission.Wrapf(
-			"early claim height: %d; got: %d",
-			earliestServicerClaimSubmissionBlockHeight,
-			currentBlockHeight,
-		)
+		//return nil, servicertypes.ErrEarlyClaimSubmission.Wrapf(
+		//	"early claim height: %d; got: %d",
+		//	earliestServicerClaimSubmissionBlockHeight,
+		//	currentBlockHeight,
+		//)
 	}
 
 	// claim is too late
 	latestServicerClaimSubmissionBlockHeight := earliestServicerClaimSubmissionBlockHeight + uint64(GovClaimSubmissionBlocksWindow)
 	if currentBlockHeight > latestServicerClaimSubmissionBlockHeight {
-		return nil, servicertypes.ErrLateClaimSubmission.Wrapf(
-			"late claim height: %d; got: %d",
-			latestServicerClaimSubmissionBlockHeight,
-			currentBlockHeight,
-		)
+		//return nil, servicertypes.ErrLateClaimSubmission.Wrapf(
+		//	"late claim height: %d; got: %d",
+		//	latestServicerClaimSubmissionBlockHeight,
+		//	currentBlockHeight,
+		//)
 	}
 
 	claim := &servicertypes.Claim{
