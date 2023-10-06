@@ -1,26 +1,74 @@
 syntax = "proto3";
+
 package poktroll.portal;
 
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "poktroll/portal/params.proto";
+import "poktroll/portal/portal.proto";
+import "poktroll/application/application.proto";
+import "cosmos_proto/cosmos.proto";
 
 option go_package = "poktroll/x/portal/types";
 
 // Query defines the gRPC querier service.
 service Query {
+  
   // Parameters queries the parameters of the module.
-  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+  rpc Params (QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/poktroll/portal/params";
+  
+  }
+  
+  // Queries a list of Portal items.
+  rpc Portals (QueryAllPortalsRequest) returns (QueryAllPortalsResponse) {
+    option (google.api.http).get = "/poktroll/portal/portals";
+  
+  }
+  rpc Portal  (QueryGetPortalRequest ) returns (QueryGetPortalResponse ) {
+    option (google.api.http).get = "/poktroll/portal/portals/{address}";
+  
+  }
+  
+  // Queries a list of GetDelegatedPortals items.
+  rpc GetDelegatedPortals (QueryGetDelegatedPortalsRequest) returns (QueryGetDelegatedPortalsResponse) {
+    option (google.api.http).get = "/poktroll/portal/get_delegated_portals/{appAddress}";
+  
   }
 }
-
 // QueryParamsRequest is request type for the Query/Params RPC method.
 message QueryParamsRequest {}
 
 // QueryParamsResponse is response type for the Query/Params RPC method.
 message QueryParamsResponse {
+  
   // params holds all the parameters of this module.
   Params params = 1 [(gogoproto.nullable) = false];
 }
+
+message QueryAllPortalsRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllPortalsResponse {
+  repeated Portal                                 portals    = 1 [(gogoproto.nullable) = false];
+           cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+message QueryGetPortalRequest {
+  string address = 1;
+}
+
+message QueryGetPortalResponse {
+  Portal portal = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryGetDelegatedPortalsRequest {
+  string appAddress = 1;
+}
+
+message QueryGetDelegatedPortalsResponse {
+  application.Delegatees delegatees = 1 [(gogoproto.nullable) = false];
+}
+
