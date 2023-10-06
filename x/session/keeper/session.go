@@ -16,7 +16,7 @@ import (
 
 const (
 	// TODO_REFACTOR: Move these constants into governance parameters
-	numSessionBlocks       uint64 = 4
+	NumSessionBlocks       uint64 = 4
 	numServicersPerSession uint64 = 25
 )
 
@@ -117,7 +117,7 @@ type sessionHydrator struct {
 
 // hydrateSessionMetadata hydrates the height at which the session started, its number, and the number of blocks per session
 func (s *sessionHydrator) hydrateSessionMetadata() error {
-	numBlocksPerSession := numSessionBlocks // TODO: Get from governance params
+	numBlocksPerSession := NumSessionBlocks // TODO: Get from governance params
 	numBlocksAheadOfSession := s.blockHeight % numBlocksPerSession
 	s.session.NumBlocksPerSession = numBlocksPerSession
 	s.session.SessionNumber = s.blockHeight / numBlocksPerSession

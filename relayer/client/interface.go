@@ -28,6 +28,7 @@ type ServicerClient interface {
 	// on-chain in exchange for a reward.
 	SubmitProof(
 		ctx context.Context,
+		sessionId string,
 		smtRootHash []byte,
 		closestKey []byte,
 		closestValueHash []byte,

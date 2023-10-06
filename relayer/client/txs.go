@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,12 +11,16 @@ import (
 	"poktroll/x/servicer/types"
 	"strings"
 
+	errorsmod "cosmossdk.io/errors"
 	abciTypes "github.com/cometbft/cometbft/abci/types"
 	cometTypes "github.com/cometbft/cometbft/types"
 )
 
 var (
-	errNotTxMsg = "expected tx websocket msg; got: %s"
+	errNotTxMsg                = errorsmod.Register("relayer/client", 1, "Expected tx websocket msg")
+	errInvalidTimedOutTxHash   = errorsmod.Register("relayer/client", 2, "Invalid time out tx hash")
+	errFailedToFetchTimedOutTx = errorsmod.Register("relayer/client", 3, "Failed to fetch error for timed out tx")
+	errTxTimeOut               = errorsmod.Register("relayer/client", 4, "Tx timed out")
 )
 
 // cometTxResponseWebsocketMsg is used to deserialize incoming websocket messages from
@@ -48,8 +53,6 @@ func (client *servicerClient) subscribeToOwnTxs(
 
 	//return txsNotifee
 	go client.timeoutTxs(ctx, blocksNotifee)
-
-	return
 }
 
 // Closes the error channels for expect transactions from the latest block when it times out.
@@ -101,6 +104,8 @@ func (client *servicerClient) timeoutTxs(
 			txErrCh <- fmt.Errorf("tx timed out: %s", txHash)
 			close(txErrCh)
 			delete(txsByHash, txHash)
+
+			go client.getTxTimeoutError(ctx, txHash)
 		}
 
 		delete(client.txsByHashByTimeout, block.Height())
@@ -114,10 +119,9 @@ func (client *servicerClient) timeoutTxs(
 func (client *servicerClient) txsFactoryHandler() messageHandler {
 	return func(ctx context.Context, msg []byte) error {
 		txMsg, err := client.newCometTxResponseMsg(msg)
-		expectedErr := fmt.Errorf(errNotTxMsg, string(msg))
 		switch {
 		case err == nil:
-		case err.Error() == expectedErr.Error():
+		case errNotTxMsg.Is(err):
 			return nil
 		case err != nil:
 			return fmt.Errorf("failed to parse new tx message: %w", err)
@@ -145,8 +149,8 @@ func (client *servicerClient) txsFactoryHandler() messageHandler {
 
 		// TODO_CONSIDERATION: do we really need both of these maps?
 		for timeoutHeight, txsByHash := range client.txsByHashByTimeout {
-			for txHash, _ := range txsByHash {
-				if txHash == txHash {
+			for txHashAsKey, _ := range txsByHash {
+				if txHash == txHashAsKey {
 					delete(txsByHash, txHash)
 				}
 			}
@@ -158,7 +162,7 @@ func (client *servicerClient) txsFactoryHandler() messageHandler {
 	}
 }
 
-// newCometTxResponseMsg attempts to deserialize the given bytes into a comet tx event byte slic.
+// newCometTxResponseMsg attempts to deserialize the given bytes into a comet tx event byte slice.
 // if the resulting block has a height of zero, assume the message was not a
 // block message and return an errNotBlockMsg error.
 func (client *servicerClient) newCometTxResponseMsg(txMsgBz []byte) (*cometTxResponseWebsocketMsg, error) {
@@ -169,8 +173,23 @@ func (client *servicerClient) newCometTxResponseMsg(txMsgBz []byte) (*cometTxRes
 
 	// If msg does not match the expected format then block will be its zero value.
 	if bytes.Equal(txResponseMsg.Tx, []byte{}) {
-		return nil, fmt.Errorf(errNotTxMsg, string(txMsgBz))
+		return nil, errNotTxMsg.Wrapf("got: %s", string(txMsgBz))
 	}
 
 	return txResponseMsg, nil
+}
+
+// This function is intended to be called as a goroutine
+// TODO_DISCUSS: Should it be prefixed with `go`?
+func (client *servicerClient) getTxTimeoutError(ctx context.Context, txHashHex string) error {
+	txHash, err := hex.DecodeString(txHashHex)
+	if err != nil {
+		return errInvalidTimedOutTxHash.Wrapf("got: %s", txHashHex)
+	}
+
+	txResponse, err := client.clientCtx.Client.Tx(ctx, txHash, false)
+	if err != nil {
+		return errFailedToFetchTimedOutTx.Wrapf("got tx: %s: %s", txHashHex, err.Error())
+	}
+	return errTxTimeOut.Wrapf("got: %x: %s", txHashHex, txResponse.TxResult.Log)
 }
