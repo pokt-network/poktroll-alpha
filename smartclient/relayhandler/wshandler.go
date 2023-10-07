@@ -222,6 +222,13 @@ func (relayHandler *RelayHandler) handleMessage(
 		ApplicationAddress: currentSession.Application.Address,
 	}
 
+	// update signer if not already present
+	// NOTE: this can only be nil when the signer is a ring signer
+	if relayHandler.signer == nil && relayHandler.signingKey != nil {
+		if err := relayHandler.updateSinger(); err != nil {
+			return err
+		}
+	}
 	// Sign the RelayRequest with the provided signer
 	signature, err := signRelayRequest(relayRequest, relayHandler.signer)
 	if err != nil {

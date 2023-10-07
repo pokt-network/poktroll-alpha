@@ -9,6 +9,9 @@ import (
 	ring "github.com/noot/ring-go"
 )
 
+var _ Signer = (*SimpleSigner)(nil)
+var _ Signer = (*RingSigner)(nil)
+
 type Signer interface {
 	Sign(relayRequest [32]byte) (signature []byte, err error)
 }

@@ -45,6 +45,14 @@ func (relayHandler *RelayHandler) handleHTTPRelays(
 		ApplicationAddress: relayHandler.applicationAddress,
 	}
 
+	// update signer if not already present
+	// NOTE: this can only be nil when the signer is a ring signer
+	if relayHandler.signer == nil && relayHandler.signingKey != nil {
+		if err := relayHandler.updateSinger(); err != nil {
+			utils.ReplyWithHTTPError(500, err, w)
+			return
+		}
+	}
 	signature, err := signRelayRequest(relayRequest, relayHandler.signer)
 	if err != nil {
 		utils.ReplyWithHTTPError(500, err, w)

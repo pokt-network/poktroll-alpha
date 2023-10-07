@@ -100,7 +100,7 @@ func NewRelayHandler(
 	blockQueryClient *client.BlocksQueryClient,
 	applicationAddress string,
 	endpointSelectionStrategy EndpointSelectionStrategy,
-	signer Signer,
+	signer smartclient.Signer,
 	signingKey ring_types.Scalar,
 ) *RelayHandler {
 	return &RelayHandler{
@@ -257,12 +257,12 @@ func (relayHandler *RelayHandler) getSessionRelayerUrl(session *sessionTypes.Ses
 	return endpoint.Url
 }
 
-// UpdateSinger returns the RingSinger implementation of the Signer interface
+// updateSinger returns the RingSinger implementation of the Signer interface
 // used to sign delegated relays on behalf of an application
-func (relayHandler *RelayHandler) UpdateSinger() error {
+func (relayHandler *RelayHandler) updateSinger() error {
 	ring, err := relayHandler.getRingForAddress(relayHandler.applicationAddress)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	relayHandler.signer = smartclient.NewRingSigner(ring, relayHandler.signingKey)
 	return nil
@@ -366,7 +366,7 @@ func getLastSessionBlock(session *sessionTypes.Session) uint64 {
 // - returning the signature that may be added back to the relay request by the caller
 func signRelayRequest(
 	relayRequest *types.RelayRequest,
-	signer Signer,
+	signer smartclient.Signer,
 ) (signature []byte, err error) {
 	relayRequest.ApplicationSignature = nil
 	unsignedRelayRequestBz, err := relayRequest.Marshal()
