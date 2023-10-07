@@ -4,12 +4,22 @@ import (
 	"context"
 	"crypto/sha256"
 	"errors"
+	"fmt"
+	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	cryptocdc "github.com/cosmos/cosmos-sdk/crypto/codec"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	"github.com/noot/ring-go"
 	"log"
 	"net/http"
+	"poktroll/smartclient"
+	portalTypes "poktroll/x/portal/types"
 	"strings"
 
 	authTypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
+	ring_secp256k1 "github.com/athanorlabs/go-dleq/secp256k1"
+	ring_types "github.com/athanorlabs/go-dleq/types"
 	"poktroll/smartclient/client"
 	"poktroll/utils"
 	applicationTypes "poktroll/x/application/types"
@@ -44,6 +54,11 @@ type RelayHandler struct {
 	// in order to listen and serve the appropriate relays
 	applicationQueryClient applicationTypes.QueryClient
 
+	// portalQueryclient is the query client for the portal module
+	// it is used to fetch the delegated pubkeys for a given application
+	// in order to create a ring for signing delegated relays
+	portalQueryClient portalTypes.QueryClient
+
 	// sessionQueryClient is the query client for the session module
 	// it is used to fetch the session info for a given service, block height and application
 	sessionQueryClient sessionTypes.QueryClient
@@ -69,22 +84,29 @@ type RelayHandler struct {
 	endpointSelectionStrategy EndpointSelectionStrategy
 
 	// Signer is the signer used to sign the relay request
-	signer Signer
+	signer smartclient.Signer
+
+	// signingKey is the private key scalar on the secp256k1 curve used to sign the relay
+	// request when using the ring siganture provided the portal is a delegatee of the app
+	signingKey ring_types.Scalar
 }
 
 func NewRelayHandler(
 	listenAddr string,
 	applicationQueryClient applicationTypes.QueryClient,
+	portalQueryClient portalTypes.QueryClient,
 	sessionQueryClient sessionTypes.QueryClient,
 	accountQueryClient authTypes.QueryClient,
 	blockQueryClient *client.BlocksQueryClient,
 	applicationAddress string,
 	endpointSelectionStrategy EndpointSelectionStrategy,
 	signer Signer,
+	signingKey ring_types.Scalar,
 ) *RelayHandler {
 	return &RelayHandler{
 		listenAddr:                listenAddr,
 		applicationQueryClient:    applicationQueryClient,
+		portalQueryClient:         portalQueryClient,
 		sessionQueryClient:        sessionQueryClient,
 		accountQueryClient:        accountQueryClient,
 		blockQueryClient:          blockQueryClient,
@@ -93,6 +115,7 @@ func NewRelayHandler(
 		servicesSessions:          make(map[string]utils.Observable[*sessionTypes.Session]),
 		endpointSelectionStrategy: endpointSelectionStrategy,
 		signer:                    signer,
+		signingKey:                signingKey,
 	}
 }
 
@@ -232,6 +255,83 @@ func (relayHandler *RelayHandler) getSessionRelayerUrl(session *sessionTypes.Ses
 	endpoints := getSessionEndpoints(session, rpcType)
 	endpoint := relayHandler.endpointSelectionStrategy.SelectEndpoint(endpoints)
 	return endpoint.Url
+}
+
+// UpdateSinger returns the RingSinger implementation of the Signer interface
+// used to sign delegated relays on behalf of an application
+func (relayHandler *RelayHandler) UpdateSinger() error {
+	ring, err := relayHandler.getRingForAddress(relayHandler.applicationAddress)
+	if err != nil {
+		return nil, err
+	}
+	relayHandler.signer = smartclient.NewRingSigner(ring, relayHandler.signingKey)
+	return nil
+}
+
+// getRingForAddress returns the ring used to sign a message for the given application
+// address, by querying the portal module for it's delegated pubkeys
+func (relayerHandler *RelayHandler) getRingForAddress(address string) (*ring.Ring, error) {
+	// get application public key
+	appPubKeyReq := &authTypes.QueryAccountRequest{Address: address}
+	appPubKeyRes, err := relayerHandler.accountQueryClient.Account(relayerHandler.ctx, appPubKeyReq)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get applications account: %s [%w]", address, err)
+	}
+	acc := new(authTypes.BaseAccount)
+	if err := acc.Unmarshal(appPubKeyRes.Account.Value); err != nil {
+		return nil, fmt.Errorf("unable to deserialise applications account: %s [%w]", address, err)
+	}
+	appPubKey := acc.GetPubKey()
+	// get delegated pubkeys
+	req := &portalTypes.QueryGetDelegatedPortalsRequest{AppAddress: address}
+	res, err := relayerHandler.portalQueryClient.GetDelegatedPortals(relayerHandler.ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve delegated portals for application: %s [%w]", address, err)
+	}
+	// convert all delegated portals pub keys and app pub key into a slice
+	// where the app pub key is index 0
+	pubKeys := make([]cryptotypes.PubKey, len(res.Delegatees.PubKeys)+1) // +1 for app pub key
+	pubKeys[0] = appPubKey
+	for i, anyKey := range res.Delegatees.PubKeys {
+		pubKeys[i+1], err = anyToPubKey(anyKey)
+		if err != nil {
+			return nil, fmt.Errorf("unable to convert codectypes.Any into a cosmos.crypto.PubKey: %w", err)
+		}
+	}
+	// convert the pubkeys to points on the secp256k1 curve
+	points, err := pubKeysToPoints(pubKeys)
+	if err != nil {
+		return nil, fmt.Errorf("unable to convert public keys to points on the secp256k1 curve: %w", err)
+	}
+	// return the ring for these pubkeys
+	return ring.NewFixedKeyRingFromPublicKeys(ring_secp256k1.NewCurve(), points)
+}
+
+// pubKeysToPoints converts a slice of cosmos.crypto.PubKey to a slice of points on the secp256k1 curve
+// NOTE: Assumes the public keys are secp256k1 public keys unexpected behaviour if not
+func pubKeysToPoints(keys []cryptotypes.PubKey) ([]ring_types.Point, error) {
+	curve := ring_secp256k1.NewCurve()
+	points := make([]ring_types.Point, len(keys))
+	for i, key := range keys {
+		point, err := curve.DecodeToPoint(key.Bytes())
+		if err != nil {
+			return nil, err
+		}
+		points[i] = point
+	}
+	return points, nil
+}
+
+// anyToPubKey unmarshals a serialised Any into a cosmos.crypto.PubKey
+func anyToPubKey(any codectypes.Any) (cryptotypes.PubKey, error) {
+	reg := codectypes.NewInterfaceRegistry()
+	cryptocdc.RegisterInterfaces(reg)
+	cdc := codec.NewProtoCodec(reg)
+	var pub cryptotypes.PubKey
+	if err := cdc.UnpackAny(&any, &pub); err != nil {
+		return nil, fmt.Errorf("Any type [%+v] is not cryptotypes.PubKey: %w", any, err)
+	}
+	return pub, nil
 }
 
 // getSessionEndpoints returns a slice of valid endpoints for a given session and rpc type

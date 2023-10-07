@@ -3,6 +3,11 @@ package cmd
 import (
 	"context"
 	"fmt"
+	ring_secp256k1 "github.com/athanorlabs/go-dleq/secp256k1"
+	ring_types "github.com/athanorlabs/go-dleq/types"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"net/url"
 	"os"
 	"os/signal"
@@ -18,6 +23,7 @@ import (
 	client "poktroll/smartclient/client"
 	"poktroll/smartclient/relayhandler"
 	applicationTypes "poktroll/x/application/types"
+	portalTypes "poktroll/x/portal/types"
 	sessionTypes "poktroll/x/session/types"
 )
 
@@ -26,6 +32,7 @@ const waitGroupContextKey = "smart_client_cmd_wait_group"
 var (
 	signingKeyName        string
 	applicationListenHost string
+	ringSinger            bool
 )
 
 func SmartClientCmd() *cobra.Command {
@@ -37,6 +44,7 @@ func SmartClientCmd() *cobra.Command {
 
 	cmd.Flags().StringVar(&signingKeyName, "signing-key", "", "The signing key to use")
 	cmd.Flags().StringVar(&applicationListenHost, "listen", "", "The application endpoint to use")
+	cmd.Flags().BoolVar(&ringSinger, "ring-signer", false, "Use a ring signer instead of a simple signer")
 
 	cmd.Flags().String(flags.FlagKeyringBackend, "", "Select keyring's backend (os|file|kwallet|pass|test)")
 	cmd.Flags().String(flags.FlagNode, "tcp://localhost:36657", "tcp://<host>:<port> to tendermint rpc interface for this chain")
@@ -84,8 +92,9 @@ func runSmartClient(cmd *cobra.Command, args []string) error {
 	}
 	blockQueryURL.Scheme = "ws"
 
-	// build the needed QueryClients (application, session and account)
+	// build the needed QueryClients (application, portal, session and account)
 	applicationQueryClient := applicationTypes.NewQueryClient(clientCtx)
+	portalQueryClient := portalTypes.NewQueryClient(clientCtx)
 	sessionQueryClient := sessionTypes.NewQueryClient(clientCtx)
 	accountQueryClient := authTypes.NewQueryClient(clientCtx)
 
@@ -102,7 +111,17 @@ func runSmartClient(cmd *cobra.Command, args []string) error {
 	// create a signer from the keyring and signing key name
 	// this should support a ring signature implementation
 	// TODO: provide a flag to select the signer implementation
-	signer := smartclient.NewSimpleSigner(clientCtx.Keyring, signingKeyName)
+	var signer smartclient.Signer
+	var signingKey ring_types.Scalar
+	if !ringSinger {
+		signer = smartclient.NewSimpleSigner(clientCtx.Keyring, signingKeyName)
+	} else {
+		signingKey, err = keyRecordToScalar(clientCtx.Keyring, signingKeyName)
+		if err != nil {
+			cancelCtx()
+			panic(fmt.Errorf("failed to get signing key: %w", err))
+		}
+	}
 
 	// ensure the protocol or any other part of the URL is not used in the listen address
 	tcpListenAddr, err := url.Parse(applicationListenHost)
@@ -114,12 +133,14 @@ func runSmartClient(cmd *cobra.Command, args []string) error {
 	smartClient := relayhandler.NewRelayHandler(
 		tcpListenAddr.Host,
 		applicationQueryClient,
+		portalQueryClient,
 		sessionQueryClient,
 		accountQueryClient,
 		blockQueryClient,
 		applicationAddress.String(),
 		endpointSelectionStrategy,
 		signer,
+		signingKey,
 	)
 	if err != nil {
 		cancelCtx()
@@ -142,4 +163,30 @@ func runSmartClient(cmd *cobra.Command, args []string) error {
 	wg.Wait()
 
 	return nil
+}
+
+// keyRecordToScalar converts the private key obtained from a key record to a scalar
+// point on the secp256k1 curve
+func keyRecordToScalar(keyring keyring.Keyring, keyName string) (ring_types.Scalar, error) {
+	keyRecord, err := keyring.Key(keyName)
+	if err != nil {
+		return nil, fmt.Errorf("key not found: %w", err)
+	}
+	local := keyRecord.GetLocal()
+	if local == nil {
+		return nil, fmt.Errorf("cannot extract private key from key record: nil")
+	}
+	priv, ok := local.PrivKey.GetCachedValue().(cryptotypes.PrivKey)
+	if !ok {
+		return nil, fmt.Errorf("cannot extract private key from key record: %T", local.PrivKey.GetCachedValue())
+	}
+	if _, ok := priv.(*secp256k1.PrivKey); !ok {
+		return nil, fmt.Errorf("unexpected private key type: %T, want %T", priv, &secp256k1.PrivKey{})
+	}
+	crv := ring_secp256k1.NewCurve()
+	privKey, err := crv.DecodeToScalar(priv.Bytes())
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode private key: %w", err)
+	}
+	return privKey, nil
 }
