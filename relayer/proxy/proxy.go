@@ -140,7 +140,7 @@ func (proxy *Proxy) signResponse(relayResponse *servicerTypes.RelayResponse) (si
 
 func validateSessionRequest(session *sessionTypes.Session, relayRequest *servicerTypes.RelayRequest) error {
 	// TODO: cache ring for application at start of session
-	// TODO: add ring comparison
+	// TODO: add ring comparison (https://github.com/noot/ring-go/issues/13)
 
 	sigBz, err := relayRequest.GetSignableBytes()
 	if err != nil {
