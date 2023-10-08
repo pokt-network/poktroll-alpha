@@ -181,15 +181,15 @@ func (client *servicerClient) newCometTxResponseMsg(txMsgBz []byte) (*cometTxRes
 func (client *servicerClient) getTxTimeoutError(ctx context.Context, txHashHex string) error {
 	txHash, err := hex.DecodeString(txHashHex)
 	if err != nil {
-		// TODO_THIS_COMMIT: move to a cosmos-sdk error.
+		// TODO: move to a cosmos-sdk error.
 		return fmt.Errorf("invalid tx hash for timed out tx: %s", txHashHex)
 	}
 
 	txResponse, err := client.clientCtx.Client.Tx(ctx, txHash, false)
 	if err != nil {
-		// TODO_THIS_COMMIT: move to a cosmos-sdk error.
+		// TODO: move to a cosmos-sdk error.
 		return fmt.Errorf("failed to fetch error for timed out tx: %s: %w", txHashHex, err)
 	}
-	// TODO_THIS_COMMIT: move to a cosmos-sdk error.
+	// TODO: move to a cosmos-sdk error.
 	return fmt.Errorf("tx timed out: %x: %s", txHashHex, txResponse.TxResult.Log)
 }

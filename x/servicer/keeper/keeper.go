@@ -16,12 +16,16 @@ import (
 	sharedtypes "poktroll/x/shared/types"
 )
 
+// TODO: We need to add this for all modules
+var _ ServicerKeeper = &Keeper{}
+
+// TODO: We need to keep this updated to know which functions are exported
 type ServicerKeeper interface {
 	SetServicers(ctx sdk.Context, servicers sharedtypes.Servicers)
-	GetServicers(ctx sdk.Context, address string)
+	GetServicers(ctx sdk.Context, address string) (servicers sharedtypes.Servicers, found bool)
 	RemoveServicers(ctx sdk.Context, address string)
 	GetAllServicers(ctx sdk.Context) (list []sharedtypes.Servicers)
-	Inject(depinject.Config) error
+	InjectDeps(depinject.Config) error
 }
 
 type (
@@ -41,6 +45,7 @@ func NewKeeper(
 	memKey storetypes.StoreKey,
 	ps paramtypes.Subspace,
 	bk types.BankKeeper,
+	// sk types.SessionKeeper,
 
 ) *Keeper {
 	// set KeyTable if it has not already been set
@@ -54,7 +59,7 @@ func NewKeeper(
 		memKey:     memKey,
 		paramstore: ps,
 		bankKeeper: bk,
-		// NB: sessionKeeper is provided via `depinject`
+		// sessionKeeper: sk, // NB: sessionKeeper is provided via `depinject`
 	}
 }
 
@@ -62,6 +67,10 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-func (k Keeper) Inject(config depinject.Config) error {
-	return depinject.Inject(config, &k.sessionKeeper)
+func (k *Keeper) InjectDeps(config depinject.Config) error {
+	fmt.Printf("OLSH INJECTING DEPS %+v\n", config)
+	fmt.Printf("OLSH sessionKeeper before %+v\n", k.sessionKeeper)
+	err := depinject.Inject(config, &k.sessionKeeper)
+	fmt.Printf("OLSH sessionKeeper after %+v\n", k.sessionKeeper)
+	return err
 }

@@ -29,6 +29,7 @@ message MsgUnstakeServicer {
 
 message MsgUnstakeServicerResponse {}
 
+// TODO: This should embed the `Claim` proto inside of `MsgClaim`
 message MsgClaim {
   string servicer_address = 1;
   bytes  smst_root_hash = 2;

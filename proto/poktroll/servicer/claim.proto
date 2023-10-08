@@ -4,9 +4,9 @@ package poktroll.servicer;
 option go_package = "poktroll/x/servicer/types";
 
 message Claim {
-    string SessionId = 1;
-    uint64 SessionNumber = 2;
-    uint64 CommittedHeight = 3;
-    bytes SmstRootHash = 4;
-    string ServicerAddress = 5;
+    string session_id = 1;
+    uint64 session_number = 2;
+    uint64 committed_height = 3;
+    bytes smst_root_hash = 4;
+    string servicer_address = 5;
 }

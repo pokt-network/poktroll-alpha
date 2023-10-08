@@ -99,8 +99,7 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 	}
 
 	claim := &servicertypes.Claim{
-		// TODO_CONSIDRATION: may not need `SessionId` field, session ID is the
-		// key in the servicer/claims store.
+		// TECHDEBT: Insert the SessionHeader in the claim instead
 		SessionId:       msg.GetSessionId(),
 		SessionNumber:   lastEndedSessionNumber + 1,
 		CommittedHeight: uint64(ctx.BlockHeight()),
@@ -119,8 +118,7 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 	return &servicertypes.MsgClaimResponse{}, nil
 }
 
-// TODO_THIS_COMMIT: factor this out to a library pkg so that it can be
-// reused in the client / relayer.
+// TECHDEBT: factor this out to a library pkg so that it can be reused by the clien / relayer.
 func getPseudoRandomHeightOffset(sessionId string, startHeight uint64, offset uint64) uint64 {
 	rngSeed, _ := binary.Varint([]byte(sessionId))
 	maxRandomSessionEndHeightOffset := sessionkeeper.NumSessionBlocks - govSessionEndHeightOffset

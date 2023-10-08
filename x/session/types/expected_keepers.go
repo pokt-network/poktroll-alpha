@@ -28,5 +28,5 @@ type ApplicationKeeper interface {
 
 type ServicerKeeper interface {
 	GetAllServicers(ctx sdk.Context) []sharedtypes.Servicers
-	Inject(depinject.Config) error
+	InjectDeps(depinject.Config) error
 }

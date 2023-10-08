@@ -11,8 +11,6 @@ import (
 
 // InsertClaim inserts the given claim into the state tree.
 func (k Keeper) InsertClaim(ctx sdk.Context, claim *types.Claim) error {
-	// TODO_CONSIDERATION: do we want to re-use the servicer store for claims or
-	// create a new "claims store"?
 	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.ClaimsKeyPrefix))
 	claimBz, err := k.cdc.Marshal(claim)
 	if err != nil {

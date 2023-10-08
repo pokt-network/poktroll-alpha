@@ -598,6 +598,7 @@ func New(
 		app.GetSubspace(servicermoduletypes.ModuleName),
 
 		app.BankKeeper,
+		// &app.SessionKeeper,
 	)
 	servicerModule := servicermodule.NewAppModule(appCodec, app.ServicerKeeper, app.AccountKeeper, app.BankKeeper)
 

@@ -6,7 +6,7 @@ metadata:
 data:
   poktroll.sh: |-
     #!/bin/sh
-    
+
     echo "AUTH_TOKEN is: $AUTH_TOKEN"
     VALIDATOR_NAME=validator1
     CHAIN_ID=poktroll
@@ -41,10 +41,10 @@ data:
 
     # start the node
     # You can attach to this process with delve (dlv) for debugging purpose with `dlv attach $(pgrep poktrolld) --listen :40004 --headless --api-version=2 --accept-multiclient` - run inside the container!
-    # poktrolld start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://celestia-rollkit:26658","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE_ID --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://0.0.0.0:36657 --p2p.laddr "0.0.0.0:36656"
+    poktrolld start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://celestia-rollkit:26658","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE_ID --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://0.0.0.0:36657 --p2p.laddr "0.0.0.0:36656"
 
     # OR debug the node (uncomment this line but comment previous line)
-    dlv exec /usr/local/bin/poktrolld --listen :40004 --headless --api-version=2 --accept-multiclient -- start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://celestia-rollkit:26658","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE_ID --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://0.0.0.0:36657 --p2p.laddr "0.0.0.0:36656"
+    # dlv exec /usr/local/bin/poktrolld --listen :40004 --headless --api-version=2 --accept-multiclient -- start --rollkit.aggregator true --rollkit.da_layer celestia --rollkit.da_config='{"base_url":"http://celestia-rollkit:26658","timeout":60000000000,"fee":600000,"gas_limit":6000000,"auth_token":"'$AUTH_TOKEN'"}' --rollkit.namespace_id $NAMESPACE_ID --rollkit.da_start_height $DA_BLOCK_HEIGHT --rpc.laddr tcp://0.0.0.0:36657 --p2p.laddr "0.0.0.0:36656"
 ---
 # apiVersion: rbac.authorization.k8s.io/v1
 # kind: RoleBinding
@@ -118,7 +118,7 @@ spec:
               mountPath: /root/.poktroll/keyring-test/
             - name: configs-volume
               mountPath: /root/.poktroll/config-src/
-            - name: data-volume             
+            - name: data-volume
               mountPath: /root/.poktroll/data/
       volumes:
         - name: scripts-volume
@@ -130,7 +130,7 @@ spec:
         - name: configs-volume
           configMap:
             name: poktrolld-configs
-        - name: data-volume               
+        - name: data-volume
           persistentVolumeClaim:
             claimName: poktrolld-data
 

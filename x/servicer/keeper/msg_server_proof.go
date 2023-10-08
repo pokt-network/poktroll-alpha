@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pokt-network/smt"
 
@@ -50,12 +51,14 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		return nil, err
 	}
 
+	// TODO: Need to also verify the entire session header metadata.
 	// verify the claim is for the same session tree.
 	if !bytes.Equal(claim.SmstRootHash, msg.SmstRootHash) {
 		return nil, fmt.Errorf("smst root hash mismatch, expected: %x; got: %x", claim.SmstRootHash, msg.SmstRootHash)
 	}
 
 	// ASSUMPTION: the first signer is the servicer address.
+	// TODO(@h5law): This logic will be replaced by the ring signature implementation
 	firstSignerAddress := msg.GetSigners()[0]
 	if claim.ServicerAddress != firstSignerAddress.String() {
 		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
@@ -64,6 +67,8 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 
 	// WIP WIP WIP // WIP WIP WIP // WIP WIP WIP // WIP WIP WIP
 	// HELP: expecting `k.sessionKeeper != nil`
+	// logger.Debug("OLSHANSKY SESSION KEEPER", k.sessionKeeper)
+	fmt.Println("OLSHANSKY SESSION KEEPER", k.sessionKeeper)
 	session, err := k.sessionKeeper.GetSessionForApp(
 		ctx, msg.GetSession().GetApplication().GetAddress(),
 		msg.GetSession().GetService().GetId(),
@@ -71,8 +76,12 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		msg.GetSession().GetSessionNumber(),
 	)
 	if err != nil {
+		fmt.Printf("failed to get session for app: %v", err)
+		// logger.Error(fmt.Sprintf("failed to get session for app: %v", err))
 		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
 		return nil, fmt.Errorf("failed to get session for app: %w", err)
+	} else {
+		fmt.Printf("got session for app: %v", session)
 	}
 
 	// TODO_CONSIDERATION: we can  do this in terms of sessionId instead of
@@ -95,7 +104,7 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	// commit heights of the majority of claims while still being random and
 	// fair.
 	if uint64(ctx.BlockHeight()) < earliestProofHeight {
-		// TODO_THIS_COMMIT: uncomment - currently debugging depinject
+		// TODO_THIS_COMMIT: uncomment - currently debugging depinject so disabling earliest proof height verification
 		// & servicer/session module dep cycle
 		//
 		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
