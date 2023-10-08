@@ -7,6 +7,7 @@ import (
 	"poktroll/x/application/types"
 )
 
+// TODO: emit tendermint/comet event to listen for changes
 func (k msgServer) DelegateToPortal(goCtx context.Context, msg *types.MsgDelegateToPortal) (*types.MsgDelegateToPortalResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	logger := k.Logger(ctx).With("method", "DelegateToPortal")

@@ -19,7 +19,7 @@ message RelayRequest {
     bytes payload = 4;
     string session_id = 5;
     string application_address = 6;
-    bytes application_signature = 7;
+    bytes signature = 7;
 }
 
 // TODO: Add GetSignableBytes() method to this message
@@ -30,7 +30,7 @@ message RelayResponse {
     bytes payload = 4;
     string session_id = 5;
     string servicer_address = 6;
-    bytes servicer_signature = 7;
+    bytes signature = 7;
 }
 
 

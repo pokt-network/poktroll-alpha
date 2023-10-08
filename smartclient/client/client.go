@@ -2,6 +2,7 @@ package client
 
 // TODO: Rename the `smartclient` package to a `gateway`
 // TODO: Add diagrams for how the components of the `gateway` work
+// TODO(h5law): Add similar file for delegated query client
 
 import (
 	"context"

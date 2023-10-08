@@ -1,6 +1,7 @@
 package relayhandler
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -18,7 +19,7 @@ import (
 func (relayHandler *RelayHandler) handleWsRelays(
 	w http.ResponseWriter,
 	req *http.Request,
-	serviceId string,
+	applicationAddr, serviceId string,
 	rpcType svcTypes.RPCType,
 ) {
 	// upgrade the connection to a websocket connection or reply with an http error since
@@ -51,10 +52,10 @@ func (relayHandler *RelayHandler) handleWsRelays(
 	go relayHandler.switchRelayerOnSessionChange(sessionConn, serviceId, rpcType)
 
 	// start a goroutine that will handle requests from the client and forward them to the relayer
-	go relayHandler.handleWsRelayRequests(clientConn, sessionConn, serviceId)
+	go relayHandler.handleWsRelayRequests(clientConn, sessionConn, applicationAddr, serviceId)
 
 	// start a goroutine that will handle responses from the relayer and forward them to the client
-	go relayHandler.handleWsRelayResponses(clientConn, sessionConn, serviceId, rpcType)
+	go relayHandler.handleWsRelayResponses(clientConn, sessionConn, applicationAddr, serviceId, rpcType)
 }
 
 // switchRelayerOnSessionChange switches the relayer when the session changes
@@ -93,7 +94,7 @@ func (relayHandler *RelayHandler) switchRelayerOnSessionChange(sessionConn *sess
 func (relayHandler *RelayHandler) handleWsRelayRequests(
 	clientConn *ws.Conn,
 	serviceConn *sessionConnection,
-	serviceId string,
+	applicationAddr, serviceId string,
 ) {
 	defer clientConn.Close()
 	// the first message is special because it may contain the subscription message
@@ -114,6 +115,7 @@ func (relayHandler *RelayHandler) handleWsRelayRequests(
 		err = relayHandler.handleMessage(
 			messageType,
 			messageBz,
+			applicationAddr,
 			serviceId,
 			clientConn,
 			serviceConn,
@@ -135,7 +137,7 @@ func (relayHandler *RelayHandler) handleWsRelayRequests(
 func (relayHandler *RelayHandler) handleWsRelayResponses(
 	clientConn *ws.Conn,
 	serviceConn *sessionConnection,
-	serviceId string,
+	applicationAddr, serviceId string,
 	rpcType svcTypes.RPCType,
 ) {
 	for {
@@ -170,6 +172,7 @@ func (relayHandler *RelayHandler) handleWsRelayResponses(
 			err = relayHandler.handleMessage(
 				initialMsgType,
 				initialMsgBz,
+				applicationAddr,
 				serviceId,
 				clientConn,
 				serviceConn,
@@ -210,33 +213,41 @@ func (relayHandler *RelayHandler) handleWsRelayResponses(
 func (relayHandler *RelayHandler) handleMessage(
 	messageType int,
 	messageBz []byte,
-	serviceId string,
+	applicationAddr, serviceId string,
 	clientConn *ws.Conn,
 	serviceConn *sessionConnection,
 	currentSession *sessionTypes.Session,
 	firstMessage bool,
 ) error {
+	addr := applicationAddr
+	if addr == "" {
+		addr = currentSession.Application.Address
+	}
 	relayRequest := &types.RelayRequest{
 		Payload:            messageBz,
 		SessionId:          currentSession.SessionId,
-		ApplicationAddress: currentSession.Application.Address,
+		ApplicationAddress: addr,
 	}
 
-	// update signer if not already present
-	// NOTE: this can only be nil when the signer is a ring signer
-	if relayHandler.signer == nil && relayHandler.signingKey != nil {
-		if err := relayHandler.updateSinger(); err != nil {
+	// If we are not using the simple signer we need the signingKey to be non-nil
+	if relayHandler.signer == nil && relayHandler.signingKey == nil {
+		return fmt.Errorf("no signing key provided for ring signature")
+	}
+	signer := relayHandler.signer
+	if signer == nil {
+		var err error
+		signer, err = relayHandler.getCachedSigner(addr)
+		if err != nil {
 			return err
 		}
 	}
-	// Sign the RelayRequest with the provided signer
-	signature, err := signRelayRequest(relayRequest, relayHandler.signer)
+	signature, err := signRelayRequest(relayRequest, signer)
 	if err != nil {
 		return err
 	}
 
 	// append the signature to the RelayRequest and marshal it to bytes to be sent to the relayer
-	relayRequest.ApplicationSignature = signature
+	relayRequest.Signature = signature
 	relayRequestBz, err := relayRequest.Marshal()
 	if err != nil {
 		return err
@@ -253,6 +264,7 @@ func (relayHandler *RelayHandler) handleMessage(
 		return relayHandler.handleMessage(
 			messageType,
 			messageBz,
+			applicationAddr,
 			serviceId,
 			clientConn,
 			serviceConn,

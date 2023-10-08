@@ -138,7 +138,7 @@ func (httpProxy *httpProxy) executeRelay(req *http.Request, sessionId string) (*
 		return nil, err
 	}
 
-	relayResponse.ServicerSignature = signature
+	relayResponse.Signature = signature
 	return relayResponse, nil
 }
 

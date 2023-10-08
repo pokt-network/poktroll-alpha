@@ -137,6 +137,8 @@ func (proxy *Proxy) signResponse(relayResponse *servicerTypes.RelayResponse) (si
 }
 
 func validateSessionRequest(session *sessionTypes.Session, relayRequest *servicerTypes.RelayRequest) error {
+	// TODO: cache ring for application at start of session
+	// TODO: add ring comparison
 	// TODO: validate relayRequest signature
 
 	// a similar SessionId means it's been generated from the same params

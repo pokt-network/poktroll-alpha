@@ -2,6 +2,7 @@ package relayhandler
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -17,7 +18,7 @@ import (
 func (relayHandler *RelayHandler) handleHTTPRelays(
 	w http.ResponseWriter,
 	req *http.Request,
-	serviceId string,
+	applicationAddr, serviceId string,
 	rpcType svcTypes.RPCType,
 ) {
 	// get the current session for the service
@@ -36,30 +37,40 @@ func (relayHandler *RelayHandler) handleHTTPRelays(
 		}
 	}
 
+	addr := applicationAddr
+	if addr == "" {
+		addr = relayHandler.applicationAddress
+	}
 	relayRequest := &types.RelayRequest{
 		Headers:            headers,
 		Method:             req.Method,
 		Url:                req.URL.String(),
 		Payload:            payload,
 		SessionId:          session.SessionId,
-		ApplicationAddress: relayHandler.applicationAddress,
+		ApplicationAddress: addr,
 	}
 
-	// update signer if not already present
-	// NOTE: this can only be nil when the signer is a ring signer
-	if relayHandler.signer == nil && relayHandler.signingKey != nil {
-		if err := relayHandler.updateSinger(); err != nil {
+	// If we are not using the simple signer we need the signingKey to be non-nil
+	if relayHandler.signer == nil && relayHandler.signingKey == nil {
+		utils.ReplyWithHTTPError(500, fmt.Errorf("no signing key"), w)
+		return
+	}
+	signer := relayHandler.signer
+	if signer == nil {
+		var err error
+		signer, err = relayHandler.getCachedSigner(addr)
+		if err != nil {
 			utils.ReplyWithHTTPError(500, err, w)
 			return
 		}
 	}
-	signature, err := signRelayRequest(relayRequest, relayHandler.signer)
+	signature, err := signRelayRequest(relayRequest, signer)
 	if err != nil {
 		utils.ReplyWithHTTPError(500, err, w)
 		return
 	}
 
-	relayRequest.ApplicationSignature = signature
+	relayRequest.Signature = signature
 	relayRequestBz, err := relayRequest.Marshal()
 	if err != nil {
 		utils.ReplyWithHTTPError(500, err, w)

@@ -89,6 +89,11 @@ type RelayHandler struct {
 	// signingKey is the private key scalar on the secp256k1 curve used to sign the relay
 	// request when using the ring siganture provided the portal is a delegatee of the app
 	signingKey ring_types.Scalar
+
+	// pubKeyCache is a cache of the public keys used to create the ring for a given application
+	// they are stored in a map of application address to a slice of points on the secp256k1 curve
+	// TODO: subscribe to on-chain events to update this cache
+	ringCache map[string][]ring_types.Point
 }
 
 func NewRelayHandler(
@@ -116,6 +121,7 @@ func NewRelayHandler(
 		endpointSelectionStrategy: endpointSelectionStrategy,
 		signer:                    signer,
 		signingKey:                signingKey,
+		ringCache:                 make(map[string][]ring_types.Point),
 	}
 }
 
@@ -192,11 +198,12 @@ func (relayHandler *RelayHandler) providedServicesSessionsListener(
 
 // ServeHTTP is the http.Handler implementation for the relay handler
 // it infers the service and the protocol from the request path and scheme
-// requests should be in the form of <protocol>://host:port/serviceId
+// requests should be in the form of <protocol>://host:port/serviceId?senderAddr=<senderAddr>
 func (relayHandler *RelayHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
 	protocol := req.URL.Scheme
 	serviceId := strings.Split(path, "/")[1]
+	applicationAddr := req.URL.Query().Get("senderAddr")
 
 	// protocol seems to be always empty, so we infer it from the request headers
 	if protocol == "" {
@@ -208,9 +215,9 @@ func (relayHandler *RelayHandler) ServeHTTP(w http.ResponseWriter, req *http.Req
 	}
 
 	if protocol == "http" {
-		relayHandler.handleHTTPRelays(w, req, serviceId, svcTypes.RPCType_JSON_RPC)
+		relayHandler.handleHTTPRelays(w, req, applicationAddr, serviceId, svcTypes.RPCType_JSON_RPC)
 	} else if protocol == "ws" {
-		relayHandler.handleWsRelays(w, req, serviceId, svcTypes.RPCType_WEBSOCKET)
+		relayHandler.handleWsRelays(w, req, applicationAddr, serviceId, svcTypes.RPCType_WEBSOCKET)
 	} else {
 		// we inform the client about his bad request that assumes an unsupported protocol
 		utils.ReplyWithHTTPError(400, errInvalidProtocol, w)
@@ -257,20 +264,38 @@ func (relayHandler *RelayHandler) getSessionRelayerUrl(session *sessionTypes.Ses
 	return endpoint.Url
 }
 
-// updateSinger returns the RingSinger implementation of the Signer interface
-// used to sign delegated relays on behalf of an application
-func (relayHandler *RelayHandler) updateSinger() error {
-	ring, err := relayHandler.getRingForAddress(relayHandler.applicationAddress)
-	if err != nil {
-		return err
+// getCachedSigner returns the ring for a given application address from the cache, otherwise
+// fetching and creating it if not found
+// TODO(h5law): invalidate cache when delegations are updated
+func (relayHandler *RelayHandler) getCachedSigner(address string) (smartclient.Signer, error) {
+	var ring *ring.Ring
+	var err error
+	if relayHandler.ringCache[address] == nil {
+		ring, err = relayHandler.getRingForAddress(address)
+	} else {
+		ring, err = newRingFromPoints(relayHandler.ringCache[address])
 	}
-	relayHandler.signer = smartclient.NewRingSigner(ring, relayHandler.signingKey)
-	return nil
+	if err != nil {
+		return nil, err
+	}
+	return smartclient.NewRingSigner(ring, relayHandler.signingKey), nil
 }
 
-// getRingForAddress returns the ring used to sign a message for the given application
+// getRingForAddress returns the RingSinger implementation of the Signer interface
+// used to sign delegated relays on behalf of an application. It does so by fetching
+// the latest information from the portal module and creating a ring from the delegated
+// pubkeys, as well as caching the pub keys for future use
+func (relayHandler *RelayHandler) getRingForAddress(addr string) (*ring.Ring, error) {
+	points, err := relayHandler.getDelegatedPubKeysForAddress(addr)
+	if err != nil {
+		return nil, err
+	}
+	return newRingFromPoints(points)
+}
+
+// getDelegatedPubKeysForAddress returns the ring used to sign a message for the given application
 // address, by querying the portal module for it's delegated pubkeys
-func (relayerHandler *RelayHandler) getRingForAddress(address string) (*ring.Ring, error) {
+func (relayerHandler *RelayHandler) getDelegatedPubKeysForAddress(address string) ([]ring_types.Point, error) {
 	// get application public key
 	appPubKeyReq := &authTypes.QueryAccountRequest{Address: address}
 	appPubKeyRes, err := relayerHandler.accountQueryClient.Account(relayerHandler.ctx, appPubKeyReq)
@@ -303,7 +328,13 @@ func (relayerHandler *RelayHandler) getRingForAddress(address string) (*ring.Rin
 	if err != nil {
 		return nil, fmt.Errorf("unable to convert public keys to points on the secp256k1 curve: %w", err)
 	}
-	// return the ring for these pubkeys
+	// update the cache overwriting the previous value
+	relayerHandler.ringCache[address] = points
+	return points, nil
+}
+
+// newRingFromPoints creates a new ring from a slice of points on the secp256k1 curve
+func newRingFromPoints(points []ring_types.Point) (*ring.Ring, error) {
 	return ring.NewFixedKeyRingFromPublicKeys(ring_secp256k1.NewCurve(), points)
 }
 
@@ -368,7 +399,7 @@ func signRelayRequest(
 	relayRequest *types.RelayRequest,
 	signer smartclient.Signer,
 ) (signature []byte, err error) {
-	relayRequest.ApplicationSignature = nil
+	relayRequest.Signature = nil
 	unsignedRelayRequestBz, err := relayRequest.Marshal()
 	if err != nil {
 		return nil, err
@@ -388,8 +419,8 @@ func getVerifiedRelayResponse(relayResponseBz []byte) (*types.RelayResponse, err
 		return nil, err
 	}
 
-	signature := relayResponse.ServicerSignature
-	relayResponse.ServicerSignature = nil
+	signature := relayResponse.Signature
+	relayResponse.Signature = nil
 	relayResponseBz, err = relayResponse.Marshal()
 	if err != nil {
 		return nil, err
@@ -402,7 +433,7 @@ func getVerifiedRelayResponse(relayResponseBz []byte) (*types.RelayResponse, err
 
 	// verify signature against relayResponseHash
 
-	relayResponse.ServicerSignature = signature
+	relayResponse.Signature = signature
 
 	return &relayResponse, nil
 }

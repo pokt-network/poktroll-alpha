@@ -212,7 +212,7 @@ func (wsProxy *wsProxy) handleWsResponseMessage(
 		return utils.ReplyWithWsError(err, clientConn)
 	}
 
-	relayResponse.ServicerSignature = signature
+	relayResponse.Signature = signature
 	relayResponse.SessionId = sessionResult.Session.SessionId
 	relayResponse.ServicerAddress = wsProxy.servicerAddress
 
