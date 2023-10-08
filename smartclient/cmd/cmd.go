@@ -109,14 +109,14 @@ func runSmartClient(cmd *cobra.Command, args []string) error {
 	endpointSelectionStrategy := &relayhandler.ChooseFirstEndpoint{}
 
 	// create a signer from the keyring and signing key name
-	// this should support a ring signature implementation
-	// TODO: provide a flag to select the signer implementation
+	// or extract the scalar point from the private key for
+	// use in the ring signer if the ring signer is enabled
 	var signer smartclient.Signer
 	var signingKey ring_types.Scalar
 	if !ringSinger {
 		signer = smartclient.NewSimpleSigner(clientCtx.Keyring, signingKeyName)
 	} else {
-		signingKey, err = keyRecordToScalar(clientCtx.Keyring, signingKeyName)
+		signingKey, err = recordLocalToScalar(key.GetLocal())
 		if err != nil {
 			cancelCtx()
 			panic(fmt.Errorf("failed to get signing key: %w", err))
@@ -142,11 +142,6 @@ func runSmartClient(cmd *cobra.Command, args []string) error {
 		signer,
 		signingKey,
 	)
-	if err != nil {
-		cancelCtx()
-		panic(fmt.Errorf("failed to create relay handler: %w", err))
-	}
-
 	if err := smartClient.Start(ctx); err != nil {
 		cancelCtx()
 		panic(fmt.Errorf("failed to start smart client: %w", err))
@@ -165,14 +160,9 @@ func runSmartClient(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// keyRecordToScalar converts the private key obtained from a key record to a scalar
-// point on the secp256k1 curve
-func keyRecordToScalar(keyring keyring.Keyring, keyName string) (ring_types.Scalar, error) {
-	keyRecord, err := keyring.Key(keyName)
-	if err != nil {
-		return nil, fmt.Errorf("key not found: %w", err)
-	}
-	local := keyRecord.GetLocal()
+// recordLocalToScalar converts the private key obtained from a
+// key record to a scalar point on the secp256k1 curve
+func recordLocalToScalar(local *keyring.Record_Local) (ring_types.Scalar, error) {
 	if local == nil {
 		return nil, fmt.Errorf("cannot extract private key from key record: nil")
 	}
