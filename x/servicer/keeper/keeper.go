@@ -68,9 +68,8 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 }
 
 func (k *Keeper) InjectDeps(config depinject.Config) error {
-	fmt.Printf("OLSH INJECTING DEPS %+v\n", config)
-	fmt.Printf("OLSH sessionKeeper before %+v\n", k.sessionKeeper)
+	fmt.Printf("OLSH injecting deps before. svcKeeper: %p; sessionKeeper %p; sessionKeeperIsNil: %t \n\n", k, &k.sessionKeeper, k.sessionKeeper == nil)
 	err := depinject.Inject(config, &k.sessionKeeper)
-	fmt.Printf("OLSH sessionKeeper after %+v\n", k.sessionKeeper)
+	fmt.Printf("OLSH injecting deps after. svcKeeper: %p; sessionKeeper %p; sessionKeeperIsNil: %t \n\n", k, &k.sessionKeeper, k.sessionKeeper == nil)
 	return err
 }

@@ -58,12 +58,12 @@ func NewKeeper(
 	}
 
 	depConfig := supply(sessionKeeper)
-	fmt.Printf("OLSH DEPINJECT CONFIG %+v\n", depConfig)
+	fmt.Printf("OLSH DEPINJECT CONFIG svcKeeper: %p; config: %+v \n\n", svcKeeper, depConfig)
 	if err := svcKeeper.InjectDeps(depConfig); err != nil {
-		fmt.Printf("OLSH INJECTION FAILED %+v\n", err)
+		fmt.Printf("OLSH INJECTION FAILED svcKeeper: %p;  %+v \n\n", svcKeeper, err)
 		panic(err)
 	} else {
-		fmt.Printf("OLSH INJECTION SUCCESSFUL\n")
+		fmt.Printf("OLSH INJECTION SUCCESSFUL svcKeeper: %p \n\n", svcKeeper)
 	}
 
 	return sessionKeeper

@@ -68,7 +68,7 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	// WIP WIP WIP // WIP WIP WIP // WIP WIP WIP // WIP WIP WIP
 	// HELP: expecting `k.sessionKeeper != nil`
 	// logger.Debug("OLSHANSKY SESSION KEEPER", k.sessionKeeper)
-	fmt.Println("OLSHANSKY SESSION KEEPER", k.sessionKeeper)
+	fmt.Printf("OLSHANSKY proof: svcKeeper: %p; sessionKeeper: %p; sessionKeeperIsNil: %t \n\n", &k, &k.Keeper.sessionKeeper, k.Keeper.sessionKeeper == nil)
 	session, err := k.sessionKeeper.GetSessionForApp(
 		ctx, msg.GetSession().GetApplication().GetAddress(),
 		msg.GetSession().GetService().GetId(),
@@ -76,12 +76,12 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		msg.GetSession().GetSessionNumber(),
 	)
 	if err != nil {
-		fmt.Printf("failed to get session for app: %v", err)
+		fmt.Printf("OLSH failed to get session for app: %v \n\n", err)
 		// logger.Error(fmt.Sprintf("failed to get session for app: %v", err))
 		// TODO_THIS_COMMIT: make a cosmos-sdk error for this.
 		return nil, fmt.Errorf("failed to get session for app: %w", err)
 	} else {
-		fmt.Printf("got session for app: %v", session)
+		fmt.Printf("OLSH got session for app: %v \n\n", session)
 	}
 
 	// TODO_CONSIDERATION: we can  do this in terms of sessionId instead of
