@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	ring_secp256k1 "github.com/athanorlabs/go-dleq/secp256k1"
+	"github.com/noot/ring-go"
 	"net/url"
 	"regexp"
 
@@ -139,7 +141,21 @@ func (proxy *Proxy) signResponse(relayResponse *servicerTypes.RelayResponse) (si
 func validateSessionRequest(session *sessionTypes.Session, relayRequest *servicerTypes.RelayRequest) error {
 	// TODO: cache ring for application at start of session
 	// TODO: add ring comparison
-	// TODO: validate relayRequest signature
+
+	sigBz, err := relayRequest.GetSignableBytes()
+	if err != nil {
+		return fmt.Errorf("failed to get request's signable bytes: %w", err)
+	}
+
+	ringSig := new(ring.RingSig)
+	crv := ring_secp256k1.NewCurve()
+	if err := ringSig.Deserialize(crv, relayRequest.Signature); err != nil {
+		// TODO: try and validate a non-ring signature
+	}
+	// only validate if the ring signature is present
+	if len(ringSig.PublicKeys()) != 0 {
+		ringSig.Verify(sha256.Sum256(sigBz))
+	}
 
 	// a similar SessionId means it's been generated from the same params
 	//if session.SessionId != relayRequest.SessionId {

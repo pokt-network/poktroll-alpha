@@ -11,7 +11,6 @@ message Relay {
 }
 
 // Representation of Go's http.Request (simplified naïve implementation)
-// TODO: Add GetSignableBytes() method to this message
 message RelayRequest {
     map<string, string> headers = 1;
     string method = 2;
@@ -22,7 +21,6 @@ message RelayRequest {
     bytes signature = 7;
 }
 
-// TODO: Add GetSignableBytes() method to this message
 message RelayResponse {
     map<string, string> headers = 1;
     int32 status_code = 2;
