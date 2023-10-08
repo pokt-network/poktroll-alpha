@@ -154,7 +154,9 @@ func validateSessionRequest(session *sessionTypes.Session, relayRequest *service
 	}
 	// only validate if the ring signature is present
 	if len(ringSig.PublicKeys()) != 0 {
-		ringSig.Verify(sha256.Sum256(sigBz))
+		if valid := ringSig.Verify(sha256.Sum256(sigBz)); !valid {
+			return fmt.Errorf("invalid signature")
+		}
 	}
 
 	// a similar SessionId means it's been generated from the same params
