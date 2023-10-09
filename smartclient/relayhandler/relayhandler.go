@@ -15,6 +15,7 @@ import (
 	"poktroll/smartclient"
 	portalTypes "poktroll/x/portal/types"
 	"strings"
+	"sync"
 
 	authTypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -71,6 +72,11 @@ type RelayHandler struct {
 	// it is used to fetch the latest block heights to fetch the latest session info
 	blockQueryClient *client.BlocksQueryClient
 
+	// delegateQueryClient is the query client for the delegation messages
+	// it is used to invalidate cached public keys used for ring creation when
+	// an app changes it's delegated portals onchain
+	delegateQueryClient *client.DelegateQueryClient
+
 	// currentSessions is a map of service id to the current session info
 	currentSessions map[string]*sessionTypes.Session
 
@@ -93,7 +99,8 @@ type RelayHandler struct {
 	// pubKeyCache is a cache of the public keys used to create the ring for a given application
 	// they are stored in a map of application address to a slice of points on the secp256k1 curve
 	// TODO: subscribe to on-chain events to update this cache
-	ringCache map[string][]ring_types.Point
+	ringCacheMutex *sync.RWMutex
+	ringCache      map[string][]ring_types.Point
 }
 
 func NewRelayHandler(
@@ -103,6 +110,7 @@ func NewRelayHandler(
 	sessionQueryClient sessionTypes.QueryClient,
 	accountQueryClient authTypes.QueryClient,
 	blockQueryClient *client.BlocksQueryClient,
+	delegateQueryClient *client.DelegateQueryClient,
 	applicationAddress string,
 	endpointSelectionStrategy EndpointSelectionStrategy,
 	signer smartclient.Signer,
@@ -115,12 +123,14 @@ func NewRelayHandler(
 		sessionQueryClient:        sessionQueryClient,
 		accountQueryClient:        accountQueryClient,
 		blockQueryClient:          blockQueryClient,
+		delegateQueryClient:       delegateQueryClient,
 		applicationAddress:        applicationAddress,
 		currentSessions:           make(map[string]*sessionTypes.Session),
 		servicesSessions:          make(map[string]utils.Observable[*sessionTypes.Session]),
 		endpointSelectionStrategy: endpointSelectionStrategy,
 		signer:                    signer,
 		signingKey:                signingKey,
+		ringCacheMutex:            &sync.RWMutex{},
 		ringCache:                 make(map[string][]ring_types.Point),
 	}
 }
@@ -264,16 +274,30 @@ func (relayHandler *RelayHandler) getSessionRelayerUrl(session *sessionTypes.Ses
 	return endpoint.Url
 }
 
+// invalidateCachedPubKeys invalidates the cached pub keys for a given application address
+// by listening to the delegate query client for new delegate messages and clearing the address from
+// the cache map
+func (relayHandler *RelayHandler) invalidateCachedPubKeys(ctx context.Context) {
+	newDelegates := relayHandler.delegateQueryClient.DelegateNotifee().Subscribe(ctx).Ch()
+	for range newDelegates {
+		relayHandler.ringCacheMutex.Lock()
+		delete(relayHandler.ringCache, relayHandler.applicationAddress)
+		relayHandler.ringCacheMutex.Unlock()
+	}
+}
+
 // getCachedSigner returns the ring for a given application address from the cache, otherwise
 // fetching and creating it if not found
-// TODO(h5law): invalidate cache when delegations are updated
 func (relayHandler *RelayHandler) getCachedSigner(address string) (smartclient.Signer, error) {
 	var ring *ring.Ring
 	var err error
-	if relayHandler.ringCache[address] == nil {
+	relayHandler.ringCacheMutex.RLock()
+	defer relayHandler.ringCacheMutex.RUnlock()
+	points, ok := relayHandler.ringCache[address]
+	if !ok {
 		ring, err = relayHandler.getRingForAddress(address)
 	} else {
-		ring, err = newRingFromPoints(relayHandler.ringCache[address])
+		ring, err = newRingFromPoints(points)
 	}
 	if err != nil {
 		return nil, err
@@ -329,6 +353,8 @@ func (relayerHandler *RelayHandler) getDelegatedPubKeysForAddress(address string
 		return nil, fmt.Errorf("unable to convert public keys to points on the secp256k1 curve: %w", err)
 	}
 	// update the cache overwriting the previous value
+	relayerHandler.ringCacheMutex.Lock()
+	defer relayerHandler.ringCacheMutex.Unlock()
 	relayerHandler.ringCache[address] = points
 	return points, nil
 }

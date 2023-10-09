@@ -105,6 +105,13 @@ func runSmartClient(cmd *cobra.Command, args []string) error {
 		panic(fmt.Errorf("failed to create block query client: %w", err))
 	}
 
+	// build the delegate message subscription client
+	delegateQueryClient, err := client.NewDelegateQueryClient(ctx, blockQueryURL.String())
+	if err != nil {
+		cancelCtx()
+		panic(fmt.Errorf("failed to create delegate query client: %w", err))
+	}
+
 	// use the ChooseFirstEndpoint strategy to select the first relayer endpoint
 	endpointSelectionStrategy := &relayhandler.ChooseFirstEndpoint{}
 
@@ -137,6 +144,7 @@ func runSmartClient(cmd *cobra.Command, args []string) error {
 		sessionQueryClient,
 		accountQueryClient,
 		blockQueryClient,
+		delegateQueryClient,
 		applicationAddress.String(),
 		endpointSelectionStrategy,
 		signer,
