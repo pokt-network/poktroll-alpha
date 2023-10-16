@@ -107,7 +107,7 @@ func (sm *SessionManager) createTreeForSession(storePath string) (*smt.SMST, smt
 		return nil, nil, err
 	}
 
-	tree := smt.NewSparseMerkleSumTree(treeStore, sha256.New())
+	tree := smt.NewSparseMerkleSumTree(treeStore, sha256.New(), smt.WithValueHasher(nil))
 	return tree, treeStore, nil
 }
 

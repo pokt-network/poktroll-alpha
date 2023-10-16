@@ -1,16 +1,18 @@
 package keeper
 
 import (
-	"cosmossdk.io/errors"
 	"fmt"
+
+	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocdc "github.com/cosmos/cosmos-sdk/crypto/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	"poktroll/x/application/types"
 
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"poktroll/x/application/types"
 )
 
 // SetApplication set a specific application in the store from its index
@@ -181,7 +183,7 @@ func anyToPubKey(any codectypes.Any) (cryptotypes.PubKey, error) {
 	cdc := codec.NewProtoCodec(reg)
 	var pub cryptotypes.PubKey
 	if err := cdc.UnpackAny(&any, &pub); err != nil {
-		return nil, fmt.Errorf("Any type [%+v] is not cryptotypes.PubKey: %w", any, err)
+		return nil, fmt.Errorf("any type [%+v] is not cryptotypes.PubKey: %w", any, err)
 	}
 	return pub, nil
 }
@@ -189,4 +191,26 @@ func anyToPubKey(any codectypes.Any) (cryptotypes.PubKey, error) {
 // publicKeyToAddress converts a cryptotypes.PubKey to a bech32 address string
 func publicKeyToAddress(publicKey cryptotypes.PubKey) string {
 	return sdk.AccAddress(publicKey.Address()).String()
+}
+
+func (k Keeper) BurnCoins(ctx sdk.Context, appAddress string, amount sdk.Coins) error {
+	application, found := k.GetApplication(ctx, appAddress)
+	if !found {
+		return types.ErrApplicationNotFound
+	}
+
+	coinAmount := amount[0]
+
+	if application.Stake.IsLT(coinAmount) {
+		return types.ErrInsufficientStake
+	}
+
+	newStake := application.Stake.Sub(coinAmount)
+	application.Stake = &newStake
+
+	if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, amount); err != nil {
+		return err
+	}
+
+	return nil
 }

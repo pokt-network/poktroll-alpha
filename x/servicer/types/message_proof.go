@@ -20,9 +20,6 @@ func NewMsgProof(
 	return &MsgProof{
 		ServicerAddress: servicerAddress,
 		SmstRootHash:    smstRoot,
-		Path:            path,
-		ValueHash:       valueHash,
-		SmstSum:         smstSum,
 		Proof:           proofBz,
 	}, nil
 }

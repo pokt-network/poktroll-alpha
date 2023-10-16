@@ -15,6 +15,7 @@ var _ SessionWithTree = &sessionWithTree{}
 
 type SessionWithTree interface {
 	GetSessionId() string
+	GetSessionInfo() *types.Session
 	SessionTree() *smt.SMST
 	CloseTree() ([]byte, error)
 	DeleteTree() error
@@ -58,7 +59,7 @@ func (s *sessionWithTree) SessionTree() *smt.SMST {
 		}
 
 		s.treeStore = store
-		s.tree = smt.ImportSparseMerkleSumTree(s.treeStore, sha256.New(), s.claimedSMTRoot)
+		s.tree = smt.ImportSparseMerkleSumTree(s.treeStore, sha256.New(), s.claimedSMTRoot, smt.WithValueHasher(nil))
 	}
 
 	return s.tree
@@ -66,6 +67,10 @@ func (s *sessionWithTree) SessionTree() *smt.SMST {
 
 func (s *sessionWithTree) GetSessionId() string {
 	return s.sessionInfo.SessionId
+}
+
+func (s *sessionWithTree) GetSessionInfo() *types.Session {
+	return s.sessionInfo
 }
 
 // get the root of the no longer updatable tree

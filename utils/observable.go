@@ -17,7 +17,7 @@ type ObservableImpl[V any] struct {
 // Creates a new observable which emissions are controlled by the emitter channel
 func NewControlledObservable[V any](emitter chan V) (Observable[V], chan V) {
 	// If the caller does not provide an emitter, create a new one and return it
-	e := make(chan V)
+	e := make(chan V, 1)
 	if emitter != nil {
 		e = emitter
 	}
@@ -72,9 +72,9 @@ func (o *ObservableImpl[V]) listen(emitter <-chan V) {
 	o.closed = true
 	for _, ch := range o.subscribers {
 		close(ch)
-		o.subscribers = []chan V{}
 	}
-	o.mu.Lock()
+	o.subscribers = []chan V{}
+	o.mu.Unlock()
 }
 
 // Subscription is a generic interface that provide access to the underlying channel

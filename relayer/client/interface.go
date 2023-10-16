@@ -7,6 +7,7 @@ import (
 
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
+	sessionTypes "poktroll/x/session/types"
 )
 
 // TODO_DESIGN: Might need to update the interface for SubmitClaim/Proof to:
@@ -23,16 +24,13 @@ type ServicerClient interface {
 	LatestBlock() types.Block
 	// SubmitClaim sends a claim message with the given SMT root hash as the
 	// commitment.
-	SubmitClaim(ctx context.Context, sessionId string, smtRootHash []byte) error
+	SubmitClaim(ctx context.Context, session *sessionTypes.Session, smtRootHash []byte) error
 	// SubmitProof sends a proof message with the given parameters, to be validated
 	// on-chain in exchange for a reward.
 	SubmitProof(
 		ctx context.Context,
 		sessionId string,
 		smtRootHash []byte,
-		closestKey []byte,
-		closestValueHash []byte,
-		closestSum uint64,
-		proof *smt.SparseMerkleProof,
+		proof *smt.SparseMerkleClosestProof,
 	) error
 }

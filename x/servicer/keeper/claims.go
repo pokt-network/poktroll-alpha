@@ -19,7 +19,7 @@ func (k Keeper) InsertClaim(ctx sdk.Context, claim *types.Claim) error {
 		return err
 	}
 
-	claimKey := fmt.Sprintf("%s", claim.GetSessionId())
+	claimKey := types.ClaimsKey(claim.GetSessionId())
 	store.Set([]byte(claimKey), claimBz)
 	return nil
 }
