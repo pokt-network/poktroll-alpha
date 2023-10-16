@@ -22,7 +22,7 @@ type ApplicationKeeper interface {
 	GetAllApplication(ctx sdk.Context) (list []types.Application)
 	DelegatePortal(ctx sdk.Context, appAddress string, portalPubKey cryptotypes.PubKey) error
 	UndelagatePortal(ctx sdk.Context, appAddress string, portalPubKey cryptotypes.PubKey) error
-	BurnTokens(ctx sdk.Context, appAddress sdk.AccAddress, amount sdk.Coin) error
+	BurnCoins(ctx sdk.Context, appAddress sdk.AccAddress, amount sdk.Coin) error
 }
 
 type (

@@ -153,6 +153,7 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		return nil, err
 	}
 
+	// Check that the retrieved block hash matches the path in the proof.
 	commitBlockHash := commitBlock.Block.Header.LastBlockID.Hash.Bytes()
 	if !bytes.Equal(proof.Path, commitBlockHash) {
 		return nil, types.ErrInvalidPath.Wrapf(
@@ -163,6 +164,7 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	}
 
 	spec := smt.NoPrehashSpec(sha256.New(), true)
+	// verify the proof
 	valid, err := smt.VerifyClosestProof(proof, msg.SmstRootHash, spec)
 	if err != nil {
 		return nil, err
@@ -175,15 +177,19 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		return nil, types.ErrInvalidProof
 	}
 
+	// Extract sum from the SMST root hash.
 	sum := binary.BigEndian.Uint64(msg.SmstRootHash[len(msg.SmstRootHash)-8:])
+
+	// Use cost factor to get how much coins to mint and burn.
 	cost := sum * CostFactor
 
-	// mint tokens to the servicer
+	// mint tokens to the module
 	mintAmount := sdk.NewCoins(sdk.NewCoin("stake", sdk.NewIntFromUint64(cost)))
 	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, mintAmount); err != nil {
 		return nil, err
 	}
 
+	// transfer tokens from the module to the servicer
 	if err := k.bankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
 		types.ModuleName,
