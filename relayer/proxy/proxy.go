@@ -2,12 +2,15 @@ package proxy
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"net/url"
 	"regexp"
 
+	ring_secp256k1 "github.com/athanorlabs/go-dleq/secp256k1"
 	cosmosClient "github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/noot/ring-go"
 
 	"poktroll/relayer/client"
 	"poktroll/utils"
@@ -18,7 +21,7 @@ import (
 
 var urlSchemePresenceRegex = regexp.MustCompile(`^\w{0,25}://`)
 
-type responseSigner func(*servicerTypes.RelayResponse) error
+type responseSigner func(*servicerTypes.RelayResponse) (signature []byte, err error)
 
 type RelayWithSession struct {
 	Relay   *servicerTypes.Relay
@@ -35,6 +38,7 @@ type Proxy struct {
 	relayNotifier       chan *RelayWithSession
 	relayNotifee        utils.Observable[*RelayWithSession]
 	serviceEndpoints    map[string][]string
+	servicerAddress     string
 }
 
 // IMPROVE: be consistent with component configuration & setup.
@@ -64,6 +68,7 @@ func NewProxy(
 		keyName:             keyName,
 		client:              client,
 		serviceEndpoints:    serviceEndpoints,
+		servicerAddress:     address,
 	}
 
 	proxy.relayNotifee, proxy.relayNotifier = utils.NewControlledObservable[*RelayWithSession](nil)
@@ -93,6 +98,7 @@ func (proxy *Proxy) listen(ctx context.Context) error {
 					proxy.client,
 					proxy.relayNotifier,
 					proxy.signResponse,
+					proxy.servicerAddress,
 				)
 				go httpProxy.Start(advertisedEndpoint.Url)
 			case types.RPCType_WEBSOCKET:
@@ -104,6 +110,7 @@ func (proxy *Proxy) listen(ctx context.Context) error {
 					proxy.client,
 					proxy.relayNotifier,
 					proxy.signResponse,
+					proxy.servicerAddress,
 				)
 				go websocketProxy.Start(ctx, advertisedEndpoint.Url)
 			default:
@@ -116,18 +123,42 @@ func (proxy *Proxy) listen(ctx context.Context) error {
 	return nil
 }
 
-func (proxy *Proxy) signResponse(relayResponse *servicerTypes.RelayResponse) error {
+func (proxy *Proxy) signResponse(relayResponse *servicerTypes.RelayResponse) (signature []byte, err error) {
 	relayResBz, err := relayResponse.Marshal()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	relayResponse.ServicerSignature, _, err = proxy.keyring.Sign(proxy.keyName, relayResBz)
-	return nil
+	relayHash := sha256.Sum256(relayResBz)
+	signature, _, err = proxy.keyring.Sign(proxy.keyName, relayHash[:])
+	if err != nil {
+		return nil, err
+	}
+
+	return signature, nil
 }
 
 func validateSessionRequest(session *sessionTypes.Session, relayRequest *servicerTypes.RelayRequest) error {
-	// TODO: validate relayRequest signature
+	// TODO: cache ring for application at start of session
+	// TODO: add ring comparison (https://github.com/noot/ring-go/issues/13)
+
+	sigBz, err := relayRequest.GetSignableBytes()
+	if err != nil {
+		return fmt.Errorf("failed to get request's signable bytes: %w", err)
+	}
+
+	ringSig := new(ring.RingSig)
+	crv := ring_secp256k1.NewCurve()
+	if err := ringSig.Deserialize(crv, relayRequest.Signature); err != nil {
+		// TODO: Query the application's public key from the blockchain and use it to verify the signature
+		return nil
+	}
+	// only validate if the ring signature is present
+	if len(ringSig.PublicKeys()) != 0 {
+		if valid := ringSig.Verify(sha256.Sum256(sigBz)); !valid {
+			return fmt.Errorf("invalid signature")
+		}
+	}
 
 	// a similar SessionId means it's been generated from the same params
 	//if session.SessionId != relayRequest.SessionId {

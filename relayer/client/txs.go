@@ -61,15 +61,9 @@ func (client *servicerClient) timeoutTxs(
 	ctx context.Context,
 	blocksNotifee utils.Observable[types.Block],
 ) {
-	ch := blocksNotifee.Subscribe().Ch()
+	ch := blocksNotifee.Subscribe(ctx).Ch()
 	// TODO: Add a comment
 	for block := range ch {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-		}
-
 		// TODO_TECHDEBT: move latest block assignment to a dedicated subscription / goroutine
 		// Update latest block
 		client.latestBlockMutex.Lock()

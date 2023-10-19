@@ -100,7 +100,7 @@ func (client *servicerClient) signAndBroadcastMessageTx(
 	}
 
 	// calculate timeout height
-	timeoutHeight := client.LatestBlock().Height() +
+	timeoutHeight := client.LatestBlock(ctx).Height() +
 		uint64(client.txTimeoutHeightOffset)
 
 	// TECHDEBT: this should be configurable

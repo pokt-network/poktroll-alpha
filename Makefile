@@ -7,6 +7,8 @@ POCKET_NODE = 127.0.0.1:36657 # Used by the relayer for reading and listening on
 # TODO: Consider renaming this to `ROLLUP_NODE` since they gossip Txs with the sequencer until the block is published
 SEQUENCER_NODE = 127.0.0.1:36657 # Used by the relayer to send transactions
 
+# TODO(post-alpha): Rename to portal because that's what this is basically doing
+SMART_CLIENT := localhost:8080
 SESSION_HEIGHT ?= 1 # Default height when retrieving session data
 
 .PHONY: prompt_user
@@ -216,7 +218,7 @@ app3_unstake: ## Unstake for app3
 
 .PHONY: delegate
 delegate: ## Delegate the application to the specified portal (must specify the APP and PORTAL env vars)
-	poktrolld --home=$(POKTROLLD_HOME) tx application delegate-to-portal '$(PORTAL)' --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx application delegate-to-portal '$(PORTAL)' --keyring-backend test --from $(APP) --node $(NODE)
 
 .PHONY: delegate_app1_portal1
 delegate_app1_portal1: ## Delegate app1 to portal1
@@ -232,7 +234,7 @@ delegate_app3_portal3: ## Delegate app3 to portal3
 
 .PHONY: undelegate
 undelegate: ## Undelegate the application to the specified portal (must specify the APP and PORTAL env vars)
-	poktrolld --home=$(POKTROLLD_HOME) tx application undelegate-from-portal '$(PORTAL)' --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx application undelegate-from-portal '$(PORTAL)' --keyring-backend test --from $(APP) --node $(NODE)
 
 .PHONY: undelegate_app1_portal1
 undelegate_app1_portal1: ## Undelegate app1 to portal1
@@ -248,11 +250,11 @@ undelegate_app3_portal3: ## Delegate app3 to portal3
 
 .PHONY: portals_get
 portals_get: ## Retrieves all portals from the poktroll state
-	poktrolld --home=$(POKTROLLD_HOME) q portal list-portals --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) q portal list-portals --node $(NODE)
 
 .PHONY: portal_stake
 portal_stake: ## Stake tokens for the portal specified (must specify the PORTAL and SERVICES env vars)
-	poktrolld --home=$(POKTROLLD_HOME) tx portal stake-portal 1000stake $(SERVICES) --keyring-backend test --from $(PORTAL) --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx portal stake-portal 1000stake $(SERVICES) --keyring-backend test --from $(PORTAL) --node $(NODE)
 
 .PHONY: portal1_stake
 portal1_stake: ## Stake for portal1
@@ -268,7 +270,7 @@ portal3_stake: ## Stake for portal3
 
 .PHONY: portal_unstake
 portal_unstake: ## Unstake tokens for the portal specified (must specify the PORTAL env var)
-	poktrolld --home=$(POKTROLLD_HOME) tx portal unstake-portal --keyring-backend test --from $(PORTAL) --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx portal unstake-portal --keyring-backend test --from $(PORTAL) --node $(NODE)
 
 .PHONY: portal1_unstake
 portal1_unstake: ## Unstake for portal1
@@ -284,7 +286,7 @@ portal3_unstake: ## Unstake for portal3
 
 .PHONY: app_delegatees
 app_delegatees: ## Retrieves all delegatees for the application specified (must specify the APP env var)
-	poktrolld --home=$(POKTROLLD_HOME) query portal get-delegated-portals '$(APP)' --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) query portal get-delegated-portals '$(APP)' --node $(NODE)
 
 .PHONY: app1_delegatees
 app1_delegatees: ## Retrieves all delegatees for app1
@@ -304,7 +306,7 @@ test_unit_all: ## Run all unit tests
 
 .PHONY: session_get
 session_get: ## Queries the poktroll node for session data
-	poktrolld --home=$(POKTROLLD_HOME) query session get-session $(APP) $(SVC) $(HEIGHT) --node $(POCKET_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) query session get-session $(APP) $(SVC) $(HEIGHT) --node $(NODE)
 
 .PHONY: session_get_app1_svc1
 session_get_app1_svc1: ## Getting the session for app1 and svc1 and height1
@@ -329,20 +331,29 @@ relayer_start: ## Start the relayer
 .PHONY: claims_query
 claims_query: ## Query the poktroll node for claims data
 	SERVICER_ADDR=$(shell poktrolld keys show servicer1 -a --keyring-backend test); \
-	poktrolld query servicer claims $$SERVICER_ADDR
+	poktrolld query servicer claims $$SERVICER_ADDR --node $(NODE)
+
+# TODO(post-alpha): Rename this to gateway because it's basically starting a daemon process
+.PHONY: appclient_start
+appclient_start: ## Start the appclient
+	poktrolld smartclient \
+	--signing-key app1 \
+	--node $(NODE) \
+	--listen $(SMART_CLIENT) \
+	--keyring-backend test
 
 .PHONY: anvil_start
 anvil_start: ## Start the anvil
 	anvil -p 8547 -b 5
 
 .PHONY: cast_relay
-cast_relay: ## Cast a relay
-	cast block
+cast_relay: ## Cast a relay from localhost through the "smart client" (kind of like a gateway)
+	cast block -r http://$(SMART_CLIENT)/svc2
 
 .PHONY: ws_subscribe
 ws_subscribe: ## Subscribe to the websocket for new blocks
-	echo "Copy paste the following: {"id":1,"jsonrpc":"2.0","method":"eth_subscribe","params":["newHeads"]}"
-	wscat --connect ws://localhost:8546
+	echo "Copy paste the following: {\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"eth_subscribe\",\"params\":[\"newHeads\"]}"
+	wscat --connect ws://$(SMART_CLIENT)/svc1
 
 .PHONY: localnet_up
 localnet_up: ## Starts localnet

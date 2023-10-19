@@ -64,14 +64,7 @@ func (m *Miner) handleSessions(ctx context.Context) {
 	// TODO: Fetch and process incomplete sessions before listening to new ones
 	// Add persistence to pending claims and proofs of a given session
 	// Use m.handleSingleSession for each of them
-
-	subscription := m.sessionManager.Sessions().Subscribe()
-	go func() {
-		<-ctx.Done()
-		subscription.Unsubscribe()
-	}()
-
-	ch := subscription.Ch()
+	ch := m.sessionManager.Sessions().Subscribe(ctx).Ch()
 	// this emits each time a batch of sessions is ready to be processed.
 	for closedSessions := range ch {
 		// process sessions in parallel.
@@ -108,7 +101,7 @@ func (m *Miner) handleSingleSession(ctx context.Context, session sessionmanager.
 	// HACK: this is a hack to get the claim submission block height assuming that getting a block
 	// right after the claim is submitted will return the block at which the claim was submitted.
 	// seems that m.client.LatestBlock() is not returning the latest block.
-	claimSubmissionBlockHeight := int64(m.client.LatestBlock().Height() + 1)
+	claimSubmissionBlockHeight := int64(m.client.LatestBlock(ctx).Height() + 1)
 	log.Printf("claim submitted at block height: %d", claimSubmissionBlockHeight)
 
 	// TODO_REFACTOR: This should happen a few blocks later. WAIT should be an async process
@@ -121,7 +114,7 @@ func (m *Miner) handleSingleSession(ctx context.Context, session sessionmanager.
 		return
 	}
 
-	log.Printf("proof submitted at block height: %d", m.client.LatestBlock().Height())
+	log.Printf("proof submitted at block height: %d", m.client.LatestBlock(ctx).Height())
 
 	// prune tree now that proof is submitted
 	if err := session.DeleteTree(); err != nil {
@@ -134,13 +127,7 @@ func (m *Miner) handleSingleSession(ctx context.Context, session sessionmanager.
 // goroutine.
 // IMPORTANT: This method is intended to be called as a new goroutine.
 func (m *Miner) handleRelays(ctx context.Context) {
-	subscription := m.relays.Subscribe()
-	go func() {
-		<-ctx.Done()
-		subscription.Unsubscribe()
-	}()
-
-	ch := subscription.Ch()
+	ch := m.relays.Subscribe(ctx).Ch()
 	// process each relay in parallel
 	for relay := range ch {
 		go m.handleSingleRelay(ctx, relay)
@@ -291,12 +278,12 @@ func (m *Miner) waitAndProve(ctx context.Context, session sessionmanager.Session
 
 // waitForBlock blocks until the block at the given height is received.
 func (m *Miner) waitForBlock(ctx context.Context, height uint64) (types.Block, error) {
-	currentBlock := m.client.LatestBlock()
+	currentBlock := m.client.LatestBlock(ctx)
 	if currentBlock.Height() == height {
 		return currentBlock, nil
 	}
 
-	subscription := m.client.BlocksNotifee().Subscribe()
+	subscription := m.client.BlocksNotifee().Subscribe(ctx)
 	defer subscription.Unsubscribe()
 	ch := subscription.Ch()
 	for block := range ch {

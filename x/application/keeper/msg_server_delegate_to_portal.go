@@ -16,6 +16,12 @@ func (k msgServer) DelegateToPortal(goCtx context.Context, msg *types.MsgDelegat
 		logger.Error(fmt.Sprintf("could not update store with delegated portal for application: %s", msg.AppAddress))
 		return nil, err
 	}
+	if err := ctx.EventManager().EmitTypedEvent(&types.EventDelegate{
+		Address: msg.AppAddress,
+	}); err != nil {
+		logger.Error(fmt.Sprintf("could not emit delegate event for application: %s", msg.AppAddress))
+		return nil, err
+	}
 	logger.Info(fmt.Sprintf("Successfully delegated application %s to %s", msg.AppAddress, msg.PortalAddress))
 	return &types.MsgDelegateToPortalResponse{}, nil
 }

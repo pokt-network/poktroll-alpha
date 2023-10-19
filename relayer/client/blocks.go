@@ -13,7 +13,7 @@ import (
 
 var (
 	_              types.Block = &cometBlockWebsocketMsg{}
-	errNotBlockMsg             = "expected block websocket msg; got: %s"
+	ErrNotBlockMsg             = "expected block websocket msg; got: %s"
 )
 
 // cometBlockWebsocketMsg is used to deserialize incoming websocket messages from
@@ -37,12 +37,12 @@ func (client *servicerClient) BlocksNotifee() utils.Observable[types.Block] {
 }
 
 // LatestBlocks implements the respective method on the ServicerClient interface.
-func (client *servicerClient) LatestBlock() types.Block {
+func (client *servicerClient) LatestBlock(ctx context.Context) types.Block {
 	client.latestBlockMutex.RLock()
 	defer client.latestBlockMutex.RUnlock()
 	// block until we have a block to return
 	if client.latestBlock == nil {
-		subscription := client.BlocksNotifee().Subscribe()
+		subscription := client.BlocksNotifee().Subscribe(ctx)
 		<-subscription.Ch()
 		subscription.Unsubscribe()
 	}
@@ -68,8 +68,8 @@ func (client *servicerClient) subscribeToBlocks(ctx context.Context) utils.Obser
 // which will cause it to be emitted by the corresponding blocksNotifee observable.
 func blocksFactoryHandler(blocksNotifier chan types.Block) messageHandler {
 	return func(ctx context.Context, msg []byte) error {
-		blockMsg, err := newCometBlockMsg(msg)
-		expectedErr := fmt.Errorf(errNotBlockMsg, string(msg))
+		blockMsg, err := NewCometBlockMsg(msg)
+		expectedErr := fmt.Errorf(ErrNotBlockMsg, string(msg))
 		switch {
 		case err == nil:
 		case err.Error() == expectedErr.Error():
@@ -83,10 +83,10 @@ func blocksFactoryHandler(blocksNotifier chan types.Block) messageHandler {
 	}
 }
 
-// newCometBlockMsg attempts to deserialize the given bytes into a comet block.
+// NewCometBlockMsg attempts to deserialize the given bytes into a comet block.
 // if the resulting block has a height of zero, assume the message was not a
 // block message and return an errNotBlockMsg error.
-func newCometBlockMsg(blockMsgBz []byte) (types.Block, error) {
+func NewCometBlockMsg(blockMsgBz []byte) (types.Block, error) {
 	blockMsg := new(cometBlockWebsocketMsg)
 	if err := json.Unmarshal(blockMsgBz, blockMsg); err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func newCometBlockMsg(blockMsgBz []byte) (types.Block, error) {
 
 	// If msg does not match the expected format then the block's height has a zero value.
 	if blockMsg.Block.Header.Height == 0 {
-		return nil, fmt.Errorf(errNotBlockMsg, string(blockMsgBz))
+		return nil, fmt.Errorf(ErrNotBlockMsg, string(blockMsgBz))
 	}
 
 	return blockMsg, nil
