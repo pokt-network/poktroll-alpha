@@ -49,12 +49,15 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		return nil, err
 	}
 
+	// TODO: relay should contain session headers to be used to fetch the target session
+	// Which will be compared to the one sent by the relayer on the claim and/or proof
 	relayBz := proof.ClosestValueHash[:len(proof.ClosestValueHash)-8]
 	relay := &types.Relay{}
 	if err := relay.Unmarshal(relayBz); err != nil {
 		return nil, err
 	}
 
+	// Get application address from relay
 	applicationAddress := relay.Req.ApplicationAddress
 
 	logger = logger.
@@ -63,6 +66,9 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 		With("session_id", msg.SessionId)
 
 	// lookup the corresponding claim and verify that it matches.
+	// TODO: We still rely on the submitter's session ID, which is not ideal.
+	// To get the session Id from its keeper, we need a block number, an application address and a serviceId
+	// We are missing the serviceId here, so we can't get the session ID from the keeper.
 	claim, err := k.GetClaim(ctx, msg.SessionId)
 	if err != nil {
 		logger.Error("failed to get claim", "err", err)
@@ -188,6 +194,12 @@ func (k msgServer) Proof(goCtx context.Context, msg *types.MsgProof) (*types.Msg
 	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, mintAmount); err != nil {
 		return nil, err
 	}
+
+	// TODO_INVESTIGATE: bankKeeper and applicationKeeper do not seem to be properly accessing
+	// the state. msg.ServicerAddress seems to be unknown to the bankKeeper and is creating a new
+	// account with 0 balance even if the balance is correct when called from here.
+	// Same when calling the applicationKeeper to burn coins. Which seems to no recognize the
+	// application address and fail to burn/deduce coins from it.
 
 	// transfer tokens from the module to the servicer
 	if err := k.bankKeeper.SendCoinsFromModuleToAccount(

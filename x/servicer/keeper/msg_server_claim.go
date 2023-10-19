@@ -69,12 +69,21 @@ func (k msgServer) Claim(goCtx context.Context, msg *servicertypes.MsgClaim) (*s
 		return nil, servicertypes.ErrActiveFirstSession
 	}
 
-	// block#:                     [ 1 2 3 4 5 ][ 6 7 8 9 10 ]
-	// session#:                   [ ↑   1     ][ ↑ ↑ ↑ ↑ 2  ]
-	//  lastEndedSessionStartHeight ─┘   ↑────────┘ │ │ │
-	//           lastEndedSessionNumber ─┘	        └─│─┴─ GovClaimSubmissionBlocksWindow (3 blocks [7-9])
-	//                                                │
-	//                                                claimCommittedHeight (8)
+	// block#:                   [ 1 ... 10 ][ 11 12 13 14 15 16 17 18 19 20 ][ 21 22 23 24 ... ]
+	// session#:                 [ ↑   1  ↑ ][        ↑     ↑ 2   ↑          ][				 ↑ 3      ]
+	//                             │   ↑  │           │     │     │                    │
+	// lastEndedSessionNumber ─────│───┘  │           │     │     │                    │
+	// (claimed session)           │      │           │     │     │                    │
+	//                             │      │           │     └─────┴─────────────GovClaimSubmissionBlocksWindow
+	// earliestClaimSubmissionBlockHeight─────────────┘     ↑                          │
+	// = sessionStartHeight (1)────┘      │           ↑     │                          │
+	// + numSessionBlocks (+10)───────────┘           │     │                          │
+	// + GovEarliestClaimSubmissionBlocksOffset (3)   │     │                          │
+	//                                                │     │                          │
+	// GovLatestClaimSubmissionBlocksInterval (10)────┴─────│──────────────────────────┘
+	//                                                      │
+	// randClaimSubmissionBlockHeightOffset (seed = block[13].hash)
+	//
 
 	// TODO_THIS_COMMIT: factor all this out to a library pkg so that it can be
 	// reused in the client / relayer.

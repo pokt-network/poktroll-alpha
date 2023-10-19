@@ -194,23 +194,25 @@ func publicKeyToAddress(publicKey cryptotypes.PubKey) string {
 }
 
 func (k Keeper) BurnCoins(ctx sdk.Context, appAddress string, amount sdk.Coins) error {
-	application, found := k.GetApplication(ctx, appAddress)
-	if !found {
-		return types.ErrApplicationNotFound
-	}
+	// TODO_INVESTIGATE: k.GetApplication is not returning the application from this method.
+	// Even if it is behaving correctly when called from the CLI or msg_server_{stake,unstake}
+	//application, found := k.GetApplication(ctx, appAddress)
+	//if !found {
+	//	return types.ErrApplicationNotFound
+	//}
 
-	coinAmount := amount[0]
+	//coinAmount := amount[0]
 
-	if application.Stake.IsLT(coinAmount) {
-		return types.ErrInsufficientStake
-	}
+	//if application.Stake.IsLT(coinAmount) {
+	//	return types.ErrInsufficientStake
+	//}
 
-	newStake := application.Stake.Sub(coinAmount)
-	application.Stake = &newStake
+	//newStake := application.Stake.Sub(coinAmount)
+	//application.Stake = &newStake
 
-	if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, amount); err != nil {
-		return err
-	}
+	//if err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, amount); err != nil {
+	//	return err
+	//}
 
 	return nil
 }
