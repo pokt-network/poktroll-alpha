@@ -3,15 +3,16 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"os"
+	"os/signal"
+	"sync"
+
 	ring_secp256k1 "github.com/athanorlabs/go-dleq/secp256k1"
 	ring_types "github.com/athanorlabs/go-dleq/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	"net/url"
-	"os"
-	"os/signal"
-	"sync"
 
 	cosmosclient "github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -118,6 +119,11 @@ func runSmartClient(cmd *cobra.Command, args []string) error {
 	// create a signer from the keyring and signing key name
 	// or extract the scalar point from the private key for
 	// use in the ring signer if the ring signer is enabled
+
+	// TODO: Use the ringSigner flag to build the signer and make it transparent to the user
+	// whether the signer is a simple signer or a ring signer. If the ring signer is enabled,
+	// the user should not be required to provide a signing key name. Either way, the signer
+	// variable should be set to a value that implements the Signer interface.
 	var signer smartclient.Signer
 	var signingKey ring_types.Scalar
 	if !ringSinger {

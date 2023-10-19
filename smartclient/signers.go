@@ -38,7 +38,7 @@ func NewSimpleSigner(keyring keyring.Keyring, keyName string) *SimpleSigner {
 	return &SimpleSigner{keyring: keyring, keyName: keyName, pubKey: pubKey}
 }
 
-// Sign implements the Signer interface
+// Sign implements the Signer interface using the keyring and key name provided
 func (signer *SimpleSigner) Sign(data [32]byte) (signature []byte, err error) {
 	sig, _, err := signer.keyring.Sign(signer.keyName, data[:])
 	return sig, err

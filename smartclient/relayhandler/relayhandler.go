@@ -5,11 +5,6 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/codec"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	cryptocdc "github.com/cosmos/cosmos-sdk/crypto/codec"
-	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	"github.com/noot/ring-go"
 	"log"
 	"net/http"
 	"poktroll/smartclient"
@@ -17,16 +12,23 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	cryptocdc "github.com/cosmos/cosmos-sdk/crypto/codec"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	"github.com/noot/ring-go"
+
 	authTypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	ring_secp256k1 "github.com/athanorlabs/go-dleq/secp256k1"
-	ring_types "github.com/athanorlabs/go-dleq/types"
 	"poktroll/smartclient/client"
 	"poktroll/utils"
 	applicationTypes "poktroll/x/application/types"
 	svcTypes "poktroll/x/service/types"
 	"poktroll/x/servicer/types"
 	sessionTypes "poktroll/x/session/types"
+
+	ring_secp256k1 "github.com/athanorlabs/go-dleq/secp256k1"
+	ring_types "github.com/athanorlabs/go-dleq/types"
 )
 
 var (
@@ -94,11 +96,16 @@ type RelayHandler struct {
 
 	// signingKey is the private key scalar on the secp256k1 curve used to sign the relay
 	// request when using the ring siganture provided the portal is a delegatee of the app
+	// TODO: This should be handled by the signer and not the relay handler. The relay handler
+	// should only be aware of the signer interface and not the implementation
 	signingKey ring_types.Scalar
 
 	// pubKeyCache is a cache of the public keys used to create the ring for a given application
 	// they are stored in a map of application address to a slice of points on the secp256k1 curve
 	// TODO: subscribe to on-chain events to update this cache
+	// TODO: The ring signer should handle this by having full knowledge of the delegate events and
+	// and session changes. Which implies injecting the delegateQueryClient and sessionQueryClient
+	// into the signer at creation time
 	ringCacheMutex *sync.RWMutex
 	ringCache      map[string][]ring_types.Point
 }
@@ -183,8 +190,10 @@ func (relayHandler *RelayHandler) providedServicesSessionsListener(
 	ctx context.Context,
 	sessionsNotifiers map[string]*sessionNotifier,
 ) {
+	// We use a single block subscription for all services to avoid creating too many subscriptions
 	newBlocks := relayHandler.blockQueryClient.BlocksNotifee().Subscribe(ctx).Ch()
 	for block := range newBlocks {
+		// For each new block we loop over the active sessions and check if they reached their end
 		for serviceId, activeSession := range sessionsNotifiers {
 			if block.Height() <= getLastSessionBlock(activeSession.Session) {
 				continue
@@ -253,7 +262,7 @@ func (relayHandler *RelayHandler) fetchCurrentSession(ctx context.Context, servi
 // getSessionRelayerUrl returns the relayer url for a given service and rpc type
 // it waits for the session info to be available if it is not already but does not fetch it
 func (relayHandler *RelayHandler) getServiceCurrentSession(serviceId string) *sessionTypes.Session {
-	// if we dont have a session for this service, we wait for it
+	// if we dont have a session for this service, we wait for it to be available
 	if relayHandler.currentSessions[serviceId] == nil {
 		subscription := relayHandler.servicesSessions[serviceId].Subscribe(relayHandler.ctx)
 		// block until we get a session
@@ -277,6 +286,8 @@ func (relayHandler *RelayHandler) getSessionRelayerUrl(session *sessionTypes.Ses
 // invalidateCachedPubKeys invalidates the cached pub keys for a given application address
 // by listening to the delegate query client for new delegate messages and clearing the address from
 // the cache map
+// TODO: This should be handled by the signer and not the relay handler. The signer should have
+// access to the delegateQueryClient and sessionQueryClient to update the cache when needed
 func (relayHandler *RelayHandler) invalidateCachedPubKeys(ctx context.Context) {
 	newDelegates := relayHandler.delegateQueryClient.DelegateNotifee().Subscribe(ctx).Ch()
 	for range newDelegates {
@@ -288,6 +299,8 @@ func (relayHandler *RelayHandler) invalidateCachedPubKeys(ctx context.Context) {
 
 // getCachedSigner returns the ring for a given application address from the cache, otherwise
 // fetching and creating it if not found
+// TODO: This should be handled by the signer and not the relay handler. The signer should have
+// access to the delegateQueryClient and sessionQueryClient to update the cache when needed
 func (relayHandler *RelayHandler) getCachedSigner(address string) (smartclient.Signer, error) {
 	var ring *ring.Ring
 	var err error
@@ -386,7 +399,7 @@ func anyToPubKey(any codectypes.Any) (cryptotypes.PubKey, error) {
 	cdc := codec.NewProtoCodec(reg)
 	var pub cryptotypes.PubKey
 	if err := cdc.UnpackAny(&any, &pub); err != nil {
-		return nil, fmt.Errorf("Any type [%+v] is not cryptotypes.PubKey: %w", any, err)
+		return nil, fmt.Errorf("any type [%+v] is not cryptotypes.PubKey: %w", any, err)
 	}
 	return pub, nil
 }
@@ -467,6 +480,7 @@ func getVerifiedRelayResponse(relayResponseBz []byte) (*types.RelayResponse, err
 // Naive implementation of the endpoint selection strategy that always selects the first endpoint
 // We may have other strategies that select endpoints. Round robin or based on their latency, their location, etc.
 // It is up to the strategy to maintain the needed data to select the appropriate endpoint
+// TODO: Have a dedicated package for endpoint selection strategies and their common interface
 type ChooseFirstEndpoint struct{}
 
 func (c *ChooseFirstEndpoint) SelectEndpoint(endpoints []svcTypes.Endpoint) *svcTypes.Endpoint {

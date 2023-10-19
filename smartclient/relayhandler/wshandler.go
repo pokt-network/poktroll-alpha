@@ -16,6 +16,10 @@ import (
 // handleWsRelays handles websocket relay requests
 // it takes the http ServeHTTP arguments, the service id, and the rpc type
 // to upgrade the connection to a websocket connection and send it to the relayer
+// TODO_INVESTIGATE: The current implementation does not keep connections alive across sessions
+// this may come from the Relayer implementation that does not handle connections closing properly
+// Another approach is to properly close the connection after the session change and let the client
+// handle the reconnection
 func (relayHandler *RelayHandler) handleWsRelays(
 	w http.ResponseWriter,
 	req *http.Request,

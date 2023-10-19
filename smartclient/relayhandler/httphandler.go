@@ -51,6 +51,7 @@ func (relayHandler *RelayHandler) handleHTTPRelays(
 	}
 
 	// If we are not using the simple signer we need the signingKey to be non-nil
+	// TODO: consider using a signer interface instead of a signer and a signing key
 	if relayHandler.signer == nil && relayHandler.signingKey == nil {
 		utils.ReplyWithHTTPError(500, fmt.Errorf("no signing key"), w)
 		return
