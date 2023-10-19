@@ -23,11 +23,13 @@ type ServicerKeeper interface {
 
 type (
 	Keeper struct {
-		cdc        codec.BinaryCodec
-		storeKey   storetypes.StoreKey
-		memKey     storetypes.StoreKey
-		paramstore paramtypes.Subspace
-		bankKeeper types.BankKeeper
+		cdc               codec.BinaryCodec
+		storeKey          storetypes.StoreKey
+		memKey            storetypes.StoreKey
+		paramstore        paramtypes.Subspace
+		bankKeeper        types.BankKeeper
+		accountKeeper     types.AccountKeeper
+		applicationKeeper types.ApplicationKeeper
 	}
 )
 
@@ -37,6 +39,8 @@ func NewKeeper(
 	memKey storetypes.StoreKey,
 	ps paramtypes.Subspace,
 	bk types.BankKeeper,
+	ak types.AccountKeeper,
+	appk types.ApplicationKeeper,
 
 ) *Keeper {
 	// set KeyTable if it has not already been set
@@ -45,11 +49,13 @@ func NewKeeper(
 	}
 
 	return &Keeper{
-		cdc:        cdc,
-		storeKey:   storeKey,
-		memKey:     memKey,
-		paramstore: ps,
-		bankKeeper: bk,
+		cdc:               cdc,
+		storeKey:          storeKey,
+		memKey:            memKey,
+		paramstore:        ps,
+		bankKeeper:        bk,
+		accountKeeper:     ak,
+		applicationKeeper: appk,
 	}
 }
 

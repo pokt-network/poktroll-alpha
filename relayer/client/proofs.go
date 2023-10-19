@@ -9,11 +9,9 @@ import (
 
 func (client *servicerClient) SubmitProof(
 	ctx context.Context,
+	sessionId string,
 	smtRootHash []byte,
-	closestKey []byte,
-	closestValueHash []byte,
-	closestSum uint64,
-	smtProof *smt.SparseMerkleProof,
+	smtProof *smt.SparseMerkleClosestProof,
 ) error {
 	if client.address == "" {
 		return errEmptyAddress
@@ -25,15 +23,15 @@ func (client *servicerClient) SubmitProof(
 	}
 
 	msg := &types.MsgProof{
+		SessionId:       sessionId,
 		ServicerAddress: client.address,
 		SmstRootHash:    smtRootHash,
-		Path:            closestKey,
-		ValueHash:       closestValueHash,
-		SmstSum:         closestSum,
 		Proof:           proofBz,
 	}
-	if _, err = client.signAndBroadcastMessageTx(ctx, msg); err != nil {
+	txErrCh, err := client.signAndBroadcastMessageTx(ctx, msg)
+	if err != nil {
 		return err
 	}
-	return nil
+
+	return <-txErrCh
 }

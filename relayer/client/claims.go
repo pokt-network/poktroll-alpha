@@ -2,14 +2,16 @@ package client
 
 import (
 	"context"
+
 	"poktroll/x/servicer/types"
+	sessionTypes "poktroll/x/session/types"
 )
 
 // SubmitClaim implements the respective method on the ServicerClient interface.
 func (client *servicerClient) SubmitClaim(
 	ctx context.Context,
 	// TODO_REFACTOR: we should be passing sessionHeader everywhere instead of sessionId
-	sessionId string,
+	session *sessionTypes.Session,
 	smtRootHash []byte,
 ) error {
 	if client.address == "" {
@@ -19,7 +21,8 @@ func (client *servicerClient) SubmitClaim(
 	msg := &types.MsgClaim{
 		ServicerAddress: client.address,
 		SmstRootHash:    smtRootHash,
-		SessionId:       sessionId,
+		SessionId:       session.SessionId,
+		SessionNumber:   session.SessionNumber,
 	}
 	txErrCh, err := client.signAndBroadcastMessageTx(ctx, msg)
 	if err != nil {

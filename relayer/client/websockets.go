@@ -64,7 +64,7 @@ func (client *servicerClient) subscribeWithQuery(ctx context.Context, query stri
 		panic(fmt.Errorf("failed to connect to websocket: %w", err))
 	}
 
-	// TODO_DISCUSS: Should we replace `requestId` with just
+	// TODO_DISCUSS: Should we replace `requestId` with just a random string for entropy
 	requestId := client.getNextRequestId()
 	conn.WriteJSON(map[string]interface{}{
 		"jsonrpc": "2.0",

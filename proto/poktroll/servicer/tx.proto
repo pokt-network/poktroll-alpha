@@ -33,8 +33,10 @@ message MsgClaim {
   bytes  smst_root_hash = 2;
   // IMPROVE: move session_id into a new session_header field
   string session_id = 3;
-  // TECHDEBT: expiration_height is not used right now and could be computed from on-chain data
-  int64 expiration_height = 4;
+  uint64 session_number = 4;
+  // TECHDEBT: invalidation_height is not used right now and could be computed from on-chain data
+  // (NB: this is carryover from V0; renamed from "expiration_height" for clarity)
+  int64 invalidation_height = 5;
 }
 
 message MsgClaimResponse {}
@@ -42,9 +44,6 @@ message MsgClaimResponse {}
 message MsgProof {
   string servicer_address = 1;
   bytes smst_root_hash = 2;
-  bytes path = 3;
-  bytes value_hash = 4;
-  uint64 smst_sum = 5;
   bytes proof = 6;
   // IMPROVE: move session_id into a new session_header field
   string session_id = 7;

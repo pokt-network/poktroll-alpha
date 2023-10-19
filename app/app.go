@@ -130,6 +130,7 @@ import (
 	servicemodule "poktroll/x/service"
 	servicemodulekeeper "poktroll/x/service/keeper"
 	servicemoduletypes "poktroll/x/service/types"
+
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "poktroll/app/params"
@@ -598,8 +599,10 @@ func New(
 		app.GetSubspace(servicermoduletypes.ModuleName),
 
 		app.BankKeeper,
+		app.AccountKeeper,
+		app.ApplicationKeeper,
 	)
-	servicerModule := servicermodule.NewAppModule(appCodec, app.ServicerKeeper, app.AccountKeeper, app.BankKeeper)
+	servicerModule := servicermodule.NewAppModule(appCodec, app.ServicerKeeper, app.AccountKeeper, app.BankKeeper, app.ApplicationKeeper)
 
 	app.SessionKeeper = *sessionmodulekeeper.NewKeeper(
 		appCodec,

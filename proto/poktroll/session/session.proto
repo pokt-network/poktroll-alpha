@@ -12,6 +12,10 @@ message Session {
     string session_id = 1;
     uint64 session_number = 2; // The session number
     uint64 session_block_start_height = 3; // The height at which the session started
+    // TODO_CONSIDERATION: do we really need this field? This should be a
+    // governance parameter & can't be trusted/used by the servicer
+    // msgServer/keeper. Need to think through what we want to  when
+    // then number of blocks per session changes during an active session.
     uint64 num_blocks_per_session = 4; // The number of blocks the session will last (starting at block_height)
 
 
