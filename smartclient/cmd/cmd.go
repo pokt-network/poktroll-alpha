@@ -136,15 +136,8 @@ func runSmartClient(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// ensure the protocol or any other part of the URL is not used in the listen address
-	tcpListenAddr, err := url.Parse(applicationListenHost)
-	if err != nil {
-		cancelCtx()
-		panic(fmt.Errorf("failed to parse application address: %w", err))
-	}
-
 	smartClient := relayhandler.NewRelayHandler(
-		tcpListenAddr.Host,
+		applicationListenHost,
 		applicationQueryClient,
 		portalQueryClient,
 		sessionQueryClient,

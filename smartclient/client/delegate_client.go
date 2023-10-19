@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -14,25 +15,18 @@ import (
 	"poktroll/x/application/types"
 )
 
-var _ types.Delegate = (*delegateMsg)(nil)
 var ErrNotDelegateMsg = "expected delegate websocket msg"
 
-type delegateMsg struct {
-	appAddress string
-}
-
-func (msg *delegateMsg) Address() string {
-	return msg.appAddress
-}
-
-func NewDelegateMsg(delegateMsgBz []byte) (types.Delegate, error) {
-	dMsg := new(delegateMsg)
+func NewDelegateMsg(delegateMsgBz []byte) (*types.EventDelegate, error) {
+	dMsg := new(types.EventDelegate)
 	if err := json.Unmarshal(delegateMsgBz, dMsg); err != nil {
 		return nil, err
 	}
 
+	log.Print("delegated")
+
 	// If msg does not match the expected format then the address will be empty
-	if dMsg.Address() == "" {
+	if dMsg.Address == "" {
 		return nil, fmt.Errorf(ErrNotDelegateMsg, string(delegateMsgBz))
 	}
 
@@ -41,9 +35,9 @@ func NewDelegateMsg(delegateMsgBz []byte) (types.Delegate, error) {
 
 type DelegateQueryClient struct {
 	conn                *websocket.Conn
-	delegateNotifee     utils.Observable[types.Delegate]
+	delegateNotifee     utils.Observable[*types.EventDelegate]
 	latestDelegateMutex *sync.RWMutex
-	latestDelegate      types.Delegate
+	latestDelegate      *types.EventDelegate
 }
 
 func NewDelegateQueryClient(ctx context.Context, endpoint string) (*DelegateQueryClient, error) {
@@ -69,11 +63,11 @@ func NewDelegateQueryClient(ctx context.Context, endpoint string) (*DelegateQuer
 	return client, nil
 }
 
-func (qc *DelegateQueryClient) DelegateNotifee() utils.Observable[types.Delegate] {
+func (qc *DelegateQueryClient) DelegateNotifee() utils.Observable[*types.EventDelegate] {
 	return qc.delegateNotifee
 }
 
-func (qc *DelegateQueryClient) LatestDelegation(ctx context.Context) types.Delegate {
+func (qc *DelegateQueryClient) LatestDelegation(ctx context.Context) *types.EventDelegate {
 	qc.latestDelegateMutex.RLock()
 	defer qc.latestDelegateMutex.RUnlock()
 	// block until we have a delegation to return
@@ -85,11 +79,15 @@ func (qc *DelegateQueryClient) LatestDelegation(ctx context.Context) types.Deleg
 	return qc.latestDelegate
 }
 
-func (qc *DelegateQueryClient) listen(ctx context.Context, blocksNotifier chan types.Delegate) {
+func (qc *DelegateQueryClient) listen(ctx context.Context, blocksNotifier chan *types.EventDelegate) {
 	for {
 		_, msg, err := qc.conn.ReadMessage()
 		if err != nil {
 			return
+		}
+
+		if strings.TrimSpace(string(msg)) == `{"jsonrpc":"2.0","result":{},"id":1}` {
+			continue
 		}
 
 		dMsg, err := NewDelegateMsg(msg)
@@ -107,7 +105,7 @@ func (qc *DelegateQueryClient) listen(ctx context.Context, blocksNotifier chan t
 }
 
 func (qc *DelegateQueryClient) subscribeToDelegate(ctx context.Context) error {
-	delegateNotifee, delegateNotifier := utils.NewControlledObservable[types.Delegate](nil)
+	delegateNotifee, delegateNotifier := utils.NewControlledObservable[*types.EventDelegate](nil)
 
 	subscribeMsg := map[string]interface{}{
 		"jsonrpc": "2.0",
