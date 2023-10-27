@@ -6,8 +6,7 @@ import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "poktroll/session/params.proto";
-import "poktroll/session/session.proto";
-import "poktroll/application/application.proto";
+import "poktroll/shared/session.proto";
 
 option go_package = "poktroll/x/session/types";
 
@@ -43,6 +42,6 @@ message QueryGetSessionRequest {
 }
 
 message QueryGetSessionResponse {
-  Session session = 1 [(gogoproto.nullable) = false];
+  poktroll.shared.Session session = 1 [(gogoproto.nullable) = false];
 }
 

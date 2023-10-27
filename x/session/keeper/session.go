@@ -5,18 +5,19 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	apptypes "poktroll/x/application/types"
-	srvstypes "poktroll/x/service/types"
-	svctypes "poktroll/x/servicer/types"
-	"poktroll/x/session/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	_ "golang.org/x/crypto/sha3"
+
+	apptypes "poktroll/x/application/types"
+	srvstypes "poktroll/x/service/types"
+	"poktroll/x/session/types"
+	sharedtypes "poktroll/x/shared/types"
 )
 
 const (
 	// TODO_REFACTOR: Move these constants into governance parameters
-	numSessionBlocks       uint64 = 4
+	NumSessionBlocks       uint64 = 4
 	numServicersPerSession uint64 = 25
 )
 
@@ -25,7 +26,7 @@ var (
 	SHA3HashLen = crypto.SHA3_256.Size()
 )
 
-func (k Keeper) GetSessionForApp(ctx sdk.Context, appAddress string, serviceId string, blockHeight uint64) (*types.Session, error) {
+func (k Keeper) GetSessionForApp(ctx sdk.Context, appAddress string, serviceId string, blockHeight uint64) (*sharedtypes.Session, error) {
 	logger := k.Logger(ctx).With("module", types.ModuleName).With("method", "GetSessionForApp")
 	logger.Info(fmt.Sprintf("About to get session for app address %s", appAddress))
 
@@ -46,7 +47,7 @@ func (k Keeper) GetSessionForApp(ctx sdk.Context, appAddress string, serviceId s
 	logger.Info(fmt.Sprintf("Servicers found: %v", servicers))
 
 	// INVESTIGATE: The `Session` protobuf expects pointers but the `GetAllServicers` keep methods returns values. Look into cosmos to figure out the best path here.
-	servicerPointers := make([]*svctypes.Servicers, len(servicers))
+	servicerPointers := make([]*sharedtypes.Servicers, len(servicers))
 	for i, servicer := range servicers {
 		servicerPointers[i] = &servicer
 	}
@@ -54,7 +55,7 @@ func (k Keeper) GetSessionForApp(ctx sdk.Context, appAddress string, serviceId s
 	// filter servicers only if there is an overlap between the services the app & servicers both staked for
 	servicerPointers = findMatchingServicers(app, servicerPointers, &srvstypes.ServiceId{Id: serviceId})
 
-	session := types.Session{
+	session := sharedtypes.Session{
 		// NB: These parameters are hydrated by the hydrator below
 		// SessionId:,
 		// SessionNumber:,
@@ -82,8 +83,8 @@ func (k Keeper) GetSessionForApp(ctx sdk.Context, appAddress string, serviceId s
 }
 
 // TODO_IMPLEMENT: Need to pseudo-randomly select only the relevant servicers
-func findMatchingServicers(app apptypes.Application, servicers []*svctypes.Servicers, targetServiceId *srvstypes.ServiceId) []*svctypes.Servicers {
-	matchingServicers := []*svctypes.Servicers{}
+func findMatchingServicers(app apptypes.Application, servicers []*sharedtypes.Servicers, targetServiceId *srvstypes.ServiceId) []*sharedtypes.Servicers {
+	matchingServicers := []*sharedtypes.Servicers{}
 
 	serviceIDMap := make(map[string]struct{})
 	for _, service := range app.Services {
@@ -106,7 +107,7 @@ func findMatchingServicers(app apptypes.Application, servicers []*svctypes.Servi
 
 type sessionHydrator struct {
 	// The session being hydrated and returned
-	session *types.Session
+	session *sharedtypes.Session
 
 	// The height at which the request is being made to get session information
 	blockHeight uint64
@@ -117,7 +118,7 @@ type sessionHydrator struct {
 
 // hydrateSessionMetadata hydrates the height at which the session started, its number, and the number of blocks per session
 func (s *sessionHydrator) hydrateSessionMetadata() error {
-	numBlocksPerSession := numSessionBlocks // TODO: Get from governance params
+	numBlocksPerSession := NumSessionBlocks // TODO: Get from governance params
 	numBlocksAheadOfSession := s.blockHeight % numBlocksPerSession
 	s.session.NumBlocksPerSession = numBlocksPerSession
 	s.session.SessionNumber = s.blockHeight / numBlocksPerSession

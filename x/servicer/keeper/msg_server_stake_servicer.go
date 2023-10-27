@@ -8,6 +8,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	sharedtypes "poktroll/x/shared/types"
 )
 
 func (k msgServer) StakeServicer(goCtx context.Context, msg *types.MsgStakeServicer) (*types.MsgStakeServicerResponse, error) {
@@ -36,7 +38,7 @@ func (k msgServer) StakeServicer(goCtx context.Context, msg *types.MsgStakeServi
 		logger.Info(fmt.Sprintf("servicer not found, creating new servicer for address %s with stake amount %v", appAddress, newServicerStake))
 
 		// If the servicer is not found, create a new one
-		servicer = types.Servicers{
+		servicer = sharedtypes.Servicers{
 			Address:  msg.Address,
 			Stake:    msg.StakeAmount,
 			Services: msg.Services,

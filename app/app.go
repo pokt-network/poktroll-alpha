@@ -130,6 +130,7 @@ import (
 	servicemodule "poktroll/x/service"
 	servicemodulekeeper "poktroll/x/service/keeper"
 	servicemoduletypes "poktroll/x/service/types"
+
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "poktroll/app/params"
@@ -212,6 +213,7 @@ var (
 		// DEBUG(olshansky): Follow up with celestia team as to why this doesn't show up in `poktrolld  query auth module-acco`
 		applicationmoduletypes.ModuleName: {authtypes.Burner, authtypes.Staking},
 		servicermoduletypes.ModuleName:    {authtypes.Minter, authtypes.Burner, authtypes.Staking},
+		portalmoduletypes.ModuleName:      {authtypes.Burner, authtypes.Staking},
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
@@ -280,7 +282,7 @@ type App struct {
 
 	ApplicationKeeper applicationmodulekeeper.Keeper
 
-	ServicerKeeper servicermodulekeeper.Keeper
+	ServicerKeeper *servicermodulekeeper.Keeper
 
 	SessionKeeper sessionmodulekeeper.Keeper
 
@@ -572,6 +574,9 @@ func New(
 		keys[portalmoduletypes.StoreKey],
 		keys[portalmoduletypes.MemStoreKey],
 		app.GetSubspace(portalmoduletypes.ModuleName),
+
+		app.BankKeeper,
+		app.AccountKeeper,
 	)
 	portalModule := portalmodule.NewAppModule(appCodec, app.PortalKeeper, app.AccountKeeper, app.BankKeeper)
 
@@ -582,18 +587,21 @@ func New(
 		app.GetSubspace(applicationmoduletypes.ModuleName),
 
 		app.BankKeeper,
+		app.AccountKeeper,
+		app.PortalKeeper,
 	)
 	applicationModule := applicationmodule.NewAppModule(appCodec, app.ApplicationKeeper, app.AccountKeeper, app.BankKeeper)
 
-	app.ServicerKeeper = *servicermodulekeeper.NewKeeper(
+	app.ServicerKeeper = servicermodulekeeper.NewKeeper(
 		appCodec,
 		keys[servicermoduletypes.StoreKey],
 		keys[servicermoduletypes.MemStoreKey],
 		app.GetSubspace(servicermoduletypes.ModuleName),
 
 		app.BankKeeper,
+		// &app.SessionKeeper,
 	)
-	servicerModule := servicermodule.NewAppModule(appCodec, app.ServicerKeeper, app.AccountKeeper, app.BankKeeper)
+	servicerModule := servicermodule.NewAppModule(appCodec, *app.ServicerKeeper, app.AccountKeeper, app.BankKeeper)
 
 	app.SessionKeeper = *sessionmodulekeeper.NewKeeper(
 		appCodec,

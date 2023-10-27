@@ -1,7 +1,12 @@
 .SILENT:
 
 POKTROLLD_HOME := ./localnet/poktrolld
-POKTROLLD_NODE := tcp://127.0.0.1:36657
+
+NODE = tcp://127.0.0.1:36657 # Used by the client (i.e. CLI in this file) to send transactions & query things
+POCKET_NODE = 127.0.0.1:36657 # Used by the relayer for reading and listening on data
+# TODO: Consider renaming this to `ROLLUP_NODE` since they gossip Txs with the sequencer until the block is published
+SEQUENCER_NODE = 127.0.0.1:36657 # Used by the relayer to send transactions
+
 SESSION_HEIGHT ?= 1 # Default height when retrieving session data
 
 .PHONY: prompt_user
@@ -123,8 +128,8 @@ poktroll_send: ## Send tokens from one key to another
 poktroll_balance: ## Check the balances of both keys
 	KEY1=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | head -1); \
 	KEY2=$$(make -s poktroll_list_keys | awk -F' ' '/address: pokt1/{print $$3}' | tail -1); \
-	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY1 --node $(POKTROLLD_NODE); \
-	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY2 --node $(POKTROLLD_NODE);
+	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY1 --node $(NODE); \
+	poktrolld --home=$(POKTROLLD_HOME) query bank balances $$KEY2 --node $(NODE);
 
 # Ref: https://rollkit.dev/tutorials/gm-world-frontend
 .PHONY: poktroll_frontend_cosmology
@@ -139,11 +144,11 @@ poktroll_frontend_react: ## Start the poktroll react frontend
 
 .PHONY: servicers_get
 servicers_get: ## Retrieves all servicers from the poktroll state
-	poktrolld --home=$(POKTROLLD_HOME) q servicer list-servicers --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) q servicer list-servicers --node $(NODE)
 
 .PHONY: servicer_stake
 servicer_stake: ## Stake tokens for the servicer specified (must specify the SERVICER env var)
-	poktrolld --home=$(POKTROLLD_HOME) tx servicer stake-servicer ./testutil/json/$(SERVICER).json --keyring-backend test --from $(SERVICER) --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx servicer stake-servicer ./testutil/json/$(SERVICER).json --keyring-backend test --from $(SERVICER) --node $(NODE)
 
 .PHONY: servicer1_stake
 servicer1_stake: ## Stake for servicer1
@@ -159,7 +164,7 @@ servicer3_stake: ## Stake for servicer3
 
 .PHONY: servicer_unstake
 servicer_unstake: ## Unstake tokens for the servicer specified
-	poktrolld --home=$(POKTROLLD_HOME) tx servicer unstake-servicer --keyring-backend test --from $(SERVICER) --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx servicer unstake-servicer --keyring-backend test --from $(SERVICER) --node $(NODE)
 
 .PHONY: servicer1_unstake
 servicer1_unstake: ## Unstake for servicer1
@@ -175,11 +180,11 @@ servicer3_unstake: ## Unstake for servicer3
 
 .PHONY: apps_get
 apps_get: ## Retrieves all applications from the poktroll state
-	poktrolld --home=$(POKTROLLD_HOME) q application list-application --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) q application list-application --node $(NODE)
 
 .PHONY: app_stake
 app_stake: ## Stake tokens for the application specified (must specify the APP and SERVICES env vars)
-	poktrolld --home=$(POKTROLLD_HOME) tx application stake-application 1000stake $(SERVICES) --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx application stake-application 1000stake $(SERVICES) --keyring-backend test --from $(APP) --node $(NODE)
 
 .PHONY: app1_stake
 app1_stake: ## Stake for app1
@@ -195,7 +200,7 @@ app3_stake: ## Stake for app3
 
 .PHONY: app_unstake
 app_unstake: ## Unstake tokens for the application specified (must specify the APP env var)
-	poktrolld --home=$(POKTROLLD_HOME) tx application unstake-application --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) tx application unstake-application --keyring-backend test --from $(APP) --node $(SEQUENCER_NODE)
 
 .PHONY: app1_unstake
 app1_unstake: ## Unstake for app1
@@ -209,13 +214,97 @@ app2_unstake: ## Unstake for app2
 app3_unstake: ## Unstake for app3
 	APP=app3 make app_unstake
 
+.PHONY: delegate
+delegate: ## Delegate the application to the specified portal (must specify the APP and PORTAL env vars)
+	poktrolld --home=$(POKTROLLD_HOME) tx application delegate-to-portal '$(PORTAL)' --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+
+.PHONY: delegate_app1_portal1
+delegate_app1_portal1: ## Delegate app1 to portal1
+	APP=app1 PORTAL=pokt15vzxjqklzjtlz7lahe8z2dfe9nm5vxwwmscne4 make delegate
+
+.PHONY: delegate_app2_portal2
+delegate_app2_portal2: ## Delegate app2 to portal2
+	APP=app2 PORTAL=pokt15w3fhfyc0lttv7r585e2ncpf6t2kl9uh8rsnyz make delegate
+
+.PHONY: delegate_app3_portal3
+delegate_app3_portal3: ## Delegate app3 to portal3
+	APP=app3 PORTAL=pokt1zhmkkd0rh788mc9prfq0m2h88t9ge0j83gnxya make delegate
+
+.PHONY: undelegate
+undelegate: ## Undelegate the application to the specified portal (must specify the APP and PORTAL env vars)
+	poktrolld --home=$(POKTROLLD_HOME) tx application undelegate-from-portal '$(PORTAL)' --keyring-backend test --from $(APP) --node $(POKTROLLD_NODE)
+
+.PHONY: undelegate_app1_portal1
+undelegate_app1_portal1: ## Undelegate app1 to portal1
+	APP=app1 PORTAL=pokt15vzxjqklzjtlz7lahe8z2dfe9nm5vxwwmscne4 make undelegate
+
+.PHONY: undelegate_app2_portal2
+undelegate_app2_portal2: ## Delegate app2 to portal2
+	APP=app2 PORTAL=pokt15w3fhfyc0lttv7r585e2ncpf6t2kl9uh8rsnyz make undelegate
+
+.PHONY: undelegate_app3_portal3
+undelegate_app3_portal3: ## Delegate app3 to portal3
+	APP=app3 PORTAL=pokt1zhmkkd0rh788mc9prfq0m2h88t9ge0j83gnxya make undelegate
+
+.PHONY: portals_get
+portals_get: ## Retrieves all portals from the poktroll state
+	poktrolld --home=$(POKTROLLD_HOME) q portal list-portals --node $(POKTROLLD_NODE)
+
+.PHONY: portal_stake
+portal_stake: ## Stake tokens for the portal specified (must specify the PORTAL and SERVICES env vars)
+	poktrolld --home=$(POKTROLLD_HOME) tx portal stake-portal 1000stake $(SERVICES) --keyring-backend test --from $(PORTAL) --node $(POKTROLLD_NODE)
+
+.PHONY: portal1_stake
+portal1_stake: ## Stake for portal1
+	SERVICES=svc1,svc2 PORTAL=portal1 make portal_stake
+
+.PHONY: portal2_stake
+portal2_stake: ## Stake for portal2
+	SERVICES=svc2,svc3 PORTAL=portal2 make portal_stake
+
+.PHONY: portal3_stake
+portal3_stake: ## Stake for portal3
+	SERVICES=svc3,svc4 PORTAL=portal3 make portal_stake
+
+.PHONY: portal_unstake
+portal_unstake: ## Unstake tokens for the portal specified (must specify the PORTAL env var)
+	poktrolld --home=$(POKTROLLD_HOME) tx portal unstake-portal --keyring-backend test --from $(PORTAL) --node $(POKTROLLD_NODE)
+
+.PHONY: portal1_unstake
+portal1_unstake: ## Unstake for portal1
+	PORTAL=portal1 make portal_unstake
+
+.PHONY: portal2_unstake
+portal2_unstake: ## Unstake for portal2
+	PORTAL=portal2 make portal_unstake
+
+.PHONY: portal3_unstake
+portal3_unstake: ## Unstake for portal3
+	PORTAL=portal3 make portal_unstake
+
+.PHONY: app_delegatees
+app_delegatees: ## Retrieves all delegatees for the application specified (must specify the APP env var)
+	poktrolld --home=$(POKTROLLD_HOME) query portal get-delegated-portals '$(APP)' --node $(POKTROLLD_NODE)
+
+.PHONY: app1_delegatees
+app1_delegatees: ## Retrieves all delegatees for app1
+	APP=pokt1mrqt5f7qh8uxs27cjm9t7v9e74a9vvdnq5jva4 make app_delegatees
+
+.PHONY: app2_delegatees
+app2_delegatees: ## Retrieves all delegatees for app2
+	APP=pokt184zvylazwu4queyzpl0gyz9yf5yxm2kdhh9hpm make app_delegatees
+
+.PHONY: app3_delegatees
+app3_delegatees: ## Retrieves all delegatees for app3
+	APP=pokt1lqyu4v88vp8tzc86eaqr4lq8rwhssyn6rfwzex make app_delegatees
+
 .PHONY: test_unit_all
 test_unit_all: ## Run all unit tests
 	go test -v ./...
 
 .PHONY: session_get
 session_get: ## Queries the poktroll node for session data
-	poktrolld --home=$(POKTROLLD_HOME) query session get-session $(APP) $(SVC) $(HEIGHT) --node $(POKTROLLD_NODE)
+	poktrolld --home=$(POKTROLLD_HOME) query session get-session $(APP) $(SVC) $(HEIGHT) --node $(POCKET_NODE)
 
 .PHONY: session_get_app1_svc1
 session_get_app1_svc1: ## Getting the session for app1 and svc1 and height1
@@ -232,8 +321,9 @@ session_get_app3_svc3: ## Getting the session for app3 and svc3 and height1
 .PHONY: relayer_start
 relayer_start: ## Start the relayer
 	poktrolld relayer \
-	--node $(POKTROLLD_NODE) \
 	--signing-key servicer1 \
+	--sequencer-node $(SEQUENCER_NODE) \
+	--pocket-node $(POCKET_NODE) \
 	--keyring-backend test
 
 .PHONY: claims_query
@@ -334,7 +424,7 @@ ignite_regenerate: ## Regenerate the ignite boilerplate
 
 # Create new accounts with:
 #  - ignite account create {KEY_NAME} --keyring-dir ./localnet/poktrolld --keyring-backend test
-#  - poktrolld --home=${POKTROLLD_HOME} --node ${POKTROLLD_NODE} --keyring-backend test add-genesis-account {KEY_NAME} 1000000000000000pokt
+#  - poktrolld --home=${POKTROLLD_HOME} --node ${POCKET_NODE} --keyring-backend test add-genesis-account {KEY_NAME} 1000000000000000pokt
 .PHONY: ignite_acc_list
 ignite_acc_list: ## List all the accounts in the ignite boilerplate
 	ignite account list  --keyring-dir $(POKTROLLD_HOME) --keyring-backend test

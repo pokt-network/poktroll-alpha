@@ -7,6 +7,7 @@ import (
 
 	"poktroll/utils"
 	"poktroll/x/servicer/types"
+	sharedtypes "poktroll/x/shared/types"
 )
 
 // TODO_DESIGN: Might need to update the interface for SubmitClaim/Proof to:
@@ -28,6 +29,7 @@ type ServicerClient interface {
 	// on-chain in exchange for a reward.
 	SubmitProof(
 		ctx context.Context,
+		session *sharedtypes.Session,
 		smtRootHash []byte,
 		closestKey []byte,
 		closestValueHash []byte,

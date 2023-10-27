@@ -1,23 +1,26 @@
 syntax = "proto3";
-package poktroll.session;
+package poktroll.shared;
 
-import "poktroll/servicer/servicers.proto";
+import "poktroll/shared/servicers.proto";
 import "poktroll/application/application.proto";
 import "poktroll/service/service.proto";
 
-option go_package = "poktroll/x/session/types";
+option go_package = "poktroll/x/shared/types";
 
 message Session {
     // TODO_CONSIDERATION: Reconsider the following set of fields in term of their type, need, naming, etc...
     string session_id = 1;
     uint64 session_number = 2; // The session number
     uint64 session_block_start_height = 3; // The height at which the session started
+    // TODO_CONSIDERATION: do we really need this field? This should be a
+    // governance parameter & can't be trusted/used by the servicer
+    // msgServer/keeper.
     uint64 num_blocks_per_session = 4; // The number of blocks the session will last (starting at block_height)
 
 
     service.ServiceId service = 5;
     application.Application application = 6;
-    repeated servicer.Servicers servicers = 7;
+    repeated Servicers servicers = 7;
 
     // TODO_ADD:
     // - GeoZone

@@ -88,7 +88,7 @@ func (m *Miner) handleSingleSession(ctx context.Context, session sessionmanager.
 	}
 
 	// SubmitClaim ensures on-chain claim inclusion
-	if err := m.client.SubmitClaim(ctx, session.GetSessionId(), claimRoot); err != nil {
+	if err := m.client.SubmitClaim(ctx, session.GetSession().GetSessionId(), claimRoot); err != nil {
 		log.Printf("failed to submit claim: %s", err)
 		return
 	}
@@ -174,5 +174,13 @@ func (m *Miner) waitAndProve(ctx context.Context, session sessionmanager.Session
 	}
 
 	// SubmitProof ensures on-chain proof inclusion so we can safely prune the tree.
-	return m.client.SubmitProof(ctx, claimRoot, path, valueHash, sum, proof)
+	return m.client.SubmitProof(
+		ctx,
+		session.GetSession(),
+		claimRoot,
+		path,
+		valueHash,
+		sum,
+		proof,
+	)
 }

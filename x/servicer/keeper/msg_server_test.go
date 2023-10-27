@@ -2,18 +2,18 @@ package keeper_test
 
 import (
 	"context"
+	keepertest "poktroll/testutil/keeper"
+	"poktroll/x/servicer/keeper"
+	"poktroll/x/servicer/types"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	keepertest "poktroll/testutil/keeper"
-	"poktroll/x/servicer/keeper"
-	"poktroll/x/servicer/types"
 )
 
 func setupMsgServer(t testing.TB) (types.MsgServer, context.Context) {
 	k, ctx := keepertest.ServicerKeeper(t)
-	return keeper.NewMsgServerImpl(*k), sdk.WrapSDKContext(ctx)
+	return keeper.NewMsgServerImpl(k), sdk.WrapSDKContext(ctx)
 }
 
 func TestMsgServer(t *testing.T) {

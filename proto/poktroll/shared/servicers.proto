@@ -1,7 +1,7 @@
 syntax = "proto3";
-package poktroll.servicer;
+package poktroll.shared;
 
-option go_package = "poktroll/x/servicer/types";
+option go_package = "poktroll/x/shared/types";
 
 import "poktroll/service/service.proto";
 import "cosmos_proto/cosmos.proto";

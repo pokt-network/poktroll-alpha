@@ -6,7 +6,7 @@ metadata:
 data:
   poktroll.sh: |-
     #!/bin/sh
-    
+
     echo "AUTH_TOKEN is: $AUTH_TOKEN"
     VALIDATOR_NAME=validator1
     CHAIN_ID=poktroll
@@ -118,7 +118,7 @@ spec:
               mountPath: /root/.poktroll/keyring-test/
             - name: configs-volume
               mountPath: /root/.poktroll/config-src/
-            - name: data-volume             
+            - name: data-volume
               mountPath: /root/.poktroll/data/
       volumes:
         - name: scripts-volume
@@ -130,7 +130,7 @@ spec:
         - name: configs-volume
           configMap:
             name: poktrolld-configs
-        - name: data-volume               
+        - name: data-volume
           persistentVolumeClaim:
             claimName: poktrolld-data
 

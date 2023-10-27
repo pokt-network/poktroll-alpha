@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -101,6 +102,8 @@ func (client *servicerClient) timeoutTxs(
 			txErrCh <- fmt.Errorf("tx timed out: %s", txHash)
 			close(txErrCh)
 			delete(txsByHash, txHash)
+
+			go client.getTxTimeoutError(ctx, txHash)
 		}
 
 		delete(client.txsByHashByTimeout, block.Height())
@@ -173,4 +176,20 @@ func (client *servicerClient) newCometTxResponseMsg(txMsgBz []byte) (*cometTxRes
 	}
 
 	return txResponseMsg, nil
+}
+
+func (client *servicerClient) getTxTimeoutError(ctx context.Context, txHashHex string) error {
+	txHash, err := hex.DecodeString(txHashHex)
+	if err != nil {
+		// TODO: move to a cosmos-sdk error.
+		return fmt.Errorf("invalid tx hash for timed out tx: %s", txHashHex)
+	}
+
+	txResponse, err := client.clientCtx.Client.Tx(ctx, txHash, false)
+	if err != nil {
+		// TODO: move to a cosmos-sdk error.
+		return fmt.Errorf("failed to fetch error for timed out tx: %s: %w", txHashHex, err)
+	}
+	// TODO: move to a cosmos-sdk error.
+	return fmt.Errorf("tx timed out: %x: %s", txHashHex, txResponse.TxResult.Log)
 }
